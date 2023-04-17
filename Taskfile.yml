@@ -1,0 +1,9 @@
+version: "3"
+
+dotenv:
+  - .env
+
+includes:
+  goose:
+    taskfile: ./db/migrate/Taskfile.yml
+    dir: ./db/migrate

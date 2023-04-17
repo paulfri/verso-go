@@ -1,0 +1,29 @@
+version: "3"
+
+tasks:
+  create:
+    desc: Create the database.
+    cmds:
+      # TODO: database name
+      - psql postgres -c 'create database citra_dev;'
+
+  drop:
+    desc: Drop the database. Irreversible.
+    cmds:
+      # TODO: database name; env check
+      - psql postgres -c 'drop database citra_dev;'
+
+  gen:
+    desc: Generate a new migration.
+    cmds:
+      - goose create {{.CLI_ARGS}}
+
+  migrate:
+    desc: Migrate to the latest version.
+    cmds:
+      - goose up
+
+  rollback:
+    desc: Roll back the last migration. Irreversible.
+    cmds:
+      - goose down
