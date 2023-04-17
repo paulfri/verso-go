@@ -16,7 +16,7 @@ tasks:
   gen:
     desc: Generate a new migration.
     cmds:
-      - goose create {{.CLI_ARGS}}
+      - goose create {{.CLI_ARGS}} sql
 
   migrate:
     desc: Migrate to the latest version.
@@ -27,3 +27,8 @@ tasks:
     desc: Roll back the last migration. Irreversible.
     cmds:
       - goose down
+
+  status:
+    desc: Show migration status.
+    cmds:
+      - goose status

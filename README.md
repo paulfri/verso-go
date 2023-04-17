@@ -5,7 +5,7 @@ Syndication summarized.
 ## Dependencies
 
 ```
-brew install goose go-task
+brew install goose go-task sqlc
 ```
 
 ## Tasks
