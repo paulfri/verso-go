@@ -47,7 +47,7 @@ func (c *Controller) feedShow(ctx *gin.Context) {
 
 type CreateFeedRequest struct {
 	Title string `json:"title" binding:"required"`
-	Url   string `json:"url" binding:"required"`
+	Url   string `json:"url" binding:"required,http_url"`
 }
 
 func (c *Controller) feedCreate(ctx *gin.Context) {
