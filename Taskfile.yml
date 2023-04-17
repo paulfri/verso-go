@@ -13,9 +13,10 @@ includes:
     dir: ./db
 
 tasks:
-  server:
+  default:
     desc: Run the HTTP server.
     aliases:
+      - server
       - s
     cmds:
       - air

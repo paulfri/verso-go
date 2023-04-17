@@ -37,7 +37,7 @@ func Serve() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"feeds": feeds[0],
+			"feeds": feeds,
 		})
 	})
 
