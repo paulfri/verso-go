@@ -31,7 +31,6 @@ func Serve() {
 
 		// list all authors
 		feeds, err := queries.ListFeeds(ctx)
-		fmt.Println(feeds)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -41,5 +40,5 @@ func Serve() {
 		})
 	})
 
-	r.Run()
+	r.Run("localhost:8080")
 }
