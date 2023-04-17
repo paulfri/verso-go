@@ -1,6 +1,9 @@
 package http
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/db/query"
@@ -22,6 +25,7 @@ func Serve() {
 	r.GET("/feeds/:pk", controller.feedShow)
 	r.POST("/feeds", controller.feedCreate)
 
-	// TODO: parameterize
-	r.Run("localhost:8080")
+	bind := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
+
+	r.Run(bind)
 }
