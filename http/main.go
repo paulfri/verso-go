@@ -1,44 +1,36 @@
 package http
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/versolabs/citra/db/query"
 )
 
+type Controller struct {
+	queries *query.Queries
+}
+
 func Serve() {
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	// TODO: parameterize
+	database, err := sql.Open("postgres", "user=citra dbname=citra_dev sslmode=disable")
+	queries := query.New(database)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	r.GET("/feeds", func(c *gin.Context) {
-		ctx := context.Background()
+	controller := Controller{
+		queries: queries,
+	}
 
-		database, err := sql.Open("postgres", "user=citra dbname=citra_dev sslmode=disable")
-		queries := query.New(database)
-		if err != nil {
-			fmt.Println(err)
-		}
+	r.GET("/ping", controller.ping)
+	r.GET("/feeds", controller.feedIndex)
+	r.GET("/feeds/:pk", controller.feedShow)
 
-		// list all authors
-		feeds, err := queries.ListFeeds(ctx)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"feeds": feeds,
-		})
-	})
-
+	// TODO: parameterize
 	r.Run("localhost:8080")
 }

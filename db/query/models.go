@@ -5,11 +5,16 @@
 package query
 
 import (
-	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type Feed struct {
-	ID    int32
-	Title sql.NullString
-	Url   sql.NullString
+	ID        int32
+	Uuid      uuid.UUID
+	Title     string
+	Url       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

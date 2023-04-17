@@ -7,22 +7,31 @@ package query
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const getFeed = `-- name: GetFeed :one
-SELECT id, title, url FROM feeds
-WHERE id = $1 LIMIT 1
+SELECT id, uuid, title, url, created_at, updated_at FROM feeds
+WHERE uuid = $1 LIMIT 1
 `
 
-func (q *Queries) GetFeed(ctx context.Context, id int32) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, getFeed, id)
+func (q *Queries) GetFeed(ctx context.Context, uuid uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeed, uuid)
 	var i Feed
-	err := row.Scan(&i.ID, &i.Title, &i.Url)
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Title,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }
 
 const listFeeds = `-- name: ListFeeds :many
-SELECT id, title, url FROM feeds
+SELECT id, uuid, title, url, created_at, updated_at FROM feeds
 `
 
 func (q *Queries) ListFeeds(ctx context.Context) ([]Feed, error) {
@@ -34,7 +43,14 @@ func (q *Queries) ListFeeds(ctx context.Context) ([]Feed, error) {
 	var items []Feed
 	for rows.Next() {
 		var i Feed
-		if err := rows.Scan(&i.ID, &i.Title, &i.Url); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Title,
+			&i.Url,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
