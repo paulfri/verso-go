@@ -11,3 +11,11 @@ includes:
   sqlc:
     taskfile: ./db/Taskfile.yml
     dir: ./db
+
+tasks:
+  server:
+    desc: Run the HTTP server.
+    aliases:
+      - s
+    cmds:
+      - air

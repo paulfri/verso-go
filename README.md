@@ -8,6 +8,12 @@ Syndication summarized.
 brew install goose go-task sqlc
 ```
 
+## Server
+
+```
+task server
+```
+
 ## Tasks
 
 ```
