@@ -1,11 +1,8 @@
 package http
 
 import (
-	"database/sql"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
+	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/db/query"
 )
 
@@ -16,15 +13,8 @@ type Controller struct {
 func Serve() {
 	r := gin.Default()
 
-	// TODO: parameterize
-	database, err := sql.Open("postgres", "user=citra dbname=citra_dev sslmode=disable")
-	queries := query.New(database)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	controller := Controller{
-		queries: queries,
+		queries: db.Queries(),
 	}
 
 	r.GET("/ping", controller.ping)
