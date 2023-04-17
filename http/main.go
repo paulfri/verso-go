@@ -30,6 +30,7 @@ func Serve() {
 	r.GET("/ping", controller.ping)
 	r.GET("/feeds", controller.feedIndex)
 	r.GET("/feeds/:pk", controller.feedShow)
+	r.POST("/feeds", controller.feedCreate)
 
 	// TODO: parameterize
 	r.Run("localhost:8080")

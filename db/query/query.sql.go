@@ -11,6 +11,30 @@ import (
 	"github.com/google/uuid"
 )
 
+const createFeed = `-- name: CreateFeed :one
+INSERT INTO feeds (title, url) VALUES ($1, $2)
+RETURNING id, uuid, title, url, created_at, updated_at
+`
+
+type CreateFeedParams struct {
+	Title string
+	Url   string
+}
+
+func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, createFeed, arg.Title, arg.Url)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Title,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getFeed = `-- name: GetFeed :one
 SELECT id, uuid, title, url, created_at, updated_at FROM feeds
 WHERE uuid = $1 LIMIT 1
