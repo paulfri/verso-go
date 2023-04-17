@@ -17,8 +17,8 @@ RETURNING id, uuid, title, url, created_at, updated_at
 `
 
 type CreateFeedParams struct {
-	Title string
-	Url   string
+	Title string `json:"title"`
+	Url   string `json:"url"`
 }
 
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {

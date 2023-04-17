@@ -11,10 +11,10 @@ import (
 )
 
 type Feed struct {
-	ID        int32
-	Uuid      uuid.UUID
-	Title     string
-	Url       string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int32     `json:"id"`
+	Uuid      uuid.UUID `json:"uuid"`
+	Title     string    `json:"title"`
+	Url       string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
