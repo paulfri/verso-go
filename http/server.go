@@ -16,12 +16,10 @@ type Controller struct {
 	queries *query.Queries
 }
 
-const redisAddr = "127.0.0.1:6379"
-
 func Serve(cliContext *cli.Context) error {
 	r := gin.Default()
 
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("REDIS_URL")})
 	defer asynqClient.Close()
 
 	controller := Controller{
