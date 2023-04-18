@@ -28,7 +28,7 @@ func (c *Controller) feedIndex(ctx *gin.Context) {
 
 func (c *Controller) feedShow(ctx *gin.Context) {
 	uuid := uuid.Must(uuid.Parse(ctx.Param("pk")))
-	feed, err := c.queries.GetFeed(ctx, uuid)
+	feed, err := c.queries.GetFeedByUuid(ctx, uuid)
 
 	if err == nil {
 		ctx.JSON(http.StatusOK, gin.H{

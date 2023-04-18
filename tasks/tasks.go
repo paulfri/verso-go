@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/hibiken/asynq"
-)
-
-const (
-	TypeFeedParse = "feed:parse"
+	"github.com/mmcdole/gofeed"
+	"github.com/samber/lo"
+	"github.com/versolabs/citra/db"
+	"github.com/versolabs/citra/feed"
 )
 
 type FeedParsePayload struct {
@@ -34,6 +34,21 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedId)
+
+	queries := db.Queries()
+	thisFeed, err := queries.GetFeedById(ctx, int32(p.FeedId))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(thisFeed)
+
+	url := thisFeed.Url
+
+	items := feed.Fetch(url)
+	fmt.Println(lo.Map(items, func(item *gofeed.Item, index int) string {
+		return item.Title + "\n"
+	}))
 
 	return nil
 }

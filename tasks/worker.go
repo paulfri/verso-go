@@ -7,6 +7,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const (
+	TypeFeedParse = "feed:parse"
+)
+
 func Work(cliContext *cli.Context) error {
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{Addr: "localhost:6379"},

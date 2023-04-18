@@ -1,4 +1,8 @@
--- name: GetFeed :one
+-- name: GetFeedById :one
+SELECT * FROM feeds
+WHERE id = $1 LIMIT 1;
+
+-- name: GetFeedByUuid :one
 SELECT * FROM feeds
 WHERE uuid = $1 LIMIT 1;
 
