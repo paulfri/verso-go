@@ -19,6 +19,7 @@ type Controller struct {
 
 func Serve(cliContext *cli.Context) error {
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
 
 	controller := Controller{
 		queries: db.Queries(),
