@@ -7,6 +7,7 @@ package query
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -29,6 +30,55 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.Uuid,
 		&i.Title,
 		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createItem = `-- name: CreateItem :one
+INSERT INTO items (
+  feed_id,
+  remote_id,
+  title,
+  link,
+  content,
+  published_at,
+  remote_updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, uuid, feed_id, remote_id, title, link, content, published_at, remote_updated_at, created_at, updated_at
+`
+
+type CreateItemParams struct {
+	FeedID          int32        `json:"feed_id"`
+	RemoteID        string       `json:"remote_id"`
+	Title           string       `json:"title"`
+	Link            string       `json:"link"`
+	Content         string       `json:"content"`
+	PublishedAt     sql.NullTime `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+}
+
+func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, error) {
+	row := q.db.QueryRowContext(ctx, createItem,
+		arg.FeedID,
+		arg.RemoteID,
+		arg.Title,
+		arg.Link,
+		arg.Content,
+		arg.PublishedAt,
+		arg.RemoteUpdatedAt,
+	)
+	var i Item
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.FeedID,
+		&i.RemoteID,
+		&i.Title,
+		&i.Link,
+		&i.Content,
+		&i.PublishedAt,
+		&i.RemoteUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

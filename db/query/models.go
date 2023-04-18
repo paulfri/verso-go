@@ -21,14 +21,15 @@ type Feed struct {
 }
 
 type Item struct {
-	ID              int32          `json:"id"`
-	Uuid            uuid.UUID      `json:"uuid"`
-	FeedID          int32          `json:"feed_id"`
-	Title           sql.NullString `json:"title"`
-	Link            sql.NullString `json:"link"`
-	Content         sql.NullString `json:"content"`
-	PublishedAt     sql.NullTime   `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
+	ID              int32        `json:"id"`
+	Uuid            uuid.UUID    `json:"uuid"`
+	FeedID          int32        `json:"feed_id"`
+	RemoteID        string       `json:"remote_id"`
+	Title           string       `json:"title"`
+	Link            string       `json:"link"`
+	Content         string       `json:"content"`
+	PublishedAt     sql.NullTime `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
 }

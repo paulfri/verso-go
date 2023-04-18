@@ -2,13 +2,13 @@ package tasks
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 
 	"github.com/hibiken/asynq"
-	"github.com/mmcdole/gofeed"
-	"github.com/samber/lo"
 	"github.com/versolabs/citra/db"
+	"github.com/versolabs/citra/db/query"
 	"github.com/versolabs/citra/feed"
 )
 
@@ -46,9 +46,23 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 	url := thisFeed.Url
 
 	items := feed.Fetch(url)
-	fmt.Println(lo.Map(items, func(item *gofeed.Item, index int) string {
-		return item.Title + "\n"
-	}))
+	for _, item := range items {
+		fmt.Println(item.Title)
+
+		_, err := queries.CreateItem(ctx, query.CreateItemParams{
+			FeedID:          int32(p.FeedId),
+			RemoteID:        item.GUID,
+			Title:           item.Title,
+			Content:         item.Content,
+			Link:            item.Link,
+			PublishedAt:     sql.NullTime{Time: *item.PublishedParsed, Valid: true},
+			RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
+		})
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 
 	return nil
 }
