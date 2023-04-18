@@ -1,15 +1,15 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE feeds (
-    id serial NOT NULL,
-    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
-    title text NOT NULL,
-    url text NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now(),
-    updated_at timestamp NOT NULL DEFAULT now(),
+  id serial NOT NULL,
+  uuid uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  url text NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now(),
 
-    PRIMARY KEY(id),
-    UNIQUE(uuid)
+  PRIMARY KEY(id),
+  UNIQUE(uuid)
 );
 
 CREATE TRIGGER feeds_touch_updated_at
