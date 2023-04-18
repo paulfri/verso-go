@@ -3,19 +3,12 @@ package ai
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/sashabaranov/go-openai"
 )
 
 func Summarize(content string) string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	key := os.Getenv("OPENAI_API_KEY")
 	client := openai.NewClient(key)
 

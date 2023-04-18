@@ -17,6 +17,15 @@ tasks:
     desc: Run the HTTP server.
     aliases:
       - server
+      - serve
       - s
     cmds:
       - air
+
+  worker:
+    desc: Run the background worker.
+    aliases:
+      - work
+      - w
+    cmds:
+      - air -c .air.worker.toml
