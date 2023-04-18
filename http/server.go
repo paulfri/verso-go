@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/citra/tasks"
 )
 
 type Controller struct {
@@ -19,12 +20,9 @@ type Controller struct {
 func Serve(cliContext *cli.Context) error {
 	r := gin.Default()
 
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("REDIS_URL")})
-	defer asynqClient.Close()
-
 	controller := Controller{
 		queries: db.Queries(),
-		asynq:   asynqClient,
+		asynq:   tasks.Client(),
 	}
 
 	r.GET("/ping", controller.ping)
