@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/citra/http/sierra"
 	"github.com/versolabs/citra/tasks"
 )
 
@@ -18,25 +19,25 @@ type Controller struct {
 }
 
 func Serve(cliContext *cli.Context) error {
-	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	engine := gin.Default()
+	engine.SetTrustedProxies(nil)
 
 	controller := Controller{
 		queries: db.Queries(),
 		asynq:   tasks.Client(),
 	}
 
-	r.GET("/ping", controller.ping)
-	r.GET("/feeds", controller.feedIndex)
-	r.GET("/feeds/:pk", controller.feedShow)
-	r.POST("/feeds", controller.feedCreate)
-
+	engine.GET("/ping", controller.ping)
+	engine.GET("/feeds", controller.feedIndex)
+	engine.GET("/feeds/:pk", controller.feedShow)
+	engine.POST("/feeds", controller.feedCreate)
 	// TODO: remove
-	r.POST("/crawl", controller.crawl)
+	engine.POST("/crawl", controller.crawl)
+
+	sierra.Routes(engine)
 
 	bind := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
-
-	r.Run(bind)
+	engine.Run(bind)
 
 	return nil
 }
