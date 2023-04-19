@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+create extension if not exists pgcrypto;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP EXTENSION pgcrypto;
+drop extension pgcrypto;
 -- +goose StatementEnd

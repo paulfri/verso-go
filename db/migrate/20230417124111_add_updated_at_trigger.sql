@@ -1,15 +1,15 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE OR REPLACE FUNCTION touch_updated_at()   
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;   
-END;
+create or replace function touch_updated_at()   
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;   
+end;
 $$ language 'plpgsql';
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP FUNCTION touch_updated_at();
+drop function touch_updated_at();
 -- +goose StatementEnd

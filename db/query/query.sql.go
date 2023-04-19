@@ -12,45 +12,21 @@ import (
 	"github.com/google/uuid"
 )
 
-const createFeed = `-- name: CreateFeed :one
-INSERT INTO feeds (title, url) VALUES ($1, $2)
-RETURNING id, uuid, title, url, created_at, updated_at
-`
-
-type CreateFeedParams struct {
-	Title string `json:"title"`
-	Url   string `json:"url"`
-}
-
-func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, createFeed, arg.Title, arg.Url)
-	var i Feed
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
-		&i.Title,
-		&i.Url,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const createItem = `-- name: CreateItem :one
-INSERT INTO items (
-  feed_id,
-  remote_id,
+insert into content.rss_items (
+  rss_feed_id,
+  rss_guid,
   title,
   link,
   content,
   published_at,
   remote_updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, uuid, feed_id, remote_id, title, link, content, published_at, remote_updated_at, created_at, updated_at
+) values ($1, $2, $3, $4, $5, $6, $7) returning id, uuid, created_at, updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at
 `
 
 type CreateItemParams struct {
-	FeedID          int32        `json:"feed_id"`
-	RemoteID        string       `json:"remote_id"`
+	RssFeedID       int64        `json:"rss_feed_id"`
+	RssGuid         string       `json:"rss_guid"`
 	Title           string       `json:"title"`
 	Link            string       `json:"link"`
 	Content         string       `json:"content"`
@@ -58,91 +34,114 @@ type CreateItemParams struct {
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
 }
 
-func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, error) {
+func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (ContentRssItem, error) {
 	row := q.db.QueryRowContext(ctx, createItem,
-		arg.FeedID,
-		arg.RemoteID,
+		arg.RssFeedID,
+		arg.RssGuid,
 		arg.Title,
 		arg.Link,
 		arg.Content,
 		arg.PublishedAt,
 		arg.RemoteUpdatedAt,
 	)
-	var i Item
+	var i ContentRssItem
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
-		&i.FeedID,
-		&i.RemoteID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.RssFeedID,
+		&i.RssGuid,
 		&i.Title,
 		&i.Link,
 		&i.Content,
 		&i.PublishedAt,
 		&i.RemoteUpdatedAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const getFeedById = `-- name: GetFeedById :one
-SELECT id, uuid, title, url, created_at, updated_at FROM feeds
-WHERE id = $1 LIMIT 1
+const createRssFeed = `-- name: CreateRssFeed :one
+insert into content.rss_feeds (title, url) values ($1, $2) returning id, uuid, created_at, updated_at, title, url
 `
 
-func (q *Queries) GetFeedById(ctx context.Context, id int32) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, getFeedById, id)
-	var i Feed
+type CreateRssFeedParams struct {
+	Title string `json:"title"`
+	Url   string `json:"url"`
+}
+
+func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (ContentRssFeed, error) {
+	row := q.db.QueryRowContext(ctx, createRssFeed, arg.Title, arg.Url)
+	var i ContentRssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
-		&i.Title,
-		&i.Url,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
 	)
 	return i, err
 }
 
-const getFeedByUuid = `-- name: GetFeedByUuid :one
-SELECT id, uuid, title, url, created_at, updated_at FROM feeds
-WHERE uuid = $1 LIMIT 1
+const getRssFeedById = `-- name: GetRssFeedById :one
+select id, uuid, created_at, updated_at, title, url from content.rss_feeds
+where id = $1 limit 1
 `
 
-func (q *Queries) GetFeedByUuid(ctx context.Context, uuid uuid.UUID) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, getFeedByUuid, uuid)
-	var i Feed
+func (q *Queries) GetRssFeedById(ctx context.Context, id int64) (ContentRssFeed, error) {
+	row := q.db.QueryRowContext(ctx, getRssFeedById, id)
+	var i ContentRssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
-		&i.Title,
-		&i.Url,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
 	)
 	return i, err
 }
 
-const listFeeds = `-- name: ListFeeds :many
-SELECT id, uuid, title, url, created_at, updated_at FROM feeds
+const getRssFeedByUuid = `-- name: GetRssFeedByUuid :one
+select id, uuid, created_at, updated_at, title, url from content.rss_feeds
+where uuid = $1 limit 1
 `
 
-func (q *Queries) ListFeeds(ctx context.Context) ([]Feed, error) {
-	rows, err := q.db.QueryContext(ctx, listFeeds)
+func (q *Queries) GetRssFeedByUuid(ctx context.Context, uuid uuid.UUID) (ContentRssFeed, error) {
+	row := q.db.QueryRowContext(ctx, getRssFeedByUuid, uuid)
+	var i ContentRssFeed
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
+	)
+	return i, err
+}
+
+const listRSSFeeds = `-- name: ListRSSFeeds :many
+select id, uuid, created_at, updated_at, title, url from content.rss_feeds
+`
+
+func (q *Queries) ListRSSFeeds(ctx context.Context) ([]ContentRssFeed, error) {
+	rows, err := q.db.QueryContext(ctx, listRSSFeeds)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Feed
+	var items []ContentRssFeed
 	for rows.Next() {
-		var i Feed
+		var i ContentRssFeed
 		if err := rows.Scan(
 			&i.ID,
 			&i.Uuid,
-			&i.Title,
-			&i.Url,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
 		); err != nil {
 			return nil, err
 		}

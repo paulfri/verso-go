@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Controller) feedIndex(ctx *gin.Context) {
-	feeds, err := c.queries.ListFeeds(ctx)
+	feeds, err := c.queries.ListRSSFeeds(ctx)
 
 	if err == nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -28,7 +28,7 @@ func (c *Controller) feedIndex(ctx *gin.Context) {
 
 func (c *Controller) feedShow(ctx *gin.Context) {
 	uuid := uuid.Must(uuid.Parse(ctx.Param("pk")))
-	feed, err := c.queries.GetFeedByUuid(ctx, uuid)
+	feed, err := c.queries.GetRssFeedByUuid(ctx, uuid)
 
 	if err == nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -45,13 +45,13 @@ func (c *Controller) feedShow(ctx *gin.Context) {
 	}
 }
 
-type CreateFeedRequest struct {
+type CreateRssFeedRequest struct {
 	Title string `json:"title" binding:"required"`
 	Url   string `json:"url" binding:"required,http_url"`
 }
 
 func (c *Controller) feedCreate(ctx *gin.Context) {
-	var req CreateFeedRequest
+	var req CreateRssFeedRequest
 
 	if err := ctx.BindJSON(&req); err != nil {
 		fmt.Println(err)
@@ -63,7 +63,10 @@ func (c *Controller) feedCreate(ctx *gin.Context) {
 		return
 	}
 
-	feed, err := c.queries.CreateFeed(ctx, query.CreateFeedParams{Title: req.Title, Url: req.Url})
+	feed, err := c.queries.CreateRssFeed(
+		ctx,
+		query.CreateRssFeedParams{Title: req.Title, Url: req.Url},
+	)
 
 	if err == nil {
 		ctx.JSON(http.StatusOK, gin.H{

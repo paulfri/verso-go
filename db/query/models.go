@@ -11,25 +11,25 @@ import (
 	"github.com/google/uuid"
 )
 
-type Feed struct {
-	ID        int32     `json:"id"`
+type ContentRssFeed struct {
+	ID        int64     `json:"id"`
 	Uuid      uuid.UUID `json:"uuid"`
-	Title     string    `json:"title"`
-	Url       string    `json:"url"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Title     string    `json:"title"`
+	Url       string    `json:"url"`
 }
 
-type Item struct {
-	ID              int32        `json:"id"`
+type ContentRssItem struct {
+	ID              int64        `json:"id"`
 	Uuid            uuid.UUID    `json:"uuid"`
-	FeedID          int32        `json:"feed_id"`
-	RemoteID        string       `json:"remote_id"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	RssFeedID       int64        `json:"rss_feed_id"`
+	RssGuid         string       `json:"rss_guid"`
 	Title           string       `json:"title"`
 	Link            string       `json:"link"`
 	Content         string       `json:"content"`
 	PublishedAt     sql.NullTime `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
 }

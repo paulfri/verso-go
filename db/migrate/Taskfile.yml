@@ -28,6 +28,17 @@ tasks:
     cmds:
       - goose down
 
+  redo:
+    desc: Roll back and reapply the last migration.
+    cmds:
+      - goose redo
+
+  reset:
+    desc: Roll back and reapply all migrations.
+    cmds:
+      - goose reset
+      - goose up
+
   status:
     desc: Show migration status.
     cmds:

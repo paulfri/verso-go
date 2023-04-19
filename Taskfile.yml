@@ -14,9 +14,13 @@ includes:
 
 tasks:
   default:
+    deps:
+      - server
+      - worker
+
+  server:
     desc: Run the HTTP server.
     aliases:
-      - server
       - serve
       - s
     cmds:

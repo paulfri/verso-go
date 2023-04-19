@@ -36,7 +36,7 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedId)
 
 	queries := db.Queries()
-	thisFeed, err := queries.GetFeedById(ctx, int32(p.FeedId))
+	thisFeed, err := queries.GetRssFeedById(ctx, int64(p.FeedId))
 	if err != nil {
 		return err
 	}
@@ -50,8 +50,8 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 		fmt.Println(item.Title)
 
 		_, err := queries.CreateItem(ctx, query.CreateItemParams{
-			FeedID:          int32(p.FeedId),
-			RemoteID:        item.GUID,
+			RssFeedID:       int64(p.FeedId),
+			RssGuid:         item.GUID,
 			Title:           item.Title,
 			Content:         item.Content,
 			Link:            item.Link,

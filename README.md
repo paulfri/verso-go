@@ -5,7 +5,7 @@ Syndication summarized.
 ## Dependencies
 
 ```
-brew install golang goose go-task sqlc
+brew install golang goose go-task sqlc postgresql redis
 
 go install github.com/cosmtrek/air@latest
 ```
@@ -13,13 +13,8 @@ go install github.com/cosmtrek/air@latest
 ## Usage
 
 ```
+task
 task --list-all
-
-# Auto-reloading in development:
-task server
-task worker
-task --parallel server worker
-task -p s w
 ```
 
 ## Migrations
