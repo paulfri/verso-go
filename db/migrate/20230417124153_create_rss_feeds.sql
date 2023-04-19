@@ -9,11 +9,14 @@ create table content.rss_feeds (
   updated_at timestamp not null default now(),
 
   title text not null,
-  url text not null
+  url text not null,
+  active boolean not null default true,
+  last_crawled_at timestamp
 );
 
 create trigger feeds_touch_updated_at
-  before update on content.rss_feeds for each row execute procedure touch_updated_at();
+  before update on content.rss_feeds for each row
+  execute procedure touch_updated_at();
 -- +goose StatementEnd
 
 -- +goose Down

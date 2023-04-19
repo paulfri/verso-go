@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-create or replace function touch_updated_at()   
+create function touch_updated_at()   
 returns trigger as $$
 begin
   new.updated_at = now();

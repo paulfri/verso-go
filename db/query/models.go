@@ -12,12 +12,14 @@ import (
 )
 
 type ContentRssFeed struct {
-	ID        int64     `json:"id"`
-	Uuid      uuid.UUID `json:"uuid"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Title     string    `json:"title"`
-	Url       string    `json:"url"`
+	ID            int64        `json:"id"`
+	Uuid          uuid.UUID    `json:"uuid"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+	Title         string       `json:"title"`
+	Url           string       `json:"url"`
+	Active        bool         `json:"active"`
+	LastCrawledAt sql.NullTime `json:"last_crawled_at"`
 }
 
 type ContentRssItem struct {
@@ -32,4 +34,17 @@ type ContentRssItem struct {
 	Content         string       `json:"content"`
 	PublishedAt     sql.NullTime `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+}
+
+type ContentRssItemVersion struct {
+	ID              int64         `json:"id"`
+	Uuid            uuid.UUID     `json:"uuid"`
+	CreatedAt       time.Time     `json:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at"`
+	RssItemID       sql.NullInt64 `json:"rss_item_id"`
+	Title           string        `json:"title"`
+	Link            string        `json:"link"`
+	Content         string        `json:"content"`
+	PublishedAt     sql.NullTime  `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
 }

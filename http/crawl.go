@@ -9,7 +9,8 @@ import (
 )
 
 func (c *Controller) crawl(ctx *gin.Context) {
-	task, err := tasks.NewFeedParseTask(1)
+	task, err := tasks.NewFeedParseTask(2)
+
 	if err != nil {
 		fmt.Printf("could not create task: %v", err)
 	}
