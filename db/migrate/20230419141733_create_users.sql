@@ -1,26 +1,24 @@
 -- +goose Up
 -- +goose StatementBegin
-create schema content;
+create schema identity;
 
-create table content.rss_feeds (
+create table identity.users (
   id bigint primary key generated always as identity,
   uuid uuid unique not null default gen_random_uuid(),
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
-  title text not null,
-  url text not null unique,
-  active boolean not null default true,
-  last_crawled_at timestamp
+  email text not null unique,
+  full_name text not null
 );
 
-create trigger content_rss_feeds_touch_updated_at
-  before update on content.rss_feeds for each row
+create trigger identity_users_touch_updated_at
+  before update on identity.users for each row
   execute procedure touch_updated_at();
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop table content.rss_feeds;
-drop schema content;
+drop table identity.users;
+drop schema identity;
 -- +goose StatementEnd

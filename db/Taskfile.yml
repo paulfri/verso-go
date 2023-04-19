@@ -1,9 +1,68 @@
 version: "3"
 
 tasks:
-  gen:
+  compile:
     desc: Generate Go code from SQL queries.
     sources:
       - "*.sql"
     cmds:
       - sqlc generate
+
+  drop:
+    desc: Drop the database. Irreversible.
+    dir: ./migrate
+    cmds:
+      # TODO: database name; env check
+      - psql postgres -c 'drop database citra_dev;'
+
+  create:
+    desc: Create the database.
+    dir: ./migrate
+    cmds:
+      # TODO: database name
+      - psql postgres -c 'create database citra_dev;'
+
+  seed:
+    desc: Seed the database with fixture data.
+    dir: ..
+    cmds:
+      - go run main.go seed
+
+  gen:
+    desc: Generate a new migration.
+    dir: ./migrate
+    cmds:
+      - goose create {{.CLI_ARGS}} sql
+
+  migrate:
+    desc: Migrate to the latest version.
+    dir: ./migrate
+    cmds:
+      - goose up
+
+  rollback:
+    desc: Roll back the last migration. Irreversible.
+    dir: ./migrate
+    cmds:
+      - goose down
+
+  redo:
+    desc: Roll back and reapply the last migration.
+    dir: ./migrate
+    cmds:
+      - goose redo
+
+  reset:
+    desc: Roll back and reapply all migrations.
+    dir: ./migrate
+    cmds:
+      - task: drop
+      - task: create
+      - task: migrate
+      - task: seed
+
+  status:
+    desc: Show migration status.
+    dir: ./migrate
+    cmds:
+      - goose status

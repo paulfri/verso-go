@@ -16,13 +16,13 @@ create table content.rss_items (
   remote_updated_at timestamp with time zone
 );
 
-create trigger rss_items_touch_updated_at
+create trigger content_rss_items_touch_updated_at
   before update on content.rss_items for each row
   execute procedure touch_updated_at();
 
-create unique index rss_items_remote_id_feed_id_key on content.rss_items (rss_feed_id, rss_guid);
-create index rss_items_published_at_index on content.rss_items (published_at desc);
-create index rss_items_updated_at_index on content.rss_items (updated_at desc);
+create unique index content_rss_items_remote_id_feed_id_key on content.rss_items (rss_feed_id, rss_guid);
+create index content_rss_items_published_at_index on content.rss_items (published_at desc);
+create index content_rss_items_updated_at_index on content.rss_items (updated_at desc);
 -- +goose StatementEnd
 
 -- +goose Down

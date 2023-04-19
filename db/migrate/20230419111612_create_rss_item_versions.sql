@@ -15,9 +15,9 @@ create table content.rss_item_versions (
   remote_updated_at timestamp with time zone
 );
 
-create index rss_item_versions_rss_item_id_fkey on content.rss_item_versions (rss_item_id);
+create index content_rss_item_versions_rss_item_id_fkey on content.rss_item_versions (rss_item_id);
 
-create trigger rss_item_versions_touch_updated_at
+create trigger content_rss_item_versions_touch_updated_at
   before update on content.rss_item_versions for each row
   execute procedure touch_updated_at();
 -- +goose StatementEnd

@@ -4,11 +4,7 @@ dotenv:
   - .env
 
 includes:
-  goose:
-    taskfile: ./db/migrate/Taskfile.yml
-    dir: ./db/migrate
-
-  sqlc:
+  db:
     taskfile: ./db/Taskfile.yml
     dir: ./db
 

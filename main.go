@@ -6,6 +6,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
+	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/http"
 	"github.com/versolabs/citra/tasks"
 )
@@ -29,6 +30,11 @@ func main() {
 				Aliases: []string{"s"},
 				Usage:   "Run the background worker",
 				Action:  tasks.Work,
+			},
+			{
+				Name:   "seed",
+				Usage:  "Seed the database with test fixtures",
+				Action: db.Seed,
 			},
 		},
 	}

@@ -26,13 +26,13 @@ begin
 end;
 $$ language 'plpgsql';
 
-create trigger rss_item_versions_insert_on_item_update
+create trigger content_rss_item_versions_insert_on_item_update
   before update on content.rss_items for each row
   execute procedure create_rss_item_version();
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop trigger rss_item_versions_insert_on_item_update on content.rss_items;
+drop trigger content_rss_item_versions_insert_on_item_update on content.rss_items;
 drop function create_rss_item_version();
 -- +goose StatementEnd
