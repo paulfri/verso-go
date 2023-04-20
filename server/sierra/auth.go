@@ -3,6 +3,8 @@ package sierra
 import (
 	"net/http"
 
+	"github.com/dchest/uniuri"
+	"github.com/versolabs/citra/db/query"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,6 +19,7 @@ type AuthErrorResponse struct {
 }
 
 func (r *SierraRouter) token(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	email := req.URL.Query().Get("Email")
 	password := req.URL.Query().Get("Passwd")
 
@@ -28,7 +31,7 @@ func (r *SierraRouter) token(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := r.Controller.Queries.GetUserByEmail(req.Context(), email)
+	user, err := r.Controller.Queries.GetUserByEmail(ctx, email)
 
 	if err != nil {
 		r.Controller.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
@@ -37,10 +40,13 @@ func (r *SierraRouter) token(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if match(user.Password.String, password) {
-		token := "LyTEJPvTJiSPrCxLu46d"
+		rando := uniuri.NewLen(20)
+
+		// TODO handle error
+		r.Controller.Queries.CreateToken(ctx, query.CreateTokenParams{UserID: user.ID, Identifier: rando})
 
 		r.Controller.Render.JSON(w, http.StatusOK, AuthTokenResponse{
-			Auth: &token,
+			Auth: &rando,
 		})
 	} else {
 		r.Controller.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{

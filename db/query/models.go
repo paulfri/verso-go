@@ -49,6 +49,16 @@ type ContentRssItemVersion struct {
 	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
 }
 
+type IdentityToken struct {
+	ID         int64        `json:"id"`
+	Uuid       uuid.UUID    `json:"uuid"`
+	CreatedAt  time.Time    `json:"created_at"`
+	UpdatedAt  time.Time    `json:"updated_at"`
+	UserID     int64        `json:"user_id"`
+	Identifier string       `json:"identifier"`
+	RevokedAt  sql.NullTime `json:"revoked_at"`
+}
+
 type IdentityUser struct {
 	ID        int64          `json:"id"`
 	Uuid      uuid.UUID      `json:"uuid"`
