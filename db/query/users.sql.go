@@ -71,12 +71,51 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (Identit
 	return i, err
 }
 
+const getTokenByIdentifier = `-- name: GetTokenByIdentifier :one
+select id, uuid, created_at, updated_at, user_id, identifier, revoked_at from identity.tokens where identifier = $1
+`
+
+func (q *Queries) GetTokenByIdentifier(ctx context.Context, identifier string) (IdentityToken, error) {
+	row := q.db.QueryRowContext(ctx, getTokenByIdentifier, identifier)
+	var i IdentityToken
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.Identifier,
+		&i.RevokedAt,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 select id, uuid, created_at, updated_at, email, name, password, superuser from identity.users where email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (IdentityUser, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i IdentityUser
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Name,
+		&i.Password,
+		&i.Superuser,
+	)
+	return i, err
+}
+
+const getUserById = `-- name: GetUserById :one
+select id, uuid, created_at, updated_at, email, name, password, superuser from identity.users where id = $1
+`
+
+func (q *Queries) GetUserById(ctx context.Context, id int64) (IdentityUser, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i IdentityUser
 	err := row.Scan(
 		&i.ID,

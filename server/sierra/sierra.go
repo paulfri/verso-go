@@ -16,8 +16,11 @@ func Router(controller utils.Controller) http.Handler {
 
 	router := chi.NewRouter()
 	router.Post("/api/0/accounts/ClientLogin", sierra.token)
-	router.Get("/api/0/status", sierra.status)
-	router.Get("/api/0/user-info", sierra.user)
+
+	router.With(sierra.AuthMiddleware).Route("/", func(auth chi.Router) {
+		auth.Get("/api/0/status", sierra.status)
+		auth.Get("/api/0/user-info", sierra.user)
+	})
 
 	return router
 }
