@@ -11,7 +11,7 @@ import (
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/server/sierra"
+	"github.com/versolabs/citra/server/rainier"
 	"github.com/versolabs/citra/server/utils"
 	"github.com/versolabs/citra/tasks"
 )
@@ -24,15 +24,14 @@ func Serve(cliContext *cli.Context) error {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	controller := utils.Controller{
+	container := utils.Container{
 		Queries: db.Queries(),
 		Asynq:   tasks.Client(),
 		Render:  render.New(),
 	}
 
 	r.Get("/ping", ping)
-	r.Mount("/feeds", NewFeedsRouter(controller))
-	r.Mount("/reader", sierra.Router(controller))
+	r.Mount("/reader", rainier.Router(&container))
 
 	bind := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 	http.ListenAndServe(bind, r)

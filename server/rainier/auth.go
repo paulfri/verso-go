@@ -1,4 +1,4 @@
-package sierra
+package rainier
 
 import (
 	"net/http"
@@ -18,23 +18,23 @@ type AuthErrorResponse struct {
 	Error string `json:"Error"`
 }
 
-func (r *SierraRouter) token(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) login(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	email := req.URL.Query().Get("Email")
 	password := req.URL.Query().Get("Passwd")
 
 	if email == "" || password == "" {
-		r.Controller.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
+		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
 		})
 
 		return
 	}
 
-	user, err := r.Controller.Queries.GetUserByEmail(ctx, email)
+	user, err := c.Container.Queries.GetUserByEmail(ctx, email)
 
 	if err != nil {
-		r.Controller.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
+		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
 		})
 	}
@@ -43,13 +43,13 @@ func (r *SierraRouter) token(w http.ResponseWriter, req *http.Request) {
 		rando := uniuri.NewLen(20)
 
 		// TODO handle error
-		r.Controller.Queries.CreateToken(ctx, query.CreateTokenParams{UserID: user.ID, Identifier: rando})
+		c.Container.Queries.CreateToken(ctx, query.CreateTokenParams{UserID: user.ID, Identifier: rando})
 
-		r.Controller.Render.JSON(w, http.StatusOK, AuthTokenResponse{
+		c.Container.Render.JSON(w, http.StatusOK, AuthTokenResponse{
 			Auth: &rando,
 		})
 	} else {
-		r.Controller.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
+		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
 		})
 	}

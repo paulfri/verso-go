@@ -1,4 +1,4 @@
-package sierra
+package rainier
 
 import (
 	"net/http"
@@ -15,12 +15,12 @@ type UserResponse struct {
 	IsPremium           bool   `json:"isPremium"`
 }
 
-func (r *SierraRouter) user(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) user(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	userID := ctx.Value(ContextUserIDKey)
-	user, _ := r.Controller.Queries.GetUserById(ctx, userID.(int64))
+	userID := ctx.Value(ContextUserIDKey{})
+	user, _ := c.Container.Queries.GetUserById(ctx, userID.(int64))
 
-	r.Controller.Render.JSON(w, http.StatusOK, UserResponse{
+	c.Container.Render.JSON(w, http.StatusOK, UserResponse{
 		UserId:              user.Uuid.String(),
 		UserName:            user.Name,
 		UserProfileId:       user.Uuid.String(),
@@ -30,4 +30,10 @@ func (r *SierraRouter) user(w http.ResponseWriter, req *http.Request) {
 		IsMultiLoginEnabled: false,
 		IsPremium:           true,
 	})
+}
+
+func (c *RainierController) token(w http.ResponseWriter, req *http.Request) {
+	token := req.Context().Value(ContextAuthTokenKey{}).(string)
+
+	c.Container.Render.Text(w, http.StatusOK, token)
 }

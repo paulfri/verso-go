@@ -6,7 +6,7 @@ import (
 	"github.com/versolabs/citra/db/query"
 )
 
-type Controller struct {
+type Container struct {
 	Asynq   *asynq.Client
 	Queries *query.Queries
 	Render  *render.Render

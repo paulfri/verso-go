@@ -1,18 +1,17 @@
-package sierra
+package rainier
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 )
 
-type ContextKey string
+type ContextUserIDKey struct{}
+type ContextAuthTokenKey struct{}
 
-const ContextUserIDKey ContextKey = "user_id"
-
-func (r SierraRouter) AuthMiddleware(next http.Handler) http.Handler {
+func (c *RainierController) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ctx := req.Context()
 		auth := req.Header.Get("Authorization")
 		split := strings.Split(auth, "GoogleLogin auth=")
 
@@ -23,18 +22,17 @@ func (r SierraRouter) AuthMiddleware(next http.Handler) http.Handler {
 			identifier := split[1]
 
 			if identifier != "" {
-				fmt.Println(identifier)
-
-				token, err := r.Controller.Queries.GetTokenByIdentifier(req.Context(), identifier)
+				token, err := c.Container.Queries.GetTokenByIdentifier(req.Context(), identifier)
 
 				if err != nil {
 					authFailed(w)
 					return
 				}
 
-				ctx := context.WithValue(req.Context(), ContextUserIDKey, token.UserID)
+				withUser := context.WithValue(ctx, ContextUserIDKey{}, token.UserID)
+				withToken := context.WithValue(withUser, ContextAuthTokenKey{}, token.Identifier)
 
-				next.ServeHTTP(w, req.WithContext(ctx))
+				next.ServeHTTP(w, req.WithContext(withToken))
 			} else {
 				authFailed(w)
 				return

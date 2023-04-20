@@ -1,4 +1,4 @@
-package sierra
+package rainier
 
 import (
 	"net/http"
@@ -22,17 +22,17 @@ type StatusResponse struct {
 
 type None struct{}
 
-func (r *SierraRouter) status(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) status(w http.ResponseWriter, req *http.Request) {
 	var err *None
 
 	if err != nil {
-		r.Controller.Render.JSON(w, http.StatusOK, StatusResponse{
+		c.Container.Render.JSON(w, http.StatusOK, StatusResponse{
 			Status:      STATUS_ERR,
 			Description: ERROR_TEXT,
 			Redirect:    REDIRECT_URL,
 		})
 	} else {
-		r.Controller.Render.JSON(w, http.StatusOK, StatusResponse{
+		c.Container.Render.JSON(w, http.StatusOK, StatusResponse{
 			Status: STATUS_OK,
 		})
 	}
