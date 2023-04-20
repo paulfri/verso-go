@@ -15,7 +15,7 @@ const DEFAULT_PASSWORD = "rectoverso"
 
 func Seed(cliContext *cli.Context) error {
 	context := context.Background()
-	queries := Queries()
+	_, queries := Init()
 
 	_, err1 := queries.CreateRssFeed(context, query.CreateRssFeedParams{
 		Title: "Sounder at Heart",

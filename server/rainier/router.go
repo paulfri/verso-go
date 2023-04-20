@@ -24,9 +24,15 @@ func Router(container *utils.Container) http.Handler {
 		auth.Get("/api/0/ping", rainier.MetaPing)
 		auth.Get("/api/0/token", rainier.UserTokenGet)
 		auth.Get("/api/0/user-info", rainier.UserGet)
+		auth.Get("/api/0/preference/list", rainier.UserPreferences)
+		auth.Get("/api/0/preference/stream/list", rainier.UserStreamPreferences)
+		auth.Get("/api/0/user/friend/list", rainier.UserFriendList)
 
 		// subscriptions
 		auth.Post("/api/0/subscription/quickadd", rainier.SubscriptionCreate)
+
+		// stream
+		auth.Get("/api/0/stream/contents/*", rainier.Stream)
 	})
 
 	return router

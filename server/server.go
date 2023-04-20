@@ -24,9 +24,12 @@ func Serve(cliContext *cli.Context) error {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	db, queries := db.Init()
+
 	container := utils.Container{
-		Queries: db.Queries(),
 		Asynq:   tasks.Client(),
+		DB:      db,
+		Queries: queries,
 		Render:  render.New(),
 	}
 

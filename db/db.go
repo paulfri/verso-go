@@ -8,12 +8,12 @@ import (
 	"github.com/versolabs/citra/db/query"
 )
 
-func Queries() *query.Queries {
-	database, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+func Init() (*sql.DB, *query.Queries) {
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 	if err != nil {
 		panic(err)
 	}
 
-	return query.New(database)
+	return db, query.New(db)
 }

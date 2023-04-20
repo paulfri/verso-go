@@ -30,7 +30,15 @@ func (c *RainierController) SubscriptionCreate(w http.ResponseWriter, req *http.
 	parsedFeed, err := feed.Parse(normalized)
 
 	if err == nil {
-		feed, err := c.Container.Queries.FindOrCreateRssFeed(
+		tx, err := c.Container.DB.Begin()
+		if err != nil {
+			panic(err)
+		}
+		defer tx.Rollback()
+
+		withTx := c.Container.Queries.WithTx(tx)
+
+		feed, err := withTx.FindOrCreateRssFeed(
 			ctx,
 			query.FindOrCreateRssFeedParams{
 				Url:   normalized,
@@ -39,11 +47,10 @@ func (c *RainierController) SubscriptionCreate(w http.ResponseWriter, req *http.
 		)
 
 		if err != nil {
-			fmt.Println(err)
-			return
+			panic(err)
 		}
 
-		subscription, err := c.Container.Queries.CreateSubscription(
+		subscription, err := withTx.CreateSubscription(
 			ctx,
 			query.CreateSubscriptionParams{
 				UserID:    userID,
@@ -57,9 +64,15 @@ func (c *RainierController) SubscriptionCreate(w http.ResponseWriter, req *http.
 
 		fmt.Println(feed.Title)
 		fmt.Println(subscription.ID)
-	} else {
-		fmt.Println(err)
 
-		c.Container.Render.Text(w, 400, err.Error())
+		err = tx.Commit()
+
+		if err != nil {
+			panic(err)
+		}
+
+		c.Container.Render.Text(w, http.StatusOK, "ok")
+	} else {
+		c.Container.Render.Text(w, http.StatusOK, err.Error())
 	}
 }
