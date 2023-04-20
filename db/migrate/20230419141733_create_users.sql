@@ -9,7 +9,9 @@ create table identity.users (
   updated_at timestamp not null default now(),
 
   email text not null unique,
-  full_name text not null
+  name text not null,
+  password text,
+  superuser bool not null default false
 );
 
 create trigger identity_users_touch_updated_at

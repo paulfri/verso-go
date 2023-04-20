@@ -2,12 +2,16 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/db/query"
+	"golang.org/x/crypto/bcrypt"
 )
+
+const DEFAULT_PASSWORD = "rectoverso"
 
 func Seed(cliContext *cli.Context) error {
 	context := context.Background()
@@ -23,7 +27,15 @@ func Seed(cliContext *cli.Context) error {
 		Url:   "https://soundofhockey.com/feed/",
 	})
 
-	err := errors.Join(err1, err2)
+	password, err3 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
+	_, err4 := queries.CreateUser(context, query.CreateUserParams{
+		Email:     "paul@verso.so",
+		Name:      "Paul Friedman",
+		Password:  sql.NullString{String: string(password), Valid: true},
+		Superuser: true,
+	})
+
+	err := errors.Join(err1, err2, err3, err4)
 
 	if err != nil {
 		fmt.Println(err)

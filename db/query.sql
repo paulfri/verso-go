@@ -38,3 +38,14 @@ insert into content.rss_items as i (
     i.published_at is distinct from excluded.published_at or
     i.remote_updated_at is distinct from excluded.remote_updated_at
   returning *;
+
+-- name: CreateUser :one
+insert into identity.users (
+  email,
+  name,
+  password,
+  superuser
+) values ($1, $2, $3, $4) returning *;
+
+-- name: GetUserByEmail :one
+select * from identity.users where email = $1;

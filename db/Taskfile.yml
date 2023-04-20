@@ -59,6 +59,7 @@ tasks:
       - task: drop
       - task: create
       - task: migrate
+      - task: compile
       - task: seed
 
   status:

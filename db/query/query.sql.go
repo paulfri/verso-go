@@ -102,6 +102,43 @@ func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (C
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+insert into identity.users (
+  email,
+  name,
+  password,
+  superuser
+) values ($1, $2, $3, $4) returning id, uuid, created_at, updated_at, email, name, password, superuser
+`
+
+type CreateUserParams struct {
+	Email     string         `json:"email"`
+	Name      string         `json:"name"`
+	Password  sql.NullString `json:"password"`
+	Superuser bool           `json:"superuser"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (IdentityUser, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Email,
+		arg.Name,
+		arg.Password,
+		arg.Superuser,
+	)
+	var i IdentityUser
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Name,
+		&i.Password,
+		&i.Superuser,
+	)
+	return i, err
+}
+
 const getRssFeedById = `-- name: GetRssFeedById :one
 select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds
 where id = $1 limit 1
@@ -140,6 +177,26 @@ func (q *Queries) GetRssFeedByUuid(ctx context.Context, uuid uuid.UUID) (Content
 		&i.Url,
 		&i.Active,
 		&i.LastCrawledAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+select id, uuid, created_at, updated_at, email, name, password, superuser from identity.users where email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (IdentityUser, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i IdentityUser
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Name,
+		&i.Password,
+		&i.Superuser,
 	)
 	return i, err
 }

@@ -48,3 +48,14 @@ type ContentRssItemVersion struct {
 	PublishedAt     sql.NullTime  `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
 }
+
+type IdentityUser struct {
+	ID        int64          `json:"id"`
+	Uuid      uuid.UUID      `json:"uuid"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Email     string         `json:"email"`
+	Name      string         `json:"name"`
+	Password  sql.NullString `json:"password"`
+	Superuser bool           `json:"superuser"`
+}
