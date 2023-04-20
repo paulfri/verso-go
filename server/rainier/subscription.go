@@ -66,7 +66,6 @@ func (c *RainierController) SubscriptionCreate(w http.ResponseWriter, req *http.
 		fmt.Println(subscription.ID)
 
 		err = tx.Commit()
-
 		if err != nil {
 			panic(err)
 		}

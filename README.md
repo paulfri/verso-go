@@ -20,9 +20,14 @@ task --list-all
 ## Migrations
 
 ```
-task goose:create
-task goose:drop
-task goose:gen -- migration_name
-task goose:migrate
-task goose:rollback
+task db:create
+task db:migrate
+task db:reset
+task db:gen -- migration_name
+```
+
+## Compiling SQL queries
+
+```
+task db:compile
 ```
