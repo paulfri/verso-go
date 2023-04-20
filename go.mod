@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
+	github.com/PuerkitoBio/purell v1.2.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
@@ -30,6 +31,7 @@ require (
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/hibiken/asynq v0.24.0 // indirect
+	github.com/hueristiq/url v0.0.0-20220804093805-5ca3562ceccd // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect

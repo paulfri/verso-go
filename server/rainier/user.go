@@ -15,7 +15,7 @@ type UserResponse struct {
 	IsPremium           bool   `json:"isPremium"`
 }
 
-func (c *RainierController) user(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) UserGet(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
 	user, _ := c.Container.Queries.GetUserById(ctx, userID.(int64))
@@ -32,7 +32,7 @@ func (c *RainierController) user(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
-func (c *RainierController) token(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) UserTokenGet(w http.ResponseWriter, req *http.Request) {
 	token := req.Context().Value(ContextAuthTokenKey{}).(string)
 
 	c.Container.Render.Text(w, http.StatusOK, token)

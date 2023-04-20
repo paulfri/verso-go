@@ -22,7 +22,7 @@ type StatusResponse struct {
 
 type None struct{}
 
-func (c *RainierController) status(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) MetaStatus(w http.ResponseWriter, req *http.Request) {
 	var err *None
 
 	if err != nil {
@@ -36,4 +36,8 @@ func (c *RainierController) status(w http.ResponseWriter, req *http.Request) {
 			Status: STATUS_OK,
 		})
 	}
+}
+
+func (c *RainierController) MetaPing(w http.ResponseWriter, req *http.Request) {
+	c.Container.Render.Text(w, http.StatusOK, "OK")
 }

@@ -6,13 +6,14 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-func Fetch(url string) []*gofeed.Item {
+func Parse(url string) (*gofeed.Feed, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
 
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
-	return feed.Items
+	return feed, nil
 }

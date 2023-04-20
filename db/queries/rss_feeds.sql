@@ -1,13 +1,20 @@
--- name: GetRssFeedById :one
+-- name: FindRssFeed :one
 select * from content.rss_feeds
 where id = $1 limit 1;
 
--- name: GetRssFeedByUuid :one
+-- name: FindRssFeedByUuid :one
 select * from content.rss_feeds
 where uuid = $1 limit 1;
 
--- name: ListRSSFeeds :many
-select * from content.rss_feeds;
+-- name: FindOrCreateRssFeed :one
+with inserted as (
+  insert into content.rss_feeds (
+    title,
+    url
+  ) select $1, $2 where not exists (
+    select 1 from content.rss_feeds where url = $2
+  ) returning *
+) select * from inserted union select * from content.rss_feeds where url = $2;
 
 -- name: CreateRssFeed :one
 insert into content.rss_feeds (title, url) values ($1, $2) returning *;
@@ -38,3 +45,11 @@ insert into content.rss_items as i (
     i.published_at is distinct from excluded.published_at or
     i.remote_updated_at is distinct from excluded.remote_updated_at
   returning *;
+
+-- name: CreateSubscription :one
+insert into content.rss_subscriptions (
+  user_id,
+  rss_feed_id
+) select $1, $2 where not exists (
+  select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
+) returning *;
