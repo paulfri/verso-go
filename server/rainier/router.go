@@ -15,24 +15,24 @@ func Router(container *utils.Container) http.Handler {
 	rainier := RainierController{Container: container}
 
 	router := chi.NewRouter()
-	router.Post("/api/0/accounts/ClientLogin", rainier.login)
+	router.Post("/accounts/ClientLogin", rainier.login)
 
 	router.With(rainier.AuthMiddleware).Route("/", func(auth chi.Router) {
-		auth.Get("/api/0/status", rainier.MetaStatus)
+		auth.Get("/status", rainier.MetaStatus)
 
 		// auth & identity
-		auth.Get("/api/0/ping", rainier.MetaPing)
-		auth.Get("/api/0/token", rainier.UserTokenGet)
-		auth.Get("/api/0/user-info", rainier.UserGet)
-		auth.Get("/api/0/preference/list", rainier.UserPreferences)
-		auth.Get("/api/0/preference/stream/list", rainier.UserStreamPreferences)
-		auth.Get("/api/0/user/friend/list", rainier.UserFriendList)
+		auth.Get("/ping", rainier.MetaPing)
+		auth.Get("/token", rainier.UserTokenGet)
+		auth.Get("/user-info", rainier.UserGet)
+		auth.Get("/preference/list", rainier.UserPreferences)
+		auth.Get("/preference/stream/list", rainier.UserStreamPreferences)
+		auth.Get("/user/friend/list", rainier.UserFriendList)
 
 		// subscriptions
-		auth.Post("/api/0/subscription/quickadd", rainier.SubscriptionCreate)
+		auth.Post("/subscription/quickadd", rainier.SubscriptionCreate)
 
 		// stream
-		auth.Get("/api/0/stream/contents/*", rainier.Stream)
+		auth.Get("/stream/contents/*", rainier.Stream)
 	})
 
 	return router

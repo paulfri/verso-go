@@ -34,7 +34,7 @@ func Serve(cliContext *cli.Context) error {
 	}
 
 	r.Get("/ping", ping)
-	r.Mount("/reader", rainier.Router(&container))
+	r.Mount("/reader/api/0", rainier.Router(&container))
 
 	bind := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 	http.ListenAndServe(bind, r)
