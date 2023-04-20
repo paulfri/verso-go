@@ -15,13 +15,13 @@ func Router(container *utils.Container) http.Handler {
 	rainier := RainierController{Container: container}
 
 	router := chi.NewRouter()
+	router.Get("/status", rainier.MetaStatus)
 	router.Post("/accounts/ClientLogin", rainier.login)
 
 	router.With(rainier.AuthMiddleware).Route("/", func(auth chi.Router) {
-		auth.Get("/status", rainier.MetaStatus)
+		auth.Get("/ping", rainier.MetaPing)
 
 		// auth & identity
-		auth.Get("/ping", rainier.MetaPing)
 		auth.Get("/token", rainier.UserTokenGet)
 		auth.Get("/user-info", rainier.UserGet)
 		auth.Get("/preference/list", rainier.UserPreferences)
