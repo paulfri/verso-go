@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 	citraCli "github.com/versolabs/citra/cli"
 	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/http"
+	"github.com/versolabs/citra/server"
 	"github.com/versolabs/citra/tasks"
 )
 
@@ -24,7 +24,7 @@ func main() {
 				Name:    "server",
 				Aliases: []string{"s"},
 				Usage:   "Run the HTTP server",
-				Action:  http.Serve,
+				Action:  server.Serve,
 			},
 			{
 				Name:    "worker",
