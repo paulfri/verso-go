@@ -6,6 +6,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
+	citraCli "github.com/versolabs/citra/cli"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/http"
 	"github.com/versolabs/citra/tasks"
@@ -35,6 +36,11 @@ func main() {
 				Name:   "seed",
 				Usage:  "Seed the database with test fixtures",
 				Action: db.Seed,
+			},
+			{
+				Name:   "crawl",
+				Usage:  "Queue the given feed for crawling",
+				Action: citraCli.Crawl,
 			},
 		},
 	}

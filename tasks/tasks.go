@@ -13,10 +13,10 @@ import (
 )
 
 type FeedParsePayload struct {
-	FeedId int
+	FeedId int64
 }
 
-func NewFeedParseTask(feedId int) (*asynq.Task, error) {
+func NewFeedParseTask(feedId int64) (*asynq.Task, error) {
 	payload, err := json.Marshal(FeedParsePayload{FeedId: feedId})
 
 	if err != nil {
@@ -56,7 +56,7 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 			Content:         item.Content,
 			Link:            item.Link,
 			PublishedAt:     sql.NullTime{Time: *item.PublishedParsed, Valid: true},
-			RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
+			RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: false},
 		})
 
 		if err != nil {
