@@ -34,6 +34,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		}
 
 		r.Get("/ping", ping)
+		r.Mount("/", rainier.LoginRouter(&container))
 		r.Mount("/reader/api/0", rainier.Router(&container))
 
 		bind := fmt.Sprintf("%s:%s", config.Host, config.Port)

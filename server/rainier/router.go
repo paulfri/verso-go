@@ -11,12 +11,23 @@ type RainierController struct {
 	Container *util.Container
 }
 
+// This handler allows the main server to mount the ClientLogin endpoint
+// at the API root instead of under the /reader/api/0 path.
+func LoginRouter(container *util.Container) http.Handler {
+	rainier := RainierController{Container: container}
+
+	router := chi.NewRouter()
+	router.Post("/accounts/ClientLogin", rainier.ClientLogin)
+
+	return router
+}
+
 func Router(container *util.Container) http.Handler {
 	rainier := RainierController{Container: container}
 
 	router := chi.NewRouter()
 	router.Get("/status", rainier.MetaStatus)
-	router.Post("/accounts/ClientLogin", rainier.login)
+	router.Post("/accounts/ClientLogin", rainier.ClientLogin)
 
 	router.With(rainier.AuthMiddleware).Route("/", func(auth chi.Router) {
 		auth.Get("/ping", rainier.MetaPing)
