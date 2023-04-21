@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/core/command"
@@ -28,18 +29,19 @@ func Serve(config *util.Config) cli.ActionFunc {
 		asynq := tasks.Client(config.RedisUrl)
 		db, queries := db.Init(config.DatabaseUrl)
 
-		command := command.Command{
+		command := &command.Command{
 			Asynq:   asynq,
 			DB:      db,
 			Queries: queries,
 		}
 
 		container := util.Container{
-			Asynq:   asynq,
-			Command: &command,
-			DB:      db,
-			Queries: queries,
-			Render:  render.New(),
+			Asynq:     asynq,
+			Command:   command,
+			DB:        db,
+			Queries:   queries,
+			Render:    render.New(),
+			Validator: validator.New(),
 		}
 
 		r.Get("/ping", ping)
