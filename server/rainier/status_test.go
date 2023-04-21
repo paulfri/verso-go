@@ -5,30 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/unrolled/render"
-	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/tasks"
-	"github.com/versolabs/citra/util"
 )
-
-func initTestContainer() *util.Container {
-	config := util.GetConfig()
-	db, queries := db.Init(config.DatabaseUrl)
-
-	return &util.Container{
-		Asynq:   tasks.Client(config.RedisUrl),
-		DB:      db,
-		Queries: queries,
-		Render:  render.New(),
-	}
-}
-
-func initTestController() *RainierController {
-	return &RainierController{
-		Container: initTestContainer(),
-	}
-}
 
 func TestMetaStatus(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/status", nil)
