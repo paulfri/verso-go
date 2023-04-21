@@ -5,19 +5,22 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/tasks"
+	"github.com/versolabs/citra/util"
 )
 
-func Crawl(cliContext *cli.Context) error {
-	client := tasks.Client()
-	feedId := cliContext.Args().Get(0)
+func Crawl(config *util.Config) cli.ActionFunc {
+	return func(cliContext *cli.Context) error {
+		client := tasks.Client(config.RedisUrl)
+		feedId := cliContext.Args().Get(0)
 
-	i, err := strconv.ParseInt(feedId, 10, 64)
-	if err != nil {
-		panic(err)
+		i, err := strconv.ParseInt(feedId, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		task, _ := tasks.NewFeedParseTask(i)
+		_, err2 := client.Enqueue(task)
+
+		return err2
 	}
-
-	task, _ := tasks.NewFeedParseTask(i)
-	_, err2 := client.Enqueue(task)
-
-	return err2
 }

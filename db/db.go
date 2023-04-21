@@ -2,17 +2,16 @@ package db
 
 import (
 	"database/sql"
-	"os"
+	"log"
 
 	_ "github.com/lib/pq"
 	"github.com/versolabs/citra/db/query"
 )
 
-func Init() (*sql.DB, *query.Queries) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-
+func Init(databaseUrl string) (*sql.DB, *query.Queries) {
+	db, err := sql.Open("postgres", databaseUrl)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return db, query.New(db)

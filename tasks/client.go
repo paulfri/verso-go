@@ -1,14 +1,11 @@
 package tasks
 
 import (
-	"os"
-
 	"github.com/hibiken/asynq"
 )
 
-func Client() *asynq.Client {
-	redis := os.Getenv("REDIS_URL")
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redis})
+func Client(redisUrl string) *asynq.Client {
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redisUrl})
 
 	return asynqClient
 }

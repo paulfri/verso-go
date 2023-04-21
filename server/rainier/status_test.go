@@ -8,18 +8,19 @@ import (
 
 	"github.com/unrolled/render"
 	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/server/utils"
 	"github.com/versolabs/citra/tasks"
+	"github.com/versolabs/citra/util"
 )
 
-func initTestContainer() *utils.Container {
-	db, queries := db.Init()
+func initTestContainer() *util.Container {
+	config := util.GetConfig()
+	db, queries := db.Init(config.DatabaseUrl)
 
-	return &utils.Container{
-		Asynq:   tasks.Client(),
-		Render:  render.New(),
+	return &util.Container{
+		Asynq:   tasks.Client(config.RedisUrl),
 		DB:      db,
 		Queries: queries,
+		Render:  render.New(),
 	}
 }
 

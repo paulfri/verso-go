@@ -10,13 +10,16 @@ import (
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/server"
 	"github.com/versolabs/citra/tasks"
+	"github.com/versolabs/citra/util"
 )
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error loading .env: %+v\n", err)
 	}
+
+	config := util.GetConfig()
 
 	app := &cli.App{
 		Commands: []*cli.Command{
@@ -24,28 +27,28 @@ func main() {
 				Name:    "server",
 				Aliases: []string{"s"},
 				Usage:   "Run the HTTP server",
-				Action:  server.Serve,
+				Action:  server.Serve(&config),
 			},
 			{
 				Name:    "worker",
 				Aliases: []string{"s"},
 				Usage:   "Run the background worker",
-				Action:  tasks.Work,
+				Action:  tasks.Work(&config),
 			},
 			{
 				Name:   "seed",
 				Usage:  "Seed the database with test fixtures",
-				Action: db.Seed,
+				Action: db.Seed(&config),
 			},
 			{
 				Name:   "crawl",
 				Usage:  "Queue the given feed for crawling",
-				Action: citraCli.Crawl,
+				Action: citraCli.Crawl(&config),
 			},
 		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error running app: %+v\n", err)
 	}
 }

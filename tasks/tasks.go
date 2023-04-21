@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/hibiken/asynq"
-	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/db/query"
 	"github.com/versolabs/citra/feed"
 )
@@ -26,7 +25,7 @@ func NewFeedParseTask(feedId int64) (*asynq.Task, error) {
 	return asynq.NewTask(TypeFeedParse, payload), nil
 }
 
-func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
+func (worker Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 	var p FeedParsePayload
 
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
@@ -35,8 +34,7 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 
 	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedId)
 
-	_, queries := db.Init()
-	thisFeed, err := queries.FindRssFeed(ctx, int64(p.FeedId))
+	thisFeed, err := worker.Container.Queries.FindRssFeed(ctx, int64(p.FeedId))
 	if err != nil {
 		return err
 	}
@@ -49,7 +47,7 @@ func HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
 	for _, item := range feed.Items {
 		fmt.Println(item.Title)
 
-		_, err := queries.CreateItem(ctx, query.CreateItemParams{
+		_, err := worker.Container.Queries.CreateItem(ctx, query.CreateItemParams{
 			RssFeedID:       int64(p.FeedId),
 			RssGuid:         item.GUID,
 			Title:           item.Title,

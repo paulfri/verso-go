@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -12,32 +11,34 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/server/rainier"
-	"github.com/versolabs/citra/server/utils"
 	"github.com/versolabs/citra/tasks"
+	"github.com/versolabs/citra/util"
 )
 
-func Serve(cliContext *cli.Context) error {
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+func Serve(config *util.Config) cli.ActionFunc {
+	return func(cliContext *cli.Context) error {
+		r := chi.NewRouter()
+		r.Use(middleware.RequestID)
+		r.Use(middleware.RealIP)
+		r.Use(middleware.Logger)
+		r.Use(middleware.Recoverer)
+		r.Use(middleware.Timeout(60 * time.Second))
 
-	db, queries := db.Init()
+		db, queries := db.Init(config.DatabaseUrl)
 
-	container := utils.Container{
-		Asynq:   tasks.Client(),
-		DB:      db,
-		Queries: queries,
-		Render:  render.New(),
+		container := util.Container{
+			Asynq:   tasks.Client(config.RedisUrl),
+			DB:      db,
+			Queries: queries,
+			Render:  render.New(),
+		}
+
+		r.Get("/ping", ping)
+		r.Mount("/reader/api/0", rainier.Router(&container))
+
+		bind := fmt.Sprintf("%s:%s", config.Host, config.Port)
+		http.ListenAndServe(bind, r)
+
+		return nil
 	}
-
-	r.Get("/ping", ping)
-	r.Mount("/reader/api/0", rainier.Router(&container))
-
-	bind := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
-	http.ListenAndServe(bind, r)
-
-	return nil
 }

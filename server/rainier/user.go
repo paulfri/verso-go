@@ -16,7 +16,7 @@ type UserResponse struct {
 	IsPremium           bool   `json:"isPremium"`
 }
 
-func (c *RainierController) UserGet(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) User(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
 	user, _ := c.Container.Queries.GetUserById(ctx, userID.(int64))
@@ -33,7 +33,7 @@ func (c *RainierController) UserGet(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
-func (c *RainierController) UserTokenGet(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) UserToken(w http.ResponseWriter, req *http.Request) {
 	token := req.Context().Value(ContextAuthTokenKey{}).(string)
 
 	c.Container.Render.Text(w, http.StatusOK, token)
@@ -52,7 +52,7 @@ func (c *RainierController) UserPreferences(w http.ResponseWriter, req *http.Req
 }
 
 const UserStreamPreferencesResponse = `{
-    "streamprefs": { }
+    "streamprefs": {}
 }`
 
 func (c *RainierController) UserStreamPreferences(w http.ResponseWriter, req *http.Request) {

@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/versolabs/citra/server/utils"
+	"github.com/versolabs/citra/util"
 )
 
 type RainierController struct {
-	Container *utils.Container
+	Container *util.Container
 }
 
-func Router(container *utils.Container) http.Handler {
+func Router(container *util.Container) http.Handler {
 	rainier := RainierController{Container: container}
 
 	router := chi.NewRouter()
@@ -22,17 +22,17 @@ func Router(container *utils.Container) http.Handler {
 		auth.Get("/ping", rainier.MetaPing)
 
 		// auth & identity
-		auth.Get("/token", rainier.UserTokenGet)
-		auth.Get("/user-info", rainier.UserGet)
+		auth.Get("/token", rainier.UserToken)
+		auth.Get("/user-info", rainier.User)
 		auth.Get("/preference/list", rainier.UserPreferences)
 		auth.Get("/preference/stream/list", rainier.UserStreamPreferences)
 		auth.Get("/user/friend/list", rainier.UserFriendList)
 
 		// subscriptions
-		auth.Post("/subscription/quickadd", rainier.SubscriptionCreate)
+		auth.Post("/subscription/quickadd", rainier.SubscriptionQuickAdd)
 
 		// stream
-		auth.Get("/stream/contents/*", rainier.Stream)
+		auth.Get("/stream/contents/*", rainier.StreamContents)
 	})
 
 	return router

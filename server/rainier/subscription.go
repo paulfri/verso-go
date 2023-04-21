@@ -11,7 +11,7 @@ import (
 	"github.com/versolabs/citra/feed"
 )
 
-func (c *RainierController) SubscriptionCreate(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	quickadd := req.URL.Query().Get("quickadd")

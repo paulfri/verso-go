@@ -14,7 +14,7 @@ func TestToken(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	testController := initTestController()
-	testController.UserTokenGet(w, req)
+	testController.UserToken(w, req)
 
 	res := w.Result()
 	defer res.Body.Close()

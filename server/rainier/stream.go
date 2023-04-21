@@ -14,7 +14,7 @@ import (
 // ot: an epoch timestamp. Items older than this timestamp are filtered out.
 // nt: an epoch timestamp. Items newer than this timestamp are filtered out.
 
-func (c *RainierController) Stream(w http.ResponseWriter, req *http.Request) {
+func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Request) {
 	switch streamID := chi.URLParam(req, "*"); streamID {
 	case "user/-/state/com.google/reading-list":
 		c.Container.Render.Text(w, http.StatusOK, "reading list")
