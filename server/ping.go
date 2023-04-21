@@ -6,6 +6,10 @@ import (
 	"github.com/unrolled/render"
 )
 
+type PingResponse struct {
+	Status string `json:"status"`
+}
+
 func ping(w http.ResponseWriter, r *http.Request) {
-	render.New().JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	render.New().JSON(w, http.StatusOK, PingResponse{Status: "ok"})
 }

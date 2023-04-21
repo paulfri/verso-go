@@ -6,6 +6,10 @@ where id = $1 limit 1;
 select * from content.rss_feeds
 where uuid = $1 limit 1;
 
+-- name: FindRssFeedByUrl :one
+select * from content.rss_feeds
+where url = $1 limit 1;
+
 -- name: FindOrCreateRssFeed :one
 with inserted as (
   insert into content.rss_feeds (
@@ -14,7 +18,9 @@ with inserted as (
   ) select $1, $2 where not exists (
     select 1 from content.rss_feeds where url = $2
   ) returning *
-) select * from inserted union select * from content.rss_feeds where url = $2;
+) select * from inserted
+  union
+  select * from content.rss_feeds where url = $2;
 
 -- name: CreateRssFeed :one
 insert into content.rss_feeds (title, url) values ($1, $2) returning *;
@@ -47,9 +53,13 @@ insert into content.rss_items as i (
   returning *;
 
 -- name: CreateSubscription :one
-insert into content.rss_subscriptions (
-  user_id,
-  rss_feed_id
-) select $1, $2 where not exists (
-  select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
-) returning *;
+with inserted as (
+  insert into content.rss_subscriptions (
+    user_id,
+    rss_feed_id
+  ) select $1, $2 where not exists (
+    select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
+  ) returning *
+) select * from inserted
+  union
+  select * from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2;

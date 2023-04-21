@@ -104,12 +104,16 @@ func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (C
 }
 
 const createSubscription = `-- name: CreateSubscription :one
-insert into content.rss_subscriptions (
-  user_id,
-  rss_feed_id
-) select $1, $2 where not exists (
-  select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
-) returning id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title
+with inserted as (
+  insert into content.rss_subscriptions (
+    user_id,
+    rss_feed_id
+  ) select $1, $2 where not exists (
+    select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
+  ) returning id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title
+) select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from inserted
+  union
+  select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
 `
 
 type CreateSubscriptionParams struct {
@@ -117,9 +121,19 @@ type CreateSubscriptionParams struct {
 	RssFeedID int64 `json:"rss_feed_id"`
 }
 
-func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (ContentRssSubscription, error) {
+type CreateSubscriptionRow struct {
+	ID          int64          `json:"id"`
+	Uuid        uuid.UUID      `json:"uuid"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	UserID      int64          `json:"user_id"`
+	RssFeedID   int64          `json:"rss_feed_id"`
+	CustomTitle sql.NullString `json:"custom_title"`
+}
+
+func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (CreateSubscriptionRow, error) {
 	row := q.db.QueryRowContext(ctx, createSubscription, arg.UserID, arg.RssFeedID)
-	var i ContentRssSubscription
+	var i CreateSubscriptionRow
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
@@ -140,7 +154,9 @@ with inserted as (
   ) select $1, $2 where not exists (
     select 1 from content.rss_feeds where url = $2
   ) returning id, uuid, created_at, updated_at, title, url, active, last_crawled_at
-) select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from inserted union select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds where url = $2
+) select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from inserted
+  union
+  select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds where url = $2
 `
 
 type FindOrCreateRssFeedParams struct {
@@ -182,6 +198,27 @@ where id = $1 limit 1
 
 func (q *Queries) FindRssFeed(ctx context.Context, id int64) (ContentRssFeed, error) {
 	row := q.db.QueryRowContext(ctx, findRssFeed, id)
+	var i ContentRssFeed
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
+		&i.Active,
+		&i.LastCrawledAt,
+	)
+	return i, err
+}
+
+const findRssFeedByUrl = `-- name: FindRssFeedByUrl :one
+select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds
+where url = $1 limit 1
+`
+
+func (q *Queries) FindRssFeedByUrl(ctx context.Context, url string) (ContentRssFeed, error) {
+	row := q.db.QueryRowContext(ctx, findRssFeedByUrl, url)
 	var i ContentRssFeed
 	err := row.Scan(
 		&i.ID,

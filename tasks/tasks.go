@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/hibiken/asynq"
+	"github.com/mmcdole/gofeed"
 	"github.com/versolabs/citra/db/query"
-	"github.com/versolabs/citra/feed"
 )
 
 type FeedParsePayload struct {
@@ -43,7 +43,8 @@ func (worker Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) err
 
 	url := thisFeed.Url
 
-	feed, _ := feed.Parse(url)
+	parser := gofeed.NewParser()
+	feed, _ := parser.ParseURL(url)
 	for _, item := range feed.Items {
 		fmt.Println(item.Title)
 

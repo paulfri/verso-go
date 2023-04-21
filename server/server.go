@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
+	"github.com/versolabs/citra/core/command"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/server/rainier"
 	"github.com/versolabs/citra/tasks"
@@ -24,10 +25,18 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
 
+		asynq := tasks.Client(config.RedisUrl)
 		db, queries := db.Init(config.DatabaseUrl)
 
+		command := command.Command{
+			Asynq:   asynq,
+			DB:      db,
+			Queries: queries,
+		}
+
 		container := util.Container{
-			Asynq:   tasks.Client(config.RedisUrl),
+			Asynq:   asynq,
+			Command: &command,
 			DB:      db,
 			Queries: queries,
 			Render:  render.New(),
