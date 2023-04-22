@@ -13,7 +13,7 @@ import (
 
 type IdentityReaderToken struct {
 	ID         int64        `json:"id"`
-	Uuid       uuid.UUID    `json:"uuid"`
+	UUID       uuid.UUID    `json:"uuid"`
 	CreatedAt  time.Time    `json:"created_at"`
 	UpdatedAt  time.Time    `json:"updated_at"`
 	UserID     int64        `json:"user_id"`
@@ -23,7 +23,7 @@ type IdentityReaderToken struct {
 
 type IdentityUser struct {
 	ID        int64          `json:"id"`
-	Uuid      uuid.UUID      `json:"uuid"`
+	UUID      uuid.UUID      `json:"uuid"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	Email     string         `json:"email"`
@@ -34,32 +34,32 @@ type IdentityUser struct {
 
 type QueueItem struct {
 	ID        int64         `json:"id"`
-	Uuid      uuid.UUID     `json:"uuid"`
+	UUID      uuid.UUID     `json:"uuid"`
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
 	UserID    int64         `json:"user_id"`
-	RssItemID sql.NullInt64 `json:"rss_item_id"`
+	RSSItemID sql.NullInt64 `json:"rss_item_id"`
 	Unread    bool          `json:"unread"`
 }
 
-type RssFeed struct {
+type RSSFeed struct {
 	ID            int64        `json:"id"`
-	Uuid          uuid.UUID    `json:"uuid"`
+	UUID          uuid.UUID    `json:"uuid"`
 	CreatedAt     time.Time    `json:"created_at"`
 	UpdatedAt     time.Time    `json:"updated_at"`
 	Title         string       `json:"title"`
-	Url           string       `json:"url"`
+	URL           string       `json:"url"`
 	Active        bool         `json:"active"`
 	LastCrawledAt sql.NullTime `json:"last_crawled_at"`
 }
 
-type RssItem struct {
+type RSSItem struct {
 	ID              int64        `json:"id"`
-	Uuid            uuid.UUID    `json:"uuid"`
+	UUID            uuid.UUID    `json:"uuid"`
 	CreatedAt       time.Time    `json:"created_at"`
 	UpdatedAt       time.Time    `json:"updated_at"`
 	FeedID          int64        `json:"feed_id"`
-	RssGuid         string       `json:"rss_guid"`
+	RSSGuid         string       `json:"rss_guid"`
 	Title           string       `json:"title"`
 	Link            string       `json:"link"`
 	Content         string       `json:"content"`
@@ -67,9 +67,9 @@ type RssItem struct {
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
 }
 
-type RssItemVersion struct {
+type RSSItemVersion struct {
 	ID              int64         `json:"id"`
-	Uuid            uuid.UUID     `json:"uuid"`
+	UUID            uuid.UUID     `json:"uuid"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`
 	ItemID          sql.NullInt64 `json:"item_id"`
@@ -80,9 +80,9 @@ type RssItemVersion struct {
 	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
 }
 
-type RssSubscription struct {
+type RSSSubscription struct {
 	ID          int64          `json:"id"`
-	Uuid        uuid.UUID      `json:"uuid"`
+	UUID        uuid.UUID      `json:"uuid"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	UserID      int64          `json:"user_id"`

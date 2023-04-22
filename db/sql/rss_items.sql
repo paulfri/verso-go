@@ -1,10 +1,10 @@
--- name: GetRecentRssItemsByRssFeedId :many
+-- name: GetRecentItemsByRSSFeedID :many
 select * from rss.items
   where items.feed_id = $1
   order by items.published_at desc
   limit $2;
 
--- name: CreateRssItem :one
+-- name: CreateRSSItem :one
 insert into rss.items as items (
   feed_id,
   rss_guid,

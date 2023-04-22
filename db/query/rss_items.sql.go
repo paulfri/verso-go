@@ -10,7 +10,7 @@ import (
 	"database/sql"
 )
 
-const createRssItem = `-- name: CreateRssItem :one
+const createRSSItem = `-- name: CreateRSSItem :one
 insert into rss.items as items (
   feed_id,
   rss_guid,
@@ -38,9 +38,9 @@ insert into rss.items as items (
   returning id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at
 `
 
-type CreateRssItemParams struct {
+type CreateRSSItemParams struct {
 	FeedID          int64        `json:"feed_id"`
-	RssGuid         string       `json:"rss_guid"`
+	RSSGuid         string       `json:"rss_guid"`
 	Title           string       `json:"title"`
 	Link            string       `json:"link"`
 	Content         string       `json:"content"`
@@ -48,24 +48,24 @@ type CreateRssItemParams struct {
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
 }
 
-func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (RssItem, error) {
-	row := q.db.QueryRowContext(ctx, createRssItem,
+func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (RSSItem, error) {
+	row := q.db.QueryRowContext(ctx, createRSSItem,
 		arg.FeedID,
-		arg.RssGuid,
+		arg.RSSGuid,
 		arg.Title,
 		arg.Link,
 		arg.Content,
 		arg.PublishedAt,
 		arg.RemoteUpdatedAt,
 	)
-	var i RssItem
+	var i RSSItem
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FeedID,
-		&i.RssGuid,
+		&i.RSSGuid,
 		&i.Title,
 		&i.Link,
 		&i.Content,
@@ -75,34 +75,34 @@ func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (R
 	return i, err
 }
 
-const getRecentRssItemsByRssFeedId = `-- name: GetRecentRssItemsByRssFeedId :many
+const getRecentItemsByRSSFeedID = `-- name: GetRecentItemsByRSSFeedID :many
 select id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at from rss.items
   where items.feed_id = $1
   order by items.published_at desc
   limit $2
 `
 
-type GetRecentRssItemsByRssFeedIdParams struct {
+type GetRecentItemsByRSSFeedIDParams struct {
 	FeedID int64 `json:"feed_id"`
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetRecentRssItemsByRssFeedId(ctx context.Context, arg GetRecentRssItemsByRssFeedIdParams) ([]RssItem, error) {
-	rows, err := q.db.QueryContext(ctx, getRecentRssItemsByRssFeedId, arg.FeedID, arg.Limit)
+func (q *Queries) GetRecentItemsByRSSFeedID(ctx context.Context, arg GetRecentItemsByRSSFeedIDParams) ([]RSSItem, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentItemsByRSSFeedID, arg.FeedID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RssItem
+	var items []RSSItem
 	for rows.Next() {
-		var i RssItem
+		var i RSSItem
 		if err := rows.Scan(
 			&i.ID,
-			&i.Uuid,
+			&i.UUID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.FeedID,
-			&i.RssGuid,
+			&i.RSSGuid,
 			&i.Title,
 			&i.Link,
 			&i.Content,

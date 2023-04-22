@@ -18,12 +18,12 @@ type Worker struct {
 func Work(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
 		srv := asynq.NewServer(
-			asynq.RedisClientOpt{Addr: config.RedisUrl},
+			asynq.RedisClientOpt{Addr: config.RedisURL},
 			asynq.Config{Concurrency: config.WorkerConcurrency},
 		)
 
-		database, queries := db.Init(config.DatabaseUrl)
-		client := Client(config.RedisUrl)
+		database, queries := db.Init(config.DatabaseURL)
+		client := Client(config.RedisURL)
 
 		worker := Worker{
 			Container: &util.Container{

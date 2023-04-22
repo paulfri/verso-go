@@ -1,5 +1,17 @@
 version: "2"
 
+overrides:
+  go:
+    rename:
+      url: "URL"
+      uuid: "UUID"
+      rss_guid: "RSSGuid"
+      rss_feed: "RSSFeed"
+      rss_item: "RSSItem"
+      rss_item_id: "RSSItemID"
+      rss_item_version: "RSSItemVersion"
+      rss_subscription: "RSSSubscription"
+
 sql:
   - engine: postgresql
     schema: ./migrate

@@ -22,10 +22,10 @@ func authenticatedTestRequest(method string, path string, _body io.Reader, token
 
 func initTestContainer() *util.Container {
 	config := util.GetConfig()
-	db, queries := db.Init(config.DatabaseUrl)
+	db, queries := db.Init(config.DatabaseURL)
 
 	return &util.Container{
-		Asynq:   worker.Client(config.RedisUrl),
+		Asynq:   worker.Client(config.RedisURL),
 		DB:      db,
 		Queries: queries,
 		Render:  render.New(),

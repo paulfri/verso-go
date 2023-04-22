@@ -33,7 +33,7 @@ type StreamContentsRequestParams struct {
 
 func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	userId := ctx.Value(ContextUserIDKey{}).(int64)
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}
 	err := c.Container.Params(&params, req)
 
@@ -42,12 +42,12 @@ func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	switch streamId := chi.URLParam(req, "*"); streamId {
+	switch streamID := chi.URLParam(req, "*"); streamID {
 	case "user/-/state/com.google/reading-list":
-		items, err := c.Container.Queries.GetQueueItemsByUserId(
+		items, err := c.Container.Queries.GetQueueItemsByUserID(
 			ctx,
-			query.GetQueueItemsByUserIdParams{
-				UserID: userId,
+			query.GetQueueItemsByUserIDParams{
+				UserID: userID,
 				Limit:  10,
 			},
 		)

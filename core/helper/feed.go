@@ -18,14 +18,14 @@ func IsValidFeed(feed string) bool {
 
 // Scrapes the given URL to look for any feed URLs in the document content.
 // Currently not implemented.
-func ScrapeForFeedUrls(url string) ([]string, error) {
+func ScrapeForFeedURLs(url string) ([]string, error) {
 	return nil, nil
 }
 
 // For a given (potentially invalid,  potentially non-feed) URL, find the
 // closest valid, subscribable feed.
 func GatherFeed(url string) (string, error) {
-	normalizedURL, err := NormalizeFeedUrl(url)
+	normalizedURL, err := NormalizeFeedURL(url)
 
 	if err != nil {
 		return "", ErrInvalidFeedURL
@@ -34,7 +34,7 @@ func GatherFeed(url string) (string, error) {
 	if IsValidFeed(normalizedURL) {
 		return normalizedURL, nil
 	} else {
-		urls, err := ScrapeForFeedUrls(normalizedURL)
+		urls, err := ScrapeForFeedURLs(normalizedURL)
 
 		// TODO: Handle multiple valid feeds from ScrapeForFeedURLs
 		if err != nil && len(urls) > 0 && IsValidFeed(urls[0]) {

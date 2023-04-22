@@ -8,10 +8,10 @@ import (
 	"github.com/PuerkitoBio/purell"
 )
 
-var ErrUnparseableUrl = errors.New("URL is not parseable")
-var ErrUnnormalizeableUrl = errors.New("URL cannot be normalized")
+var ErrUnparseableURL = errors.New("URL is not parseable")
+var ErrUnnormalizeableURL = errors.New("URL cannot be normalized")
 
-func NormalizeFeedUrl(input string) (string, error) {
+func NormalizeFeedURL(input string) (string, error) {
 	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {
 		input = "https://" + input
 	}

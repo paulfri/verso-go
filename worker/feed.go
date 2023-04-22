@@ -19,9 +19,9 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedId)
+	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedID)
 
-	thisFeed, err := worker.Container.Queries.FindRssFeed(ctx, int64(p.FeedId))
+	thisFeed, err := worker.Container.Queries.GetRSSFeed(ctx, int64(p.FeedID))
 	if err != nil {
 		return err
 	}
@@ -29,9 +29,8 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 	fmt.Println(thisFeed)
 
 	// Fetch the feed and parse it.
-	url := thisFeed.Url
 	parser := gofeed.NewParser()
-	remoteFeed, _ := parser.ParseURL(url)
+	remoteFeed, _ := parser.ParseURL(thisFeed.URL)
 
 	items := remoteFeed.Items
 	if len(items) == 0 {
@@ -40,7 +39,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		return nil
 	}
 
-	subscribers, err := worker.Container.Queries.GetSubscribersByFeedId(ctx, thisFeed.ID)
+	subscribers, err := worker.Container.Queries.GetSubscribersByRSSFeedID(ctx, thisFeed.ID)
 	if err != nil {
 		return err
 	}
@@ -48,9 +47,9 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 	for _, feedItem := range remoteFeed.Items {
 		fmt.Println(feedItem.Title)
 
-		rssItem, err := worker.Container.Queries.CreateRssItem(ctx, query.CreateRssItemParams{
-			FeedID:      int64(p.FeedId),
-			RssGuid:     feedItem.GUID,
+		rssItem, err := worker.Container.Queries.CreateRSSItem(ctx, query.CreateRSSItemParams{
+			FeedID:      int64(p.FeedID),
+			RSSGuid:     feedItem.GUID,
 			Title:       feedItem.Title,
 			Content:     feedItem.Content,
 			Link:        feedItem.Link,
@@ -63,7 +62,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 			// TODO: handle error
 			worker.Container.Queries.CreateQueueItem(ctx, query.CreateQueueItemParams{
 				UserID:    subscription.UserID,
-				RssItemID: sql.NullInt64{Int64: rssItem.ID, Valid: true},
+				RSSItemID: sql.NullInt64{Int64: rssItem.ID, Valid: true},
 			})
 		}
 

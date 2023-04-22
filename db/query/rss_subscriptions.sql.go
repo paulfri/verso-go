@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const createSubscription = `-- name: CreateSubscription :one
+const createRSSSubscription = `-- name: CreateRSSSubscription :one
 with inserted as (
   insert into rss.subscriptions (
     user_id,
@@ -27,14 +27,14 @@ select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from ins
   select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions where user_id = $1 and feed_id = $2
 `
 
-type CreateSubscriptionParams struct {
+type CreateRSSSubscriptionParams struct {
 	UserID int64 `json:"user_id"`
 	FeedID int64 `json:"feed_id"`
 }
 
-type CreateSubscriptionRow struct {
+type CreateRSSSubscriptionRow struct {
 	ID          int64          `json:"id"`
-	Uuid        uuid.UUID      `json:"uuid"`
+	UUID        uuid.UUID      `json:"uuid"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	UserID      int64          `json:"user_id"`
@@ -42,12 +42,12 @@ type CreateSubscriptionRow struct {
 	CustomTitle sql.NullString `json:"custom_title"`
 }
 
-func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (CreateSubscriptionRow, error) {
-	row := q.db.QueryRowContext(ctx, createSubscription, arg.UserID, arg.FeedID)
-	var i CreateSubscriptionRow
+func (q *Queries) CreateRSSSubscription(ctx context.Context, arg CreateRSSSubscriptionParams) (CreateRSSSubscriptionRow, error) {
+	row := q.db.QueryRowContext(ctx, createRSSSubscription, arg.UserID, arg.FeedID)
+	var i CreateRSSSubscriptionRow
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
@@ -57,23 +57,23 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 	return i, err
 }
 
-const getSubscribersByFeedId = `-- name: GetSubscribersByFeedId :many
+const getSubscribersByRSSFeedID = `-- name: GetSubscribersByRSSFeedID :many
 select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions s
   where s.feed_id = $1
 `
 
-func (q *Queries) GetSubscribersByFeedId(ctx context.Context, feedID int64) ([]RssSubscription, error) {
-	rows, err := q.db.QueryContext(ctx, getSubscribersByFeedId, feedID)
+func (q *Queries) GetSubscribersByRSSFeedID(ctx context.Context, feedID int64) ([]RSSSubscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscribersByRSSFeedID, feedID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RssSubscription
+	var items []RSSSubscription
 	for rows.Next() {
-		var i RssSubscription
+		var i RSSSubscription
 		if err := rows.Scan(
 			&i.ID,
-			&i.Uuid,
+			&i.UUID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserID,

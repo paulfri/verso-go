@@ -17,7 +17,7 @@ var cases = []struct {
 func TestNormalizeFeedURL(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.in, func(t *testing.T) {
-			result, err := NormalizeFeedUrl(test.in)
+			result, err := NormalizeFeedURL(test.in)
 
 			if err != nil {
 				t.Errorf("normalize failed: %v", err)

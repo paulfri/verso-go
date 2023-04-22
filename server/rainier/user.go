@@ -6,9 +6,9 @@ import (
 )
 
 type UserResponse struct {
-	UserId              string `json:"userId"`
+	UserID              string `json:"userId"`
 	UserName            string `json:"userName"`
-	UserProfileId       string `json:"userProfileId"`
+	UserProfileID       string `json:"userProfileId"`
 	UserEmail           string `json:"userEmail"`
 	IsBloggerUser       bool   `json:"isBloggerUser"`
 	SignupTimeSec       int64  `json:"signupTimeSec"`
@@ -19,12 +19,12 @@ type UserResponse struct {
 func (c *RainierController) User(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
-	user, _ := c.Container.Queries.GetUserById(ctx, userID.(int64))
+	user, _ := c.Container.Queries.GetUser(ctx, userID.(int64))
 
 	c.Container.Render.JSON(w, http.StatusOK, UserResponse{
-		UserId:              user.Uuid.String(),
+		UserID:              user.UUID.String(),
 		UserName:            user.Name,
-		UserProfileId:       user.Uuid.String(),
+		UserProfileID:       user.UUID.String(),
 		UserEmail:           user.Email,
 		IsBloggerUser:       false,
 		SignupTimeSec:       user.CreatedAt.Unix(),
@@ -75,15 +75,15 @@ type UserFriend struct {
 
 func (c *RainierController) UserFriendList(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	userId := ctx.Value(ContextUserIDKey{}).(int64)
-	strUserId := fmt.Sprintf("%d", userId)
-	idSlice := [1]string{strUserId}
-	user, _ := c.Container.Queries.GetUserById(ctx, userId)
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	strUserID := fmt.Sprintf("%d", userID)
+	idSlice := [1]string{strUserID}
+	user, _ := c.Container.Queries.GetUser(ctx, userID)
 
 	c.Container.Render.JSON(w, http.StatusOK, UserFriend{
-		ContactID:   strUserId,
+		ContactID:   strUserID,
 		Flags:       1,
-		Stream:      "user/" + strUserId + "/state/com.google/broadcast",
+		Stream:      "user/" + strUserID + "/state/com.google/broadcast",
 		ProfileIDs:  idSlice,
 		UserIDs:     idSlice,
 		Name:        user.Name,

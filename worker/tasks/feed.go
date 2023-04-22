@@ -11,11 +11,11 @@ const (
 )
 
 type FeedParsePayload struct {
-	FeedId int64
+	FeedID int64
 }
 
-func NewFeedParseTask(feedId int64) (*asynq.Task, error) {
-	payload, err := json.Marshal(FeedParsePayload{FeedId: feedId})
+func NewFeedParseTask(feedID int64) (*asynq.Task, error) {
+	payload, err := json.Marshal(FeedParsePayload{FeedID: feedID})
 
 	if err != nil {
 		return nil, err

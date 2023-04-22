@@ -26,8 +26,8 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
 
-		asynq := worker.Client(config.RedisUrl)
-		db, queries := db.Init(config.DatabaseUrl)
+		asynq := worker.Client(config.RedisURL)
+		db, queries := db.Init(config.DatabaseURL)
 
 		command := &command.Command{
 			Asynq:   asynq,

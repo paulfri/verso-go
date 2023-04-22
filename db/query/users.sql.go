@@ -10,30 +10,6 @@ import (
 	"database/sql"
 )
 
-const createReaderToken = `-- name: CreateReaderToken :one
-insert into identity.reader_tokens (user_id, identifier) values ($1, $2) returning id, uuid, created_at, updated_at, user_id, identifier, revoked_at
-`
-
-type CreateReaderTokenParams struct {
-	UserID     int64  `json:"user_id"`
-	Identifier string `json:"identifier"`
-}
-
-func (q *Queries) CreateReaderToken(ctx context.Context, arg CreateReaderTokenParams) (IdentityReaderToken, error) {
-	row := q.db.QueryRowContext(ctx, createReaderToken, arg.UserID, arg.Identifier)
-	var i IdentityReaderToken
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.UserID,
-		&i.Identifier,
-		&i.RevokedAt,
-	)
-	return i, err
-}
-
 const createUser = `-- name: CreateUser :one
 insert into identity.users (
   email,
@@ -60,7 +36,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (Identit
 	var i IdentityUser
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
@@ -71,21 +47,22 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (Identit
 	return i, err
 }
 
-const getReaderTokenByIdentifier = `-- name: GetReaderTokenByIdentifier :one
-select id, uuid, created_at, updated_at, user_id, identifier, revoked_at from identity.reader_tokens where identifier = $1
+const getUser = `-- name: GetUser :one
+select id, uuid, created_at, updated_at, email, name, password, superuser from identity.users where id = $1
 `
 
-func (q *Queries) GetReaderTokenByIdentifier(ctx context.Context, identifier string) (IdentityReaderToken, error) {
-	row := q.db.QueryRowContext(ctx, getReaderTokenByIdentifier, identifier)
-	var i IdentityReaderToken
+func (q *Queries) GetUser(ctx context.Context, id int64) (IdentityUser, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i IdentityUser
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.UserID,
-		&i.Identifier,
-		&i.RevokedAt,
+		&i.Email,
+		&i.Name,
+		&i.Password,
+		&i.Superuser,
 	)
 	return i, err
 }
@@ -99,27 +76,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (IdentityUse
 	var i IdentityUser
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Email,
-		&i.Name,
-		&i.Password,
-		&i.Superuser,
-	)
-	return i, err
-}
-
-const getUserById = `-- name: GetUserById :one
-select id, uuid, created_at, updated_at, email, name, password, superuser from identity.users where id = $1
-`
-
-func (q *Queries) GetUserById(ctx context.Context, id int64) (IdentityUser, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
-	var i IdentityUser
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,

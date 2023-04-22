@@ -18,9 +18,9 @@ func (c *RainierController) SubscriptionQuickAdd(w http.ResponseWriter, req *htt
 	}
 
 	ctx := req.Context()
-	userId := ctx.Value(ContextUserIDKey{}).(int64)
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
 
-	err = c.Container.Command.SubscribeToFeedByUrl(ctx, params.Quickadd, userId)
+	err = c.Container.Command.SubscribeToFeedByURL(ctx, params.Quickadd, userID)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())

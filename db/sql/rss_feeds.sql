@@ -1,16 +1,12 @@
--- name: FindRssFeed :one
+-- name: GetRSSFeed :one
 select * from rss.feeds
 where id = $1 limit 1;
 
--- name: FindRssFeedByUuid :one
-select * from rss.feeds
-where uuid = $1 limit 1;
-
--- name: FindRssFeedByUrl :one
+-- name: GetRSSFeedByURL :one
 select * from rss.feeds
 where url = $1 limit 1;
 
--- name: FindOrCreateRssFeed :one
+-- name: GetOrCreateRSSFeed :one
 with inserted as (
   insert into rss.feeds (
     title,
@@ -22,5 +18,5 @@ with inserted as (
   union
   select * from rss.feeds where url = $2;
 
--- name: CreateRssFeed :one
+-- name: CreateRSSFeed :one
 insert into rss.feeds (title, url) values ($1, $2) returning *;

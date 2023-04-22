@@ -1,4 +1,4 @@
--- name: GetQueueItemsByUserId :many
+-- name: GetQueueItemsByUserID :many
 select * from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   where qi.user_id = $1 

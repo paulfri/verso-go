@@ -1,4 +1,4 @@
--- name: CreateSubscription :one
+-- name: CreateRSSSubscription :one
 with inserted as (
   insert into rss.subscriptions (
     user_id,
@@ -11,6 +11,6 @@ select * from inserted
   union
   select * from rss.subscriptions where user_id = $1 and feed_id = $2;
 
--- name: GetSubscribersByFeedId :many
+-- name: GetSubscribersByRSSFeedID :many
 select * from rss.subscriptions s
   where s.feed_id = $1;

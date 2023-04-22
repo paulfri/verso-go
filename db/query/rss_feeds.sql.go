@@ -13,32 +13,32 @@ import (
 	"github.com/google/uuid"
 )
 
-const createRssFeed = `-- name: CreateRssFeed :one
+const createRSSFeed = `-- name: CreateRSSFeed :one
 insert into rss.feeds (title, url) values ($1, $2) returning id, uuid, created_at, updated_at, title, url, active, last_crawled_at
 `
 
-type CreateRssFeedParams struct {
+type CreateRSSFeedParams struct {
 	Title string `json:"title"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 }
 
-func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (RssFeed, error) {
-	row := q.db.QueryRowContext(ctx, createRssFeed, arg.Title, arg.Url)
-	var i RssFeed
+func (q *Queries) CreateRSSFeed(ctx context.Context, arg CreateRSSFeedParams) (RSSFeed, error) {
+	row := q.db.QueryRowContext(ctx, createRSSFeed, arg.Title, arg.URL)
+	var i RSSFeed
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Url,
+		&i.URL,
 		&i.Active,
 		&i.LastCrawledAt,
 	)
 	return i, err
 }
 
-const findOrCreateRssFeed = `-- name: FindOrCreateRssFeed :one
+const getOrCreateRSSFeed = `-- name: GetOrCreateRSSFeed :one
 with inserted as (
   insert into rss.feeds (
     title,
@@ -51,95 +51,74 @@ with inserted as (
   select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds where url = $2
 `
 
-type FindOrCreateRssFeedParams struct {
+type GetOrCreateRSSFeedParams struct {
 	Title string `json:"title"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 }
 
-type FindOrCreateRssFeedRow struct {
+type GetOrCreateRSSFeedRow struct {
 	ID            int64        `json:"id"`
-	Uuid          uuid.UUID    `json:"uuid"`
+	UUID          uuid.UUID    `json:"uuid"`
 	CreatedAt     time.Time    `json:"created_at"`
 	UpdatedAt     time.Time    `json:"updated_at"`
 	Title         string       `json:"title"`
-	Url           string       `json:"url"`
+	URL           string       `json:"url"`
 	Active        bool         `json:"active"`
 	LastCrawledAt sql.NullTime `json:"last_crawled_at"`
 }
 
-func (q *Queries) FindOrCreateRssFeed(ctx context.Context, arg FindOrCreateRssFeedParams) (FindOrCreateRssFeedRow, error) {
-	row := q.db.QueryRowContext(ctx, findOrCreateRssFeed, arg.Title, arg.Url)
-	var i FindOrCreateRssFeedRow
+func (q *Queries) GetOrCreateRSSFeed(ctx context.Context, arg GetOrCreateRSSFeedParams) (GetOrCreateRSSFeedRow, error) {
+	row := q.db.QueryRowContext(ctx, getOrCreateRSSFeed, arg.Title, arg.URL)
+	var i GetOrCreateRSSFeedRow
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Url,
+		&i.URL,
 		&i.Active,
 		&i.LastCrawledAt,
 	)
 	return i, err
 }
 
-const findRssFeed = `-- name: FindRssFeed :one
+const getRSSFeed = `-- name: GetRSSFeed :one
 select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
 where id = $1 limit 1
 `
 
-func (q *Queries) FindRssFeed(ctx context.Context, id int64) (RssFeed, error) {
-	row := q.db.QueryRowContext(ctx, findRssFeed, id)
-	var i RssFeed
+func (q *Queries) GetRSSFeed(ctx context.Context, id int64) (RSSFeed, error) {
+	row := q.db.QueryRowContext(ctx, getRSSFeed, id)
+	var i RSSFeed
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Url,
+		&i.URL,
 		&i.Active,
 		&i.LastCrawledAt,
 	)
 	return i, err
 }
 
-const findRssFeedByUrl = `-- name: FindRssFeedByUrl :one
+const getRSSFeedByURL = `-- name: GetRSSFeedByURL :one
 select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
 where url = $1 limit 1
 `
 
-func (q *Queries) FindRssFeedByUrl(ctx context.Context, url string) (RssFeed, error) {
-	row := q.db.QueryRowContext(ctx, findRssFeedByUrl, url)
-	var i RssFeed
+func (q *Queries) GetRSSFeedByURL(ctx context.Context, url string) (RSSFeed, error) {
+	row := q.db.QueryRowContext(ctx, getRSSFeedByURL, url)
+	var i RSSFeed
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
+		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Url,
-		&i.Active,
-		&i.LastCrawledAt,
-	)
-	return i, err
-}
-
-const findRssFeedByUuid = `-- name: FindRssFeedByUuid :one
-select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
-where uuid = $1 limit 1
-`
-
-func (q *Queries) FindRssFeedByUuid(ctx context.Context, uuid uuid.UUID) (RssFeed, error) {
-	row := q.db.QueryRowContext(ctx, findRssFeedByUuid, uuid)
-	var i RssFeed
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Title,
-		&i.Url,
+		&i.URL,
 		&i.Active,
 		&i.LastCrawledAt,
 	)

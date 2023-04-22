@@ -17,16 +17,16 @@ const DEFAULT_PASSWORD = "rectoverso"
 func Seed(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
 		context := context.Background()
-		_, queries := Init(config.DatabaseUrl)
+		_, queries := Init(config.DatabaseURL)
 
-		_, err1 := queries.CreateRssFeed(context, query.CreateRssFeedParams{
+		_, err1 := queries.CreateRSSFeed(context, query.CreateRSSFeedParams{
 			Title: "Sounder at Heart",
-			Url:   "https://www.sounderatheart.com/rss/current.xml",
+			URL:   "https://www.sounderatheart.com/rss/current.xml",
 		})
 
-		_, err2 := queries.CreateRssFeed(context, query.CreateRssFeedParams{
+		_, err2 := queries.CreateRSSFeed(context, query.CreateRSSFeedParams{
 			Title: "Sound of Hockey",
-			Url:   "https://soundofhockey.com/feed/",
+			URL:   "https://soundofhockey.com/feed/",
 		})
 
 		password, err3 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
