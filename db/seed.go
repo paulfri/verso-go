@@ -16,33 +16,41 @@ const DEFAULT_PASSWORD = "rectoverso"
 
 func Seed(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
-		context := context.Background()
+		ctx := context.Background()
 		_, queries := Init(config.DatabaseURL)
 
-		_, err1 := queries.CreateRSSFeed(context, query.CreateRSSFeedParams{
+		feed, err1 := queries.CreateRSSFeed(ctx, query.CreateRSSFeedParams{
 			Title: "Sounder at Heart",
 			URL:   "https://www.sounderatheart.com/rss/current.xml",
 		})
 
-		_, err2 := queries.CreateRSSFeed(context, query.CreateRSSFeedParams{
+		_, err2 := queries.CreateRSSFeed(ctx, query.CreateRSSFeedParams{
 			Title: "Sound of Hockey",
 			URL:   "https://soundofhockey.com/feed/",
 		})
 
 		password, err3 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
-		user, err4 := queries.CreateUser(context, query.CreateUserParams{
+		user, err4 := queries.CreateUser(ctx, query.CreateUserParams{
 			Email:     "paul@verso.so",
 			Name:      "Paul Friedman",
 			Password:  sql.NullString{String: string(password), Valid: true},
 			Superuser: true,
 		})
 
-		_, err5 := queries.CreateReaderToken(context, query.CreateReaderTokenParams{
+		_, err5 := queries.CreateReaderToken(ctx, query.CreateReaderTokenParams{
 			UserID:     user.ID,
 			Identifier: "F2vwA2wKSHISLXT7slqt",
 		})
 
-		err := errors.Join(err1, err2, err3, err4, err5)
+		_, err6 := queries.CreateRSSSubscription(
+			ctx,
+			query.CreateRSSSubscriptionParams{
+				UserID: user.ID,
+				FeedID: feed.ID,
+			},
+		)
+
+		err := errors.Join(err1, err2, err3, err4, err5, err6)
 
 		if err != nil {
 			fmt.Println(err)

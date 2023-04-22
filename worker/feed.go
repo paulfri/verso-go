@@ -46,23 +46,38 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 
 	for _, item := range items {
 		author := sql.NullString{}
+		author_email := sql.NullString{}
 		if len(item.Authors) > 0 {
 			a := item.Authors[0]
-			author = sql.NullString{String: a.Name, Valid: true}
+			if a.Name != "" {
+				author = sql.NullString{String: a.Name, Valid: true}
+			}
+			if a.Email != "" {
+				author_email = sql.NullString{String: a.Email, Valid: true}
+			}
+		}
+
+		published := sql.NullTime{}
+		if item.PublishedParsed != nil {
+			published = sql.NullTime{Time: *item.PublishedParsed, Valid: true}
+		}
+		updated := sql.NullTime{}
+		if item.UpdatedParsed != nil {
+			updated = sql.NullTime{Time: *item.UpdatedParsed, Valid: true}
 		}
 
 		rssItem, err := worker.Container.Queries.CreateRSSItem(
 			ctx,
 			query.CreateRSSItemParams{
-				FeedID:      int64(p.FeedID),
-				RSSGuid:     item.GUID,
-				Title:       item.Title,
-				Content:     item.Content,
-				Author:      author,
-				Link:        item.Link,
-				PublishedAt: sql.NullTime{Time: *item.PublishedParsed, Valid: true},
-				// TODO: figure out what's up with this
-				RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
+				FeedID:          int64(p.FeedID),
+				RSSGuid:         item.GUID,
+				Title:           item.Title,
+				Content:         item.Content,
+				Author:          author,
+				AuthorEmail:     author_email,
+				Link:            item.Link,
+				PublishedAt:     published,
+				RemoteUpdatedAt: updated,
 			},
 		)
 

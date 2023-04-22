@@ -63,6 +63,7 @@ type RSSItem struct {
 	Title           string         `json:"title"`
 	Link            string         `json:"link"`
 	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
 	Content         string         `json:"content"`
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`

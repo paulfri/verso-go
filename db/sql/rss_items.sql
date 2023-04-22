@@ -11,10 +11,11 @@ insert into rss.items as items (
   title,
   link,
   author,
+  author_email,
   content,
   published_at,
   remote_updated_at
-) values ($1, $2, $3, $4, $5, $6, $7, $8)
+) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   on conflict (feed_id, rss_guid) do update
   set
     title = excluded.title, 

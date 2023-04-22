@@ -12,6 +12,7 @@ create table rss.items (
   title text not null,
   link text not null,
   author text,
+  author_email text,
   content text not null,
   summary text,
   published_at timestamp with time zone,
