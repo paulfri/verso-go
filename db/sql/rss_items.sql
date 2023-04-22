@@ -1,5 +1,8 @@
--- name: GetRssItemsByRssFeedId :many
-select * from content.rss_items where rss_items.rss_feed_id = $1 limit $2;
+-- name: GetRecentRssItemsByRssFeedId :many
+select * from content.rss_items ri
+  where ri.rss_feed_id = $1
+  order by ri.published_at desc
+  limit $2;
 
 -- name: CreateRssItem :one
 insert into content.rss_items as i (

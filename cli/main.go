@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/citra/tasks"
 	"github.com/versolabs/citra/util"
+	"github.com/versolabs/citra/worker"
+	"github.com/versolabs/citra/worker/tasks"
 )
 
 func Crawl(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
-		client := tasks.Client(config.RedisUrl)
+		client := worker.Client(config.RedisUrl)
 		feedId := cliContext.Args().Get(0)
 
 		i, err := strconv.ParseInt(feedId, 10, 64)

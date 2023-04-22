@@ -75,17 +75,20 @@ func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (C
 	return i, err
 }
 
-const getRssItemsByRssFeedId = `-- name: GetRssItemsByRssFeedId :many
-select id, uuid, created_at, updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at from content.rss_items where rss_items.rss_feed_id = $1 limit $2
+const getRecentRssItemsByRssFeedId = `-- name: GetRecentRssItemsByRssFeedId :many
+select id, uuid, created_at, updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at from content.rss_items ri
+  where ri.rss_feed_id = $1
+  order by ri.published_at desc
+  limit $2
 `
 
-type GetRssItemsByRssFeedIdParams struct {
+type GetRecentRssItemsByRssFeedIdParams struct {
 	RssFeedID int64 `json:"rss_feed_id"`
 	Limit     int32 `json:"limit"`
 }
 
-func (q *Queries) GetRssItemsByRssFeedId(ctx context.Context, arg GetRssItemsByRssFeedIdParams) ([]ContentRssItem, error) {
-	rows, err := q.db.QueryContext(ctx, getRssItemsByRssFeedId, arg.RssFeedID, arg.Limit)
+func (q *Queries) GetRecentRssItemsByRssFeedId(ctx context.Context, arg GetRecentRssItemsByRssFeedIdParams) ([]ContentRssItem, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentRssItemsByRssFeedId, arg.RssFeedID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

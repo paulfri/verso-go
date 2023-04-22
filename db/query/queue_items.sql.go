@@ -44,7 +44,7 @@ const getQueueItemsByUserId = `-- name: GetQueueItemsByUserId :many
 select ri.id, ri.uuid, ri.created_at, ri.updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at, queue_items.id, queue_items.uuid, queue_items.created_at, queue_items.updated_at, user_id, rss_item_id, is_read from content.rss_items ri
   join content.queue_items on queue_items.rss_item_id = ri.id
   where queue_items.user_id = $1 
-  order by ri.id desc
+  order by ri.published_at desc
   limit $2
 `
 

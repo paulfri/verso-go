@@ -9,8 +9,8 @@ import (
 	citraCli "github.com/versolabs/citra/cli"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/server"
-	"github.com/versolabs/citra/tasks"
 	"github.com/versolabs/citra/util"
+	"github.com/versolabs/citra/worker"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 				Name:    "worker",
 				Aliases: []string{"w"},
 				Usage:   "Run the background worker",
-				Action:  tasks.Work(&config),
+				Action:  worker.Work(&config),
 			},
 			{
 				Name:   "seed",

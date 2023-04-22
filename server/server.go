@@ -13,8 +13,8 @@ import (
 	"github.com/versolabs/citra/core/command"
 	"github.com/versolabs/citra/db"
 	"github.com/versolabs/citra/server/rainier"
-	"github.com/versolabs/citra/tasks"
 	"github.com/versolabs/citra/util"
+	"github.com/versolabs/citra/worker"
 )
 
 func Serve(config *util.Config) cli.ActionFunc {
@@ -26,7 +26,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
 
-		asynq := tasks.Client(config.RedisUrl)
+		asynq := worker.Client(config.RedisUrl)
 		db, queries := db.Init(config.DatabaseUrl)
 
 		command := &command.Command{

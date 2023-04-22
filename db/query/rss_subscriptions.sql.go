@@ -56,3 +56,39 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 	)
 	return i, err
 }
+
+const getSubscribersByFeedId = `-- name: GetSubscribersByFeedId :many
+select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from content.rss_subscriptions
+  where rss_subscriptions.rss_feed_id = $1
+`
+
+func (q *Queries) GetSubscribersByFeedId(ctx context.Context, rssFeedID int64) ([]ContentRssSubscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscribersByFeedId, rssFeedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ContentRssSubscription
+	for rows.Next() {
+		var i ContentRssSubscription
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.RssFeedID,
+			&i.CustomTitle,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -8,8 +8,8 @@ import (
 
 	"github.com/unrolled/render"
 	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/tasks"
 	"github.com/versolabs/citra/util"
+	"github.com/versolabs/citra/worker"
 )
 
 func authenticatedTestRequest(method string, path string, _body io.Reader, token string) *http.Request {
@@ -25,7 +25,7 @@ func initTestContainer() *util.Container {
 	db, queries := db.Init(config.DatabaseUrl)
 
 	return &util.Container{
-		Asynq:   tasks.Client(config.RedisUrl),
+		Asynq:   worker.Client(config.RedisUrl),
 		DB:      db,
 		Queries: queries,
 		Render:  render.New(),

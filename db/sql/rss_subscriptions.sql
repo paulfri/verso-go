@@ -10,3 +10,7 @@ with inserted as (
 select * from inserted
   union
   select * from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2;
+
+-- name: GetSubscribersByFeedId :many
+select * from content.rss_subscriptions
+  where rss_subscriptions.rss_feed_id = $1;

@@ -8,6 +8,7 @@ import (
 	"github.com/mmcdole/gofeed"
 	"github.com/versolabs/citra/core/helper"
 	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/citra/worker/tasks"
 )
 
 // Subscribes the given user to the given feed URL, creating the feed in the
@@ -87,10 +88,13 @@ func (c Command) SubscribeToFeedByUrl(ctx context.Context, url string, userId in
 		}
 
 		// Fetch the most recent previous 10 items from the RSS feed to the user's queue.
-		items, err := withTx.GetRssItemsByRssFeedId(ctx, query.GetRssItemsByRssFeedIdParams{
-			RssFeedID: feed.ID,
-			Limit:     10,
-		})
+		items, err := withTx.GetRecentRssItemsByRssFeedId(
+			ctx,
+			query.GetRecentRssItemsByRssFeedIdParams{
+				RssFeedID: feed.ID,
+				Limit:     10,
+			},
+		)
 
 		if err != nil {
 			return fmt.Errorf("get items: %v", err)
@@ -108,6 +112,14 @@ func (c Command) SubscribeToFeedByUrl(ctx context.Context, url string, userId in
 				return err
 			}
 		}
+
+		// Enqueue the feed for parsing.
+		task, err := tasks.NewFeedParseTask(feed.ID)
+		if err != nil {
+			return err
+		}
+
+		defer c.Asynq.Enqueue(task)
 
 		return nil
 	})
