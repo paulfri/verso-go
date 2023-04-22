@@ -31,7 +31,7 @@ func main() {
 			},
 			{
 				Name:    "worker",
-				Aliases: []string{"s"},
+				Aliases: []string{"w"},
 				Usage:   "Run the background worker",
 				Action:  tasks.Work(&config),
 			},
