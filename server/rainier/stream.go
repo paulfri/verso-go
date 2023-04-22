@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/versolabs/citra/db/query"
 )
 
 type SortOrderValue string
@@ -31,6 +32,8 @@ type StreamContentsRequestParams struct {
 }
 
 func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userId := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}
 	err := c.Container.Params(&params, req)
 
@@ -41,7 +44,20 @@ func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Requ
 
 	switch streamId := chi.URLParam(req, "*"); streamId {
 	case "user/-/state/com.google/reading-list":
-		c.Container.Render.Text(w, http.StatusOK, "reading list")
+		items, err := c.Container.Queries.GetQueueItemsByUserId(
+			ctx,
+			query.GetQueueItemsByUserIdParams{
+				UserID: userId,
+				Limit:  10,
+			},
+		)
+
+		if err != nil {
+			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.Container.Render.JSON(w, http.StatusOK, items)
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}

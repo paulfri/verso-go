@@ -48,14 +48,14 @@ func (worker Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) err
 	for _, item := range feed.Items {
 		fmt.Println(item.Title)
 
-		_, err := worker.Container.Queries.CreateItem(ctx, query.CreateItemParams{
-			RssFeedID:       int64(p.FeedId),
-			RssGuid:         item.GUID,
-			Title:           item.Title,
-			Content:         item.Content,
-			Link:            item.Link,
-			PublishedAt:     sql.NullTime{Time: *item.PublishedParsed, Valid: true},
-			RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: false},
+		_, err := worker.Container.Queries.CreateRssItem(ctx, query.CreateRssItemParams{
+			RssFeedID:   int64(p.FeedId),
+			RssGuid:     item.GUID,
+			Title:       item.Title,
+			Content:     item.Content,
+			Link:        item.Link,
+			PublishedAt: sql.NullTime{Time: *item.PublishedParsed, Valid: true},
+			// RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
 		})
 
 		if err != nil {

@@ -11,6 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type ContentQueueItem struct {
+	ID        int64         `json:"id"`
+	Uuid      uuid.UUID     `json:"uuid"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
+	UserID    int64         `json:"user_id"`
+	RssItemID sql.NullInt64 `json:"rss_item_id"`
+	IsRead    bool          `json:"is_read"`
+}
+
 type ContentRssFeed struct {
 	ID            int64        `json:"id"`
 	Uuid          uuid.UUID    `json:"uuid"`

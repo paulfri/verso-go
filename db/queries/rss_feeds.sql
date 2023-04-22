@@ -25,7 +25,7 @@ with inserted as (
 -- name: CreateRssFeed :one
 insert into content.rss_feeds (title, url) values ($1, $2) returning *;
 
--- name: CreateItem :one
+-- name: CreateRssItem :one
 insert into content.rss_items as i (
   rss_feed_id,
   rss_guid,
@@ -52,6 +52,16 @@ insert into content.rss_items as i (
     i.remote_updated_at is distinct from excluded.remote_updated_at
   returning *;
 
+-- name: GetRssItemsByRssFeedId :many
+select * from content.rss_items where rss_items.rss_feed_id = $1 limit $2;
+
+-- name: GetQueueItemsByUserId :many
+-- select * from content.queue_items where queue_items.user_id = $1 limit $2;
+select * from content.rss_items ri
+  join content.queue_items on queue_items.rss_item_id = ri.id
+  where queue_items.user_id = $1 limit $2
+  order by ri.id desc;
+
 -- name: CreateSubscription :one
 with inserted as (
   insert into content.rss_subscriptions (
@@ -63,3 +73,9 @@ with inserted as (
 ) select * from inserted
   union
   select * from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2;
+
+-- name: CreateQueueItem :one
+insert into content.queue_items (user_id, rss_item_id)
+  values ($1, $2)
+  on conflict do nothing
+  returning *;
