@@ -4,7 +4,7 @@ tasks:
   compile:
     desc: Generate Go code from SQL queries.
     sources:
-      - "./queries/*.sql"
+      - "./sql/*.sql"
     cmds:
       - sqlc generate
 
