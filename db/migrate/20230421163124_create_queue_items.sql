@@ -7,10 +7,9 @@ create table queue.items (
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
+  unread boolean not null default true,
   user_id bigint not null references identity.users(id),
-  rss_item_id bigint references rss.items(id),
-
-  unread boolean not null default true
+  rss_item_id bigint references rss.items(id)
 );
 
 create index queue_items_index on queue.items (user_id);
