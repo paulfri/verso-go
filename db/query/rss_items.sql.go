@@ -16,10 +16,11 @@ insert into rss.items as items (
   rss_guid,
   title,
   link,
+  author,
   content,
   published_at,
   remote_updated_at
-) values ($1, $2, $3, $4, $5, $6, $7)
+) values ($1, $2, $3, $4, $5, $6, $7, $8)
   on conflict (feed_id, rss_guid) do update
   set
     title = excluded.title, 
@@ -35,17 +36,18 @@ insert into rss.items as items (
     items.content is distinct from excluded.content or
     items.published_at is distinct from excluded.published_at or
     items.remote_updated_at is distinct from excluded.remote_updated_at
-  returning id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at
+  returning id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, author, content, summary, published_at, remote_updated_at
 `
 
 type CreateRSSItemParams struct {
-	FeedID          int64        `json:"feed_id"`
-	RSSGuid         string       `json:"rss_guid"`
-	Title           string       `json:"title"`
-	Link            string       `json:"link"`
-	Content         string       `json:"content"`
-	PublishedAt     sql.NullTime `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	Content         string         `json:"content"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
 }
 
 func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (RSSItem, error) {
@@ -54,6 +56,7 @@ func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (R
 		arg.RSSGuid,
 		arg.Title,
 		arg.Link,
+		arg.Author,
 		arg.Content,
 		arg.PublishedAt,
 		arg.RemoteUpdatedAt,
@@ -68,7 +71,9 @@ func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (R
 		&i.RSSGuid,
 		&i.Title,
 		&i.Link,
+		&i.Author,
 		&i.Content,
+		&i.Summary,
 		&i.PublishedAt,
 		&i.RemoteUpdatedAt,
 	)
@@ -76,7 +81,7 @@ func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (R
 }
 
 const getRecentItemsByRSSFeedID = `-- name: GetRecentItemsByRSSFeedID :many
-select id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at from rss.items
+select id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, author, content, summary, published_at, remote_updated_at from rss.items
   where items.feed_id = $1
   order by items.published_at desc
   limit $2
@@ -105,7 +110,9 @@ func (q *Queries) GetRecentItemsByRSSFeedID(ctx context.Context, arg GetRecentIt
 			&i.RSSGuid,
 			&i.Title,
 			&i.Link,
+			&i.Author,
 			&i.Content,
+			&i.Summary,
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 		); err != nil {

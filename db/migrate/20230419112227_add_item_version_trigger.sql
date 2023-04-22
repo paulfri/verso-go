@@ -4,7 +4,7 @@ create function create_rss_item_version()
 returns trigger as $$
 begin
   insert into rss.item_versions (
-    rss_item_id,
+    item_id,
     title,
     link,
     content,

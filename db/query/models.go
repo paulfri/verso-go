@@ -37,9 +37,9 @@ type QueueItem struct {
 	UUID      uuid.UUID     `json:"uuid"`
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
+	Unread    bool          `json:"unread"`
 	UserID    int64         `json:"user_id"`
 	RSSItemID sql.NullInt64 `json:"rss_item_id"`
-	Unread    bool          `json:"unread"`
 }
 
 type RSSFeed struct {
@@ -54,17 +54,19 @@ type RSSFeed struct {
 }
 
 type RSSItem struct {
-	ID              int64        `json:"id"`
-	UUID            uuid.UUID    `json:"uuid"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
-	FeedID          int64        `json:"feed_id"`
-	RSSGuid         string       `json:"rss_guid"`
-	Title           string       `json:"title"`
-	Link            string       `json:"link"`
-	Content         string       `json:"content"`
-	PublishedAt     sql.NullTime `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
 }
 
 type RSSItemVersion struct {

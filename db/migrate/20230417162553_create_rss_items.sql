@@ -11,7 +11,9 @@ create table rss.items (
   rss_guid text not null,
   title text not null,
   link text not null,
+  author text,
   content text not null,
+  summary text,
   published_at timestamp with time zone,
   remote_updated_at timestamp with time zone
 );

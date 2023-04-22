@@ -5,6 +5,7 @@ tasks:
     desc: Generate Go code from SQL queries.
     sources:
       - sqlc.yaml
+      - "./migrate/*.sql"
       - "./sql/*.sql"
     cmds:
       - sqlc generate

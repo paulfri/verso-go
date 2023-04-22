@@ -44,19 +44,27 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		return err
 	}
 
-	for _, feedItem := range remoteFeed.Items {
-		fmt.Println(feedItem.Title)
+	for _, item := range items {
+		author := sql.NullString{}
+		if len(item.Authors) > 0 {
+			a := item.Authors[0]
+			author = sql.NullString{String: a.Name, Valid: true}
+		}
 
-		rssItem, err := worker.Container.Queries.CreateRSSItem(ctx, query.CreateRSSItemParams{
-			FeedID:      int64(p.FeedID),
-			RSSGuid:     feedItem.GUID,
-			Title:       feedItem.Title,
-			Content:     feedItem.Content,
-			Link:        feedItem.Link,
-			PublishedAt: sql.NullTime{Time: *feedItem.PublishedParsed, Valid: true},
-			// TODO: figure out what's up with this
-			// RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
-		})
+		rssItem, err := worker.Container.Queries.CreateRSSItem(
+			ctx,
+			query.CreateRSSItemParams{
+				FeedID:      int64(p.FeedID),
+				RSSGuid:     item.GUID,
+				Title:       item.Title,
+				Content:     item.Content,
+				Author:      author,
+				Link:        item.Link,
+				PublishedAt: sql.NullTime{Time: *item.PublishedParsed, Valid: true},
+				// TODO: figure out what's up with this
+				RemoteUpdatedAt: sql.NullTime{Time: *item.UpdatedParsed, Valid: true},
+			},
+		)
 
 		for _, subscription := range subscribers {
 			// TODO: handle error

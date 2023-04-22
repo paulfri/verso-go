@@ -30,14 +30,19 @@ func Seed(config *util.Config) cli.ActionFunc {
 		})
 
 		password, err3 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
-		_, err4 := queries.CreateUser(context, query.CreateUserParams{
+		user, err4 := queries.CreateUser(context, query.CreateUserParams{
 			Email:     "paul@verso.so",
 			Name:      "Paul Friedman",
 			Password:  sql.NullString{String: string(password), Valid: true},
 			Superuser: true,
 		})
 
-		err := errors.Join(err1, err2, err3, err4)
+		_, err5 := queries.CreateReaderToken(context, query.CreateReaderTokenParams{
+			UserID:     user.ID,
+			Identifier: "F2vwA2wKSHISLXT7slqt",
+		})
+
+		err := errors.Join(err1, err2, err3, err4, err5)
 
 		if err != nil {
 			fmt.Println(err)
