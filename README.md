@@ -1,6 +1,6 @@
 # citra
 
-![example workflow](https://github.com/versolabs/citra/actions/workflows/build.yml/badge.svg)
+![build](https://github.com/versolabs/citra/actions/workflows/build.yml/badge.svg)
 
 Syndication summarized.
 
