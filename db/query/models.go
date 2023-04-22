@@ -11,65 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ContentQueueItem struct {
-	ID        int64         `json:"id"`
-	Uuid      uuid.UUID     `json:"uuid"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
-	UserID    int64         `json:"user_id"`
-	RssItemID sql.NullInt64 `json:"rss_item_id"`
-	IsRead    bool          `json:"is_read"`
-}
-
-type ContentRssFeed struct {
-	ID            int64        `json:"id"`
-	Uuid          uuid.UUID    `json:"uuid"`
-	CreatedAt     time.Time    `json:"created_at"`
-	UpdatedAt     time.Time    `json:"updated_at"`
-	Title         string       `json:"title"`
-	Url           string       `json:"url"`
-	Active        bool         `json:"active"`
-	LastCrawledAt sql.NullTime `json:"last_crawled_at"`
-}
-
-type ContentRssItem struct {
-	ID              int64        `json:"id"`
-	Uuid            uuid.UUID    `json:"uuid"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
-	RssFeedID       int64        `json:"rss_feed_id"`
-	RssGuid         string       `json:"rss_guid"`
-	Title           string       `json:"title"`
-	Link            string       `json:"link"`
-	Content         string       `json:"content"`
-	PublishedAt     sql.NullTime `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
-}
-
-type ContentRssItemVersion struct {
-	ID              int64         `json:"id"`
-	Uuid            uuid.UUID     `json:"uuid"`
-	CreatedAt       time.Time     `json:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at"`
-	RssItemID       sql.NullInt64 `json:"rss_item_id"`
-	Title           string        `json:"title"`
-	Link            string        `json:"link"`
-	Content         string        `json:"content"`
-	PublishedAt     sql.NullTime  `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
-}
-
-type ContentRssSubscription struct {
-	ID          int64          `json:"id"`
-	Uuid        uuid.UUID      `json:"uuid"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	UserID      int64          `json:"user_id"`
-	RssFeedID   int64          `json:"rss_feed_id"`
-	CustomTitle sql.NullString `json:"custom_title"`
-}
-
-type IdentityToken struct {
+type IdentityReaderToken struct {
 	ID         int64        `json:"id"`
 	Uuid       uuid.UUID    `json:"uuid"`
 	CreatedAt  time.Time    `json:"created_at"`
@@ -88,4 +30,62 @@ type IdentityUser struct {
 	Name      string         `json:"name"`
 	Password  sql.NullString `json:"password"`
 	Superuser bool           `json:"superuser"`
+}
+
+type QueueItem struct {
+	ID        int64         `json:"id"`
+	Uuid      uuid.UUID     `json:"uuid"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
+	UserID    int64         `json:"user_id"`
+	RssItemID sql.NullInt64 `json:"rss_item_id"`
+	Unread    bool          `json:"unread"`
+}
+
+type RssFeed struct {
+	ID            int64        `json:"id"`
+	Uuid          uuid.UUID    `json:"uuid"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+	Title         string       `json:"title"`
+	Url           string       `json:"url"`
+	Active        bool         `json:"active"`
+	LastCrawledAt sql.NullTime `json:"last_crawled_at"`
+}
+
+type RssItem struct {
+	ID              int64        `json:"id"`
+	Uuid            uuid.UUID    `json:"uuid"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	FeedID          int64        `json:"feed_id"`
+	RssGuid         string       `json:"rss_guid"`
+	Title           string       `json:"title"`
+	Link            string       `json:"link"`
+	Content         string       `json:"content"`
+	PublishedAt     sql.NullTime `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
+}
+
+type RssItemVersion struct {
+	ID              int64         `json:"id"`
+	Uuid            uuid.UUID     `json:"uuid"`
+	CreatedAt       time.Time     `json:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at"`
+	ItemID          sql.NullInt64 `json:"item_id"`
+	Title           string        `json:"title"`
+	Link            string        `json:"link"`
+	Content         string        `json:"content"`
+	PublishedAt     sql.NullTime  `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime  `json:"remote_updated_at"`
+}
+
+type RssSubscription struct {
+	ID          int64          `json:"id"`
+	Uuid        uuid.UUID      `json:"uuid"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	UserID      int64          `json:"user_id"`
+	FeedID      int64          `json:"feed_id"`
+	CustomTitle sql.NullString `json:"custom_title"`
 }

@@ -11,8 +11,8 @@ import (
 )
 
 const createRssItem = `-- name: CreateRssItem :one
-insert into content.rss_items as i (
-  rss_feed_id,
+insert into rss.items as items (
+  feed_id,
   rss_guid,
   title,
   link,
@@ -20,7 +20,7 @@ insert into content.rss_items as i (
   published_at,
   remote_updated_at
 ) values ($1, $2, $3, $4, $5, $6, $7)
-  on conflict (rss_feed_id, rss_guid) do update
+  on conflict (feed_id, rss_guid) do update
   set
     title = excluded.title, 
     link = excluded.link, 
@@ -30,16 +30,16 @@ insert into content.rss_items as i (
   -- only perform insert if these values are changed, in order to avoid the
   -- rss_item_versions_insert_on_item_update trigger on updates to this table
   where
-    i.title is distinct from excluded.title or 
-    i.link is distinct from excluded.link or 
-    i.content is distinct from excluded.content or
-    i.published_at is distinct from excluded.published_at or
-    i.remote_updated_at is distinct from excluded.remote_updated_at
-  returning id, uuid, created_at, updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at
+    items.title is distinct from excluded.title or 
+    items.link is distinct from excluded.link or 
+    items.content is distinct from excluded.content or
+    items.published_at is distinct from excluded.published_at or
+    items.remote_updated_at is distinct from excluded.remote_updated_at
+  returning id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at
 `
 
 type CreateRssItemParams struct {
-	RssFeedID       int64        `json:"rss_feed_id"`
+	FeedID          int64        `json:"feed_id"`
 	RssGuid         string       `json:"rss_guid"`
 	Title           string       `json:"title"`
 	Link            string       `json:"link"`
@@ -48,9 +48,9 @@ type CreateRssItemParams struct {
 	RemoteUpdatedAt sql.NullTime `json:"remote_updated_at"`
 }
 
-func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (ContentRssItem, error) {
+func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (RssItem, error) {
 	row := q.db.QueryRowContext(ctx, createRssItem,
-		arg.RssFeedID,
+		arg.FeedID,
 		arg.RssGuid,
 		arg.Title,
 		arg.Link,
@@ -58,13 +58,13 @@ func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (C
 		arg.PublishedAt,
 		arg.RemoteUpdatedAt,
 	)
-	var i ContentRssItem
+	var i RssItem
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.RssFeedID,
+		&i.FeedID,
 		&i.RssGuid,
 		&i.Title,
 		&i.Link,
@@ -76,32 +76,32 @@ func (q *Queries) CreateRssItem(ctx context.Context, arg CreateRssItemParams) (C
 }
 
 const getRecentRssItemsByRssFeedId = `-- name: GetRecentRssItemsByRssFeedId :many
-select id, uuid, created_at, updated_at, rss_feed_id, rss_guid, title, link, content, published_at, remote_updated_at from content.rss_items ri
-  where ri.rss_feed_id = $1
-  order by ri.published_at desc
+select id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, content, published_at, remote_updated_at from rss.items
+  where items.feed_id = $1
+  order by items.published_at desc
   limit $2
 `
 
 type GetRecentRssItemsByRssFeedIdParams struct {
-	RssFeedID int64 `json:"rss_feed_id"`
-	Limit     int32 `json:"limit"`
+	FeedID int64 `json:"feed_id"`
+	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetRecentRssItemsByRssFeedId(ctx context.Context, arg GetRecentRssItemsByRssFeedIdParams) ([]ContentRssItem, error) {
-	rows, err := q.db.QueryContext(ctx, getRecentRssItemsByRssFeedId, arg.RssFeedID, arg.Limit)
+func (q *Queries) GetRecentRssItemsByRssFeedId(ctx context.Context, arg GetRecentRssItemsByRssFeedIdParams) ([]RssItem, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentRssItemsByRssFeedId, arg.FeedID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ContentRssItem
+	var items []RssItem
 	for rows.Next() {
-		var i ContentRssItem
+		var i RssItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Uuid,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.RssFeedID,
+			&i.FeedID,
 			&i.RssGuid,
 			&i.Title,
 			&i.Link,

@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
-create schema content;
+create schema rss;
 
-create table content.rss_feeds (
+create table rss.feeds (
   id bigint primary key generated always as identity,
   uuid uuid unique not null default gen_random_uuid(),
   created_at timestamp not null default now(),
@@ -14,13 +14,13 @@ create table content.rss_feeds (
   last_crawled_at timestamp
 );
 
-create trigger content_rss_feeds_touch_updated_at
-  before update on content.rss_feeds for each row
+create trigger rss_feeds_touch_updated_at
+  before update on rss.feeds for each row
   execute procedure touch_updated_at();
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop table content.rss_feeds;
-drop schema content;
+drop table rss.feeds;
+drop schema rss;
 -- +goose StatementEnd

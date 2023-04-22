@@ -14,7 +14,7 @@ import (
 )
 
 const createRssFeed = `-- name: CreateRssFeed :one
-insert into content.rss_feeds (title, url) values ($1, $2) returning id, uuid, created_at, updated_at, title, url, active, last_crawled_at
+insert into rss.feeds (title, url) values ($1, $2) returning id, uuid, created_at, updated_at, title, url, active, last_crawled_at
 `
 
 type CreateRssFeedParams struct {
@@ -22,9 +22,9 @@ type CreateRssFeedParams struct {
 	Url   string `json:"url"`
 }
 
-func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (ContentRssFeed, error) {
+func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (RssFeed, error) {
 	row := q.db.QueryRowContext(ctx, createRssFeed, arg.Title, arg.Url)
-	var i ContentRssFeed
+	var i RssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
@@ -40,15 +40,15 @@ func (q *Queries) CreateRssFeed(ctx context.Context, arg CreateRssFeedParams) (C
 
 const findOrCreateRssFeed = `-- name: FindOrCreateRssFeed :one
 with inserted as (
-  insert into content.rss_feeds (
+  insert into rss.feeds (
     title,
     url
   ) select $1, $2 where not exists (
-    select 1 from content.rss_feeds where url = $2
+    select 1 from rss.feeds where url = $2
   ) returning id, uuid, created_at, updated_at, title, url, active, last_crawled_at
 ) select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from inserted
   union
-  select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds where url = $2
+  select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds where url = $2
 `
 
 type FindOrCreateRssFeedParams struct {
@@ -84,13 +84,13 @@ func (q *Queries) FindOrCreateRssFeed(ctx context.Context, arg FindOrCreateRssFe
 }
 
 const findRssFeed = `-- name: FindRssFeed :one
-select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds
+select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
 where id = $1 limit 1
 `
 
-func (q *Queries) FindRssFeed(ctx context.Context, id int64) (ContentRssFeed, error) {
+func (q *Queries) FindRssFeed(ctx context.Context, id int64) (RssFeed, error) {
 	row := q.db.QueryRowContext(ctx, findRssFeed, id)
-	var i ContentRssFeed
+	var i RssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
@@ -105,13 +105,13 @@ func (q *Queries) FindRssFeed(ctx context.Context, id int64) (ContentRssFeed, er
 }
 
 const findRssFeedByUrl = `-- name: FindRssFeedByUrl :one
-select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds
+select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
 where url = $1 limit 1
 `
 
-func (q *Queries) FindRssFeedByUrl(ctx context.Context, url string) (ContentRssFeed, error) {
+func (q *Queries) FindRssFeedByUrl(ctx context.Context, url string) (RssFeed, error) {
 	row := q.db.QueryRowContext(ctx, findRssFeedByUrl, url)
-	var i ContentRssFeed
+	var i RssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
@@ -126,13 +126,13 @@ func (q *Queries) FindRssFeedByUrl(ctx context.Context, url string) (ContentRssF
 }
 
 const findRssFeedByUuid = `-- name: FindRssFeedByUuid :one
-select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from content.rss_feeds
+select id, uuid, created_at, updated_at, title, url, active, last_crawled_at from rss.feeds
 where uuid = $1 limit 1
 `
 
-func (q *Queries) FindRssFeedByUuid(ctx context.Context, uuid uuid.UUID) (ContentRssFeed, error) {
+func (q *Queries) FindRssFeedByUuid(ctx context.Context, uuid uuid.UUID) (RssFeed, error) {
 	row := q.db.QueryRowContext(ctx, findRssFeedByUuid, uuid)
-	var i ContentRssFeed
+	var i RssFeed
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,

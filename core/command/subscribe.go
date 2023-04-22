@@ -78,8 +78,8 @@ func (c Command) SubscribeToFeedByUrl(ctx context.Context, url string, userId in
 		_, err = withTx.CreateSubscription(
 			ctx,
 			query.CreateSubscriptionParams{
-				UserID:    userId,
-				RssFeedID: feed.ID,
+				UserID: userId,
+				FeedID: feed.ID,
 			},
 		)
 
@@ -91,8 +91,8 @@ func (c Command) SubscribeToFeedByUrl(ctx context.Context, url string, userId in
 		items, err := withTx.GetRecentRssItemsByRssFeedId(
 			ctx,
 			query.GetRecentRssItemsByRssFeedIdParams{
-				RssFeedID: feed.ID,
-				Limit:     10,
+				FeedID: feed.ID,
+				Limit:  10,
 			},
 		)
 

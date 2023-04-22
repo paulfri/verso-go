@@ -49,7 +49,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		fmt.Println(feedItem.Title)
 
 		rssItem, err := worker.Container.Queries.CreateRssItem(ctx, query.CreateRssItemParams{
-			RssFeedID:   int64(p.FeedId),
+			FeedID:      int64(p.FeedId),
 			RssGuid:     feedItem.GUID,
 			Title:       feedItem.Title,
 			Content:     feedItem.Content,

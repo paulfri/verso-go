@@ -15,21 +15,21 @@ import (
 
 const createSubscription = `-- name: CreateSubscription :one
 with inserted as (
-  insert into content.rss_subscriptions (
+  insert into rss.subscriptions (
     user_id,
-    rss_feed_id
+    feed_id
   ) select $1, $2 where not exists (
-    select 1 from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
-  ) returning id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title
+    select 1 from rss.subscriptions where user_id = $1 and feed_id = $2
+  ) returning id, uuid, created_at, updated_at, user_id, feed_id, custom_title
 )
-select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from inserted
+select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from inserted
   union
-  select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from content.rss_subscriptions where user_id = $1 and rss_feed_id = $2
+  select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions where user_id = $1 and feed_id = $2
 `
 
 type CreateSubscriptionParams struct {
-	UserID    int64 `json:"user_id"`
-	RssFeedID int64 `json:"rss_feed_id"`
+	UserID int64 `json:"user_id"`
+	FeedID int64 `json:"feed_id"`
 }
 
 type CreateSubscriptionRow struct {
@@ -38,12 +38,12 @@ type CreateSubscriptionRow struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	UserID      int64          `json:"user_id"`
-	RssFeedID   int64          `json:"rss_feed_id"`
+	FeedID      int64          `json:"feed_id"`
 	CustomTitle sql.NullString `json:"custom_title"`
 }
 
 func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (CreateSubscriptionRow, error) {
-	row := q.db.QueryRowContext(ctx, createSubscription, arg.UserID, arg.RssFeedID)
+	row := q.db.QueryRowContext(ctx, createSubscription, arg.UserID, arg.FeedID)
 	var i CreateSubscriptionRow
 	err := row.Scan(
 		&i.ID,
@@ -51,33 +51,33 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
-		&i.RssFeedID,
+		&i.FeedID,
 		&i.CustomTitle,
 	)
 	return i, err
 }
 
 const getSubscribersByFeedId = `-- name: GetSubscribersByFeedId :many
-select id, uuid, created_at, updated_at, user_id, rss_feed_id, custom_title from content.rss_subscriptions
-  where rss_subscriptions.rss_feed_id = $1
+select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions s
+  where s.feed_id = $1
 `
 
-func (q *Queries) GetSubscribersByFeedId(ctx context.Context, rssFeedID int64) ([]ContentRssSubscription, error) {
-	rows, err := q.db.QueryContext(ctx, getSubscribersByFeedId, rssFeedID)
+func (q *Queries) GetSubscribersByFeedId(ctx context.Context, feedID int64) ([]RssSubscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscribersByFeedId, feedID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ContentRssSubscription
+	var items []RssSubscription
 	for rows.Next() {
-		var i ContentRssSubscription
+		var i RssSubscription
 		if err := rows.Scan(
 			&i.ID,
 			&i.Uuid,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserID,
-			&i.RssFeedID,
+			&i.FeedID,
 			&i.CustomTitle,
 		); err != nil {
 			return nil, err

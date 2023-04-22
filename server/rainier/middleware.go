@@ -22,7 +22,10 @@ func (c *RainierController) AuthMiddleware(next http.Handler) http.Handler {
 			identifier := split[1]
 
 			if identifier != "" {
-				token, err := c.Container.Queries.GetTokenByIdentifier(req.Context(), identifier)
+				token, err := c.Container.Queries.GetReaderTokenByIdentifier(
+					req.Context(),
+					identifier,
+				)
 
 				if err != nil {
 					authFailed(w)

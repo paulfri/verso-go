@@ -10,18 +10,18 @@ import (
 	"database/sql"
 )
 
-const createToken = `-- name: CreateToken :one
-insert into identity.tokens (user_id, identifier) values ($1, $2) returning id, uuid, created_at, updated_at, user_id, identifier, revoked_at
+const createReaderToken = `-- name: CreateReaderToken :one
+insert into identity.reader_tokens (user_id, identifier) values ($1, $2) returning id, uuid, created_at, updated_at, user_id, identifier, revoked_at
 `
 
-type CreateTokenParams struct {
+type CreateReaderTokenParams struct {
 	UserID     int64  `json:"user_id"`
 	Identifier string `json:"identifier"`
 }
 
-func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (IdentityToken, error) {
-	row := q.db.QueryRowContext(ctx, createToken, arg.UserID, arg.Identifier)
-	var i IdentityToken
+func (q *Queries) CreateReaderToken(ctx context.Context, arg CreateReaderTokenParams) (IdentityReaderToken, error) {
+	row := q.db.QueryRowContext(ctx, createReaderToken, arg.UserID, arg.Identifier)
+	var i IdentityReaderToken
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,
@@ -71,13 +71,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (Identit
 	return i, err
 }
 
-const getTokenByIdentifier = `-- name: GetTokenByIdentifier :one
-select id, uuid, created_at, updated_at, user_id, identifier, revoked_at from identity.tokens where identifier = $1
+const getReaderTokenByIdentifier = `-- name: GetReaderTokenByIdentifier :one
+select id, uuid, created_at, updated_at, user_id, identifier, revoked_at from identity.reader_tokens where identifier = $1
 `
 
-func (q *Queries) GetTokenByIdentifier(ctx context.Context, identifier string) (IdentityToken, error) {
-	row := q.db.QueryRowContext(ctx, getTokenByIdentifier, identifier)
-	var i IdentityToken
+func (q *Queries) GetReaderTokenByIdentifier(ctx context.Context, identifier string) (IdentityReaderToken, error) {
+	row := q.db.QueryRowContext(ctx, getReaderTokenByIdentifier, identifier)
+	var i IdentityReaderToken
 	err := row.Scan(
 		&i.ID,
 		&i.Uuid,

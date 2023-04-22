@@ -43,7 +43,10 @@ func (c *RainierController) ClientLogin(w http.ResponseWriter, req *http.Request
 		rando := uniuri.NewLen(20)
 
 		// TODO handle error
-		c.Container.Queries.CreateToken(ctx, query.CreateTokenParams{UserID: user.ID, Identifier: rando})
+		c.Container.Queries.CreateReaderToken(
+			ctx,
+			query.CreateReaderTokenParams{UserID: user.ID, Identifier: rando},
+		)
 
 		c.Container.Render.JSON(w, http.StatusOK, AuthTokenResponse{
 			Auth: &rando,
