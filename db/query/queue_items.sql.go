@@ -114,3 +114,89 @@ func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsBy
 	}
 	return items, nil
 }
+
+const markAllFeedItemsAsRead = `-- name: MarkAllFeedItemsAsRead :many
+update queue.items qi
+  set unread = false
+  where exists (
+    select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at 
+    from rss.items ri
+      join rss.feeds rf on rf.id = ri.feed_id
+    where qi.rss_item_id = ri.id and qi.user_id = $1 and rf.url = $2
+  )
+  returning id, uuid, created_at, updated_at, unread, user_id, rss_item_id
+`
+
+type MarkAllFeedItemsAsReadParams struct {
+	UserID     int64  `json:"user_id"`
+	RSSFeedURL string `json:"rss_feed_url"`
+}
+
+func (q *Queries) MarkAllFeedItemsAsRead(ctx context.Context, arg MarkAllFeedItemsAsReadParams) ([]QueueItem, error) {
+	rows, err := q.db.QueryContext(ctx, markAllFeedItemsAsRead, arg.UserID, arg.RSSFeedURL)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueueItem
+	for rows.Next() {
+		var i QueueItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Unread,
+			&i.UserID,
+			&i.RSSItemID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :many
+update queue.items
+  set unread = false
+  where user_id = $1
+  returning id, uuid, created_at, updated_at, unread, user_id, rss_item_id
+`
+
+func (q *Queries) MarkAllQueueItemsAsRead(ctx context.Context, userID int64) ([]QueueItem, error) {
+	rows, err := q.db.QueryContext(ctx, markAllQueueItemsAsRead, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueueItem
+	for rows.Next() {
+		var i QueueItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Unread,
+			&i.UserID,
+			&i.RSSItemID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

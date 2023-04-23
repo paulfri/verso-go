@@ -7,6 +7,31 @@ import (
 	"github.com/versolabs/verso/core/helper"
 )
 
+const (
+	StreamIDReadingList      = "user/-/state/com.google/reading-list"
+	StreamIDBroadcastFriends = "user/-/state/com.google/broadcast-friends"
+)
+
+const (
+	StreamIDFormatFeed  = "feed/%s"
+	StreamIDFormatLabel = "user/-/label/%s"
+)
+
+func StreamIDType(streamID string) string {
+	switch streamID {
+	case StreamIDReadingList:
+		return StreamIDReadingList
+	case StreamIDBroadcastFriends:
+		return StreamIDBroadcastFriends
+	default:
+		if FeedURLFromReaderStreamID(streamID) != "" {
+			return StreamIDFormatFeed
+		}
+
+		return ""
+	}
+}
+
 func ReaderStreamIDFromFeedURL(url string) string {
 	normalized, err := helper.NormalizeFeedURL(url)
 
@@ -14,15 +39,19 @@ func ReaderStreamIDFromFeedURL(url string) string {
 		return ""
 	}
 
-	return fmt.Sprintf("feed/%v", normalized)
+	return fmt.Sprintf(StreamIDFormatFeed, normalized)
 }
 
 func FeedURLFromReaderStreamID(streamID string) string {
-	parts := strings.Split(streamID, "feed/")
-
-	if len(parts) > 1 && strings.HasPrefix(parts[1], "http") {
-		return parts[1]
+	var feedURL string
+	if _, err := fmt.Sscanf(streamID, StreamIDFormatFeed, &feedURL); err != nil {
+		return ""
 	}
 
-	return ""
+	// Sanity check that it's an http/s URL.
+	if !strings.HasPrefix(feedURL, "http") {
+		return ""
+	}
+
+	return feedURL
 }

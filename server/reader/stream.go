@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/server/reader/common"
 	"github.com/versolabs/verso/server/reader/serialize"
 )
 
@@ -52,7 +53,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 	}
 
 	switch streamID := chi.URLParam(req, "*"); streamID {
-	case "user/-/state/com.google/reading-list":
+	case common.StreamIDReadingList:
 		items, err := c.Container.Queries.GetQueueItemsByUserID(
 			ctx,
 			query.GetQueueItemsByUserIDParams{
@@ -69,7 +70,56 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 		response := serialize.ReadingList(user, items, c.Container.Config.BaseURL)
 
 		c.Container.Render.JSON(w, http.StatusOK, response)
+	case common.StreamIDBroadcastFriends:
+		// Not implemented.
+		c.Container.Render.Text(w, http.StatusNotFound, "")
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}
+}
+
+type StreamMarkAllAsReadRequestBody struct {
+	StreamID  string `json:"s" validate:"required"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	body := StreamMarkAllAsReadRequestBody{}
+	err := c.Container.JSONBody(req, &body)
+
+	if err != nil {
+		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	switch streamIDType := common.StreamIDType(body.StreamID); streamIDType {
+	case common.StreamIDReadingList:
+		_, err := c.Container.Queries.MarkAllQueueItemsAsRead(ctx, userID)
+
+		if err != nil {
+			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	case common.StreamIDFormatFeed:
+		feedURL := common.FeedURLFromReaderStreamID(body.StreamID)
+		_, err := c.Container.Queries.MarkAllFeedItemsAsRead(
+			ctx,
+			query.MarkAllFeedItemsAsReadParams{
+				UserID:     userID,
+				RSSFeedURL: feedURL,
+			},
+		)
+
+		if err != nil {
+			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	default:
+		c.Container.Render.Text(w, http.StatusBadRequest, "not supported yet")
+		return
+	}
+
+	c.Container.Render.Text(w, http.StatusOK, "OK")
 }

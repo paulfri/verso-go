@@ -18,7 +18,7 @@ func TestReaderStreamIDFromURL(t *testing.T) {
 			streamID := ReaderStreamIDFromFeedURL(test.url)
 
 			if streamID != test.streamID {
-				t.Errorf("normalize failed: got %q, want %q", streamID, test.streamID)
+				t.Errorf("failed: got %q, want %q", streamID, test.streamID)
 			}
 		})
 	}
@@ -39,7 +39,7 @@ func TestFeedURLFromReaderStreamID(t *testing.T) {
 			url := FeedURLFromReaderStreamID(test.streamID)
 
 			if url != test.url {
-				t.Errorf("normalize failed: got %q, want %q", url, test.url)
+				t.Errorf("failed: got %q, want %q", url, test.url)
 			}
 		})
 	}

@@ -2,6 +2,7 @@ package util
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -36,4 +37,29 @@ func (c Container) Params(s interface{}, req *http.Request) error {
 	}
 
 	return c.Validator.Struct(s)
+}
+
+func (c Container) Form(req *http.Request, s interface{}) error {
+	err := req.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = urlquery.Unmarshal([]byte(req.Form.Encode()), s)
+	if err != nil {
+		return err
+	}
+
+	return c.Validator.Struct(s)
+}
+
+func (c Container) JSONBody(req *http.Request, s interface{}) error {
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(s)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
