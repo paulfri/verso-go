@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"io/ioutil"

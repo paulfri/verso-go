@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/hibiken/asynq"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/db/query"
 )
 
 type Command struct {

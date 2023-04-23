@@ -6,9 +6,9 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/util"
-	"github.com/versolabs/citra/worker/tasks"
+	"github.com/versolabs/verso/db"
+	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/worker/tasks"
 )
 
 type Worker struct {

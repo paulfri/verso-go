@@ -1,10 +1,10 @@
-package rainier
+package reader
 
 import (
 	"net/http"
 
 	"github.com/dchest/uniuri"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/db/query"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +18,7 @@ type AuthErrorResponse struct {
 	Error string `json:"Error"`
 }
 
-func (c *RainierController) ClientLogin(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	email := req.URL.Query().Get("Email")
 	password := req.URL.Query().Get("Passwd")

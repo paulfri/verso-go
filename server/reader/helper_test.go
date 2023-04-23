@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 
 	"github.com/unrolled/render"
-	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/util"
-	"github.com/versolabs/citra/worker"
+	"github.com/versolabs/verso/db"
+	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/worker"
 )
 
 func authenticatedTestRequest(method string, path string, _body io.Reader, token string) *http.Request {
@@ -32,8 +32,8 @@ func initTestContainer() *util.Container {
 	}
 }
 
-func initTestController() *RainierController {
-	return &RainierController{
+func initTestController() *ReaderController {
+	return &ReaderController{
 		Container: initTestContainer(),
 	}
 }

@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type UserResponse struct {
 	IsPremium           bool   `json:"isPremium"`
 }
 
-func (c *RainierController) User(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) User(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
 	user, _ := c.Container.Queries.GetUser(ctx, userID.(int64))
@@ -33,7 +33,7 @@ func (c *RainierController) User(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
-func (c *RainierController) UserToken(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) UserToken(w http.ResponseWriter, req *http.Request) {
 	token := req.Context().Value(ContextAuthTokenKey{}).(string)
 
 	c.Container.Render.Text(w, http.StatusOK, token)
@@ -46,7 +46,7 @@ const UserPreferencesResponse = `{
 	}]
 }`
 
-func (c *RainierController) UserPreferences(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) UserPreferences(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(UserPreferencesResponse))
 }
@@ -55,7 +55,7 @@ const UserStreamPreferencesResponse = `{
     "streamprefs": {}
 }`
 
-func (c *RainierController) UserStreamPreferences(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) UserStreamPreferences(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(UserStreamPreferencesResponse))
 }
@@ -73,7 +73,7 @@ type UserFriend struct {
 	N           string    `json:"n"`
 }
 
-func (c *RainierController) UserFriendList(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) UserFriendList(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	strUserID := fmt.Sprintf("%d", userID)

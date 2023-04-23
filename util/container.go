@@ -8,8 +8,8 @@ import (
 	"github.com/hetiansu5/urlquery"
 	"github.com/hibiken/asynq"
 	"github.com/unrolled/render"
-	"github.com/versolabs/citra/core/command"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/core/command"
+	"github.com/versolabs/verso/db/query"
 )
 
 type Container struct {

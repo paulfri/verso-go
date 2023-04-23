@@ -6,11 +6,11 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
-	citraCli "github.com/versolabs/citra/cli"
-	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/server"
-	"github.com/versolabs/citra/util"
-	"github.com/versolabs/citra/worker"
+	"github.com/versolabs/verso/core/action"
+	"github.com/versolabs/verso/db"
+	"github.com/versolabs/verso/server"
+	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/worker"
 )
 
 func main() {
@@ -43,7 +43,7 @@ func main() {
 			{
 				Name:   "crawl",
 				Usage:  "Queue the given feed for crawling",
-				Action: citraCli.Crawl(&config),
+				Action: action.Crawl(&config),
 			},
 		},
 	}

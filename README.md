@@ -1,6 +1,6 @@
-# citra
+# 📚 verso
 
-![build](https://github.com/versolabs/citra/actions/workflows/build.yml/badge.svg)
+![build](https://github.com/versolabs/verso/actions/workflows/build.yml/badge.svg)
 
 Syndication summarized.
 

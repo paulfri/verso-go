@@ -5,7 +5,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/db/query"
 )
 
 func Init(url string) (*sql.DB, *query.Queries) {

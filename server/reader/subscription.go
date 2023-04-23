@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ type SubscriptionQuickAddRequestParams struct {
 	Quickadd string `query:"quickadd" validate:"required"`
 }
 
-func (c *RainierController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
 	params := SubscriptionQuickAddRequestParams{}
 	err := c.Container.Params(&params, req)
 

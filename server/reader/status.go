@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"net/http"
@@ -22,7 +22,7 @@ type StatusResponse struct {
 
 type None struct{}
 
-func (c *RainierController) MetaStatus(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) MetaStatus(w http.ResponseWriter, req *http.Request) {
 	var err *None
 
 	if err != nil {
@@ -38,6 +38,6 @@ func (c *RainierController) MetaStatus(w http.ResponseWriter, req *http.Request)
 	}
 }
 
-func (c *RainierController) MetaPing(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) MetaPing(w http.ResponseWriter, req *http.Request) {
 	c.Container.Render.Text(w, http.StatusOK, "OK")
 }

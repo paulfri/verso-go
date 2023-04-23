@@ -1,11 +1,11 @@
-package rainier
+package reader
 
 import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/versolabs/citra/db/query"
-	"github.com/versolabs/citra/server/rainier/serialize"
+	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/server/reader/serialize"
 )
 
 type SortOrderValue string
@@ -34,7 +34,7 @@ type StreamContentsRequestParams struct {
 	ExcludeNewerThan int `query:"nt"`
 }
 
-func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Request) {
+func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}

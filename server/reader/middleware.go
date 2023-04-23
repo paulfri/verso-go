@@ -1,4 +1,4 @@
-package rainier
+package reader
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 type ContextUserIDKey struct{}
 type ContextAuthTokenKey struct{}
 
-func (c *RainierController) AuthMiddleware(next http.Handler) http.Handler {
+func (c *ReaderController) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		auth := req.Header.Get("Authorization")

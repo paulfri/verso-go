@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/mmcdole/gofeed"
-	"github.com/versolabs/citra/core/helper"
-	"github.com/versolabs/citra/db/query"
-	"github.com/versolabs/citra/worker/tasks"
+	"github.com/versolabs/verso/core/helper"
+	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/worker/tasks"
 )
 
 // Subscribes the given user to the given feed URL, creating the feed in the

@@ -10,11 +10,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/citra/core/command"
-	"github.com/versolabs/citra/db"
-	"github.com/versolabs/citra/server/rainier"
-	"github.com/versolabs/citra/util"
-	"github.com/versolabs/citra/worker"
+	"github.com/versolabs/verso/core/command"
+	"github.com/versolabs/verso/db"
+	"github.com/versolabs/verso/server/reader"
+	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/worker"
 )
 
 func Serve(config *util.Config) cli.ActionFunc {
@@ -46,8 +46,8 @@ func Serve(config *util.Config) cli.ActionFunc {
 		}
 
 		r.Get("/ping", ping)
-		r.Mount("/", rainier.LoginRouter(&container))
-		r.Mount("/reader/api/0", rainier.Router(&container))
+		r.Mount("/", reader.LoginRouter(&container))
+		r.Mount("/reader/api/0", reader.Router(&container))
 
 		bind := fmt.Sprintf("%s:%s", config.Host, config.Port)
 		http.ListenAndServe(bind, r)

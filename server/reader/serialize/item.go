@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	lop "github.com/samber/lo/parallel"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/db/query"
 	"gopkg.in/guregu/null.v4"
 )
 

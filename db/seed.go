@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/citra/db/query"
-	"github.com/versolabs/citra/util"
+	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/util"
 	"golang.org/x/crypto/bcrypt"
 )
 

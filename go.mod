@@ -1,4 +1,4 @@
-module github.com/versolabs/citra
+module github.com/versolabs/verso
 
 go 1.18
 

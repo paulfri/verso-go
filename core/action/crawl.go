@@ -1,12 +1,12 @@
-package cli
+package action
 
 import (
 	"strconv"
 
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/citra/util"
-	"github.com/versolabs/citra/worker"
-	"github.com/versolabs/citra/worker/tasks"
+	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/worker"
+	"github.com/versolabs/verso/worker/tasks"
 )
 
 func Crawl(config *util.Config) cli.ActionFunc {

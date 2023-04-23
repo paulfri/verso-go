@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/samber/lo"
-	"github.com/versolabs/citra/db/query"
+	"github.com/versolabs/verso/db/query"
 )
 
 type StreamContentsResponse struct {

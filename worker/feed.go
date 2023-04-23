@@ -8,8 +8,8 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/mmcdole/gofeed"
-	"github.com/versolabs/citra/db/query"
-	"github.com/versolabs/citra/worker/tasks"
+	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/worker/tasks"
 )
 
 func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
