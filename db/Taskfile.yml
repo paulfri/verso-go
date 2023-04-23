@@ -13,6 +13,7 @@ tasks:
   drop:
     desc: Drop the database. Irreversible.
     dir: ./migrate
+    ignore_error: true
     cmds:
       # TODO: database name; env check
       - psql postgres -c 'drop database verso_dev;'
