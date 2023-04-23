@@ -38,17 +38,18 @@ type StreamContentsRequestParams struct {
 }
 
 type StreamContentsResponse struct {
-	Direction    string `json:"direction"`
-	Author       string `json:"author"`
-	Title        string `json:"title"`
-	Updated      int64  `json:"updated"`
-	Continuation string `json:"continuation"`
-	ID           string `json:"id"`
-	// TODO
-	// "self": [{
-	//   "href": "https://api.verso.so/reader/api/0/stream/contents/user/-/state/com.google/reading-list?output=json"
-	// }],
-	Items []StreamContentsItem `json:"items"`
+	Direction    string               `json:"direction"`
+	Author       string               `json:"author"`
+	Title        string               `json:"title"`
+	Updated      int64                `json:"updated"`
+	Continuation string               `json:"continuation"`
+	ID           string               `json:"id"`
+	Self         StreamContentsSelf   `json:"self"`
+	Items        []StreamContentsItem `json:"items"`
+}
+
+type StreamContentsSelf struct {
+	Href string `json:"href"`
 }
 
 type StreamContentsItemContent struct {
@@ -102,7 +103,7 @@ func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Requ
 			return
 		}
 
-		response := readingList(user, items)
+		response := c.readingList(user, items)
 
 		c.Container.Render.JSON(w, http.StatusOK, response)
 	default:
@@ -110,7 +111,7 @@ func (c *RainierController) StreamContents(w http.ResponseWriter, req *http.Requ
 	}
 }
 
-func readingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow) StreamContentsResponse {
+func (c *RainierController) readingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow) StreamContentsResponse {
 	serialized := lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) StreamContentsItem {
 		published := item.CreatedAt.Unix()
 		if item.PublishedAt.Valid {
@@ -145,6 +146,8 @@ func readingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow
 		return item.PublishedAt.Time.Unix() > max.PublishedAt.Time.Unix()
 	})
 
+	fmt.Println(c.Container.Config)
+
 	return StreamContentsResponse{
 		Direction:    "rtl",
 		Author:       user.Name,
@@ -153,6 +156,12 @@ func readingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow
 		Continuation: "page2", // TODO: paginate
 		ID:           fmt.Sprintf("user/%d/state/com.google/reading-list", user.ID),
 		Items:        serialized,
+		Self: StreamContentsSelf{
+			Href: fmt.Sprintf(
+				"%s/reader/api/0/stream/contents/user/-/state/com.google/reading-list?output=json",
+				c.Container.Config.BaseURL,
+			),
+		},
 	}
 }
 

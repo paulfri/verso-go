@@ -38,6 +38,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		container := util.Container{
 			Asynq:     asynq,
 			Command:   command,
+			Config:    config,
 			DB:        db,
 			Queries:   queries,
 			Render:    render.New(),

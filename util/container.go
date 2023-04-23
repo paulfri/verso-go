@@ -15,6 +15,7 @@ import (
 type Container struct {
 	Asynq     *asynq.Client
 	Command   *command.Command
+	Config    *Config
 	DB        *sql.DB
 	Queries   *query.Queries
 	Render    *render.Render
