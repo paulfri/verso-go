@@ -57,13 +57,38 @@ func (q *Queries) CreateRSSSubscription(ctx context.Context, arg CreateRSSSubscr
 	return i, err
 }
 
-const getSubscribersByRSSFeedID = `-- name: GetSubscribersByRSSFeedID :many
+const getSubscriptionByRSSFeedIDAndUserID = `-- name: GetSubscriptionByRSSFeedIDAndUserID :one
+select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions s
+  where s.feed_id = $1 and s.user_id = $2
+`
+
+type GetSubscriptionByRSSFeedIDAndUserIDParams struct {
+	FeedID int64 `json:"feed_id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) GetSubscriptionByRSSFeedIDAndUserID(ctx context.Context, arg GetSubscriptionByRSSFeedIDAndUserIDParams) (RSSSubscription, error) {
+	row := q.db.QueryRowContext(ctx, getSubscriptionByRSSFeedIDAndUserID, arg.FeedID, arg.UserID)
+	var i RSSSubscription
+	err := row.Scan(
+		&i.ID,
+		&i.UUID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.FeedID,
+		&i.CustomTitle,
+	)
+	return i, err
+}
+
+const getSubscriptionsByRSSFeedID = `-- name: GetSubscriptionsByRSSFeedID :many
 select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions s
   where s.feed_id = $1
 `
 
-func (q *Queries) GetSubscribersByRSSFeedID(ctx context.Context, feedID int64) ([]RSSSubscription, error) {
-	rows, err := q.db.QueryContext(ctx, getSubscribersByRSSFeedID, feedID)
+func (q *Queries) GetSubscriptionsByRSSFeedID(ctx context.Context, feedID int64) ([]RSSSubscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscriptionsByRSSFeedID, feedID)
 	if err != nil {
 		return nil, err
 	}

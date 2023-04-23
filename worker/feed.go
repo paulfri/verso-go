@@ -39,7 +39,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		return nil
 	}
 
-	subscribers, err := worker.Container.Queries.GetSubscribersByRSSFeedID(ctx, thisFeed.ID)
+	subscribers, err := worker.Container.Queries.GetSubscriptionsByRSSFeedID(ctx, thisFeed.ID)
 	if err != nil {
 		return err
 	}

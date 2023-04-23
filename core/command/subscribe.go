@@ -13,14 +13,14 @@ import (
 
 // Subscribes the given user to the given feed URL, creating the feed in the
 // database if necessary.
-func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID int64) error {
+func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID int64) (*query.CreateRSSSubscriptionRow, error) {
 	// Track whether we need to scrape the feed to collect metadata.
 	needsScrape := false
 
 	// Normalize the given feed URL.
 	feedURL, err := helper.NormalizeFeedURL(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Check if this feed already exists in the database.
@@ -36,12 +36,12 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 			needsScrape = true
 
 			if err != nil {
-				return err
+				return nil, err
 			}
 		default:
 			// If this was a general database error, return that instead of
 			// continuing.
-			return err
+			return nil, err
 		}
 	}
 
@@ -54,11 +54,13 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 		parsedFeed, err := parser.ParseURL(feedURL)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		title = parsedFeed.Title
 	}
+
+	var subscription query.CreateRSSSubscriptionRow
 
 	err = c.QueryTransaction(func(withTx *query.Queries) error {
 		// Fetch the feed record.
@@ -75,7 +77,7 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 		}
 
 		// Create a subscription for the user to the feed.
-		_, err = withTx.CreateRSSSubscription(
+		subscription, err = withTx.CreateRSSSubscription(
 			ctx,
 			query.CreateRSSSubscriptionParams{
 				UserID: userID,
@@ -124,5 +126,5 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 		return nil
 	})
 
-	return err
+	return &subscription, err
 }

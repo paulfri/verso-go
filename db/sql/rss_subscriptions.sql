@@ -11,6 +11,10 @@ select * from inserted
   union
   select * from rss.subscriptions where user_id = $1 and feed_id = $2;
 
--- name: GetSubscribersByRSSFeedID :many
+-- name: GetSubscriptionsByRSSFeedID :many
 select * from rss.subscriptions s
   where s.feed_id = $1;
+
+-- name: GetSubscriptionByRSSFeedIDAndUserID :one
+select * from rss.subscriptions s
+  where s.feed_id = $1 and s.user_id = $2;

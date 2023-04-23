@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
+	"github.com/ironstar-io/chizerolog"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/verso/core/command"
@@ -19,10 +20,12 @@ import (
 
 func Serve(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
+		logger := util.Logger()
+
 		r := chi.NewRouter()
 		r.Use(middleware.RequestID)
 		r.Use(middleware.RealIP)
-		r.Use(middleware.Logger)
+		r.Use(chizerolog.LoggerMiddleware(logger))
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
 
@@ -40,6 +43,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 			Command:   command,
 			Config:    config,
 			DB:        db,
+			Logger:    logger,
 			Queries:   queries,
 			Render:    render.New(),
 			Validator: validator.New(),

@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/hetiansu5/urlquery"
 	"github.com/hibiken/asynq"
+	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
 	"github.com/versolabs/verso/core/command"
 	"github.com/versolabs/verso/db/query"
@@ -20,6 +21,7 @@ type Container struct {
 	Queries   *query.Queries
 	Render    *render.Render
 	Validator *validator.Validate
+	Logger    *zerolog.Logger
 }
 
 // Given a struct with request parameters, unmarshal the query string from the
