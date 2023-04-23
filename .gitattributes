@@ -1,1 +1,2 @@
 db/query/*.go linguist-generated=true
+db/query/*.go -diff
