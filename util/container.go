@@ -69,12 +69,12 @@ func (c Container) JSONBody(req *http.Request, s interface{}) error {
 // Given a struct with request parameters, unmarshal the query string from the
 // given request into that struct.
 func (c Container) BodyParams(s interface{}, req *http.Request) error {
-	body, err := ioutil.ReadAll(req.Body)
+	body, _ := ioutil.ReadAll(req.Body)
 	asByte := []byte(body)
 
-	fmt.Println("%v", body)
+	fmt.Printf("%v\n", body)
 
-	err = urlquery.Unmarshal(asByte, s)
+	err := urlquery.Unmarshal(asByte, s)
 	if err != nil {
 		return err
 	}

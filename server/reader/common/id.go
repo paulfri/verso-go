@@ -33,9 +33,19 @@ func StreamIDType(streamID string) string {
 		return StreamIDBroadcastFriends
 	case StreamIDStarred:
 		return StreamIDStarred
+	case StreamIDRead:
+		return StreamIDRead
+	case StreamIDKeptUnread:
+		return StreamIDKeptUnread
+	case StreamIDBroadcast:
+		return StreamIDBroadcast
+	case StreamIDLiked:
+		return StreamIDLiked
 	default:
 		if FeedURLFromReaderStreamID(streamID) != "" {
 			return StreamIDFormatFeed
+		} else if UserLabelFromReaderStreamID(streamID) != "" {
+			return StreamIDFormatLabel
 		}
 
 		return ""
@@ -64,4 +74,17 @@ func FeedURLFromReaderStreamID(streamID string) string {
 	}
 
 	return feedURL
+}
+
+func UserLabelFromReaderStreamID(label string) string {
+	var feedURL string
+	if _, err := fmt.Sscanf(label, StreamIDFormatLabel, &feedURL); err != nil {
+		return ""
+	}
+
+	return feedURL
+}
+
+func ReaderStreamIDFromUserLabel(label string) string {
+	return fmt.Sprintf(StreamIDFormatLabel, label)
 }
