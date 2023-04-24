@@ -55,7 +55,9 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	switch streamID := chi.URLParam(req, "*"); streamID {
+	streamID := chi.URLParam(req, "*")
+
+	switch streamIDType := common.StreamIDType(streamID); streamIDType {
 	case common.StreamIDReadingList:
 		items, err := c.Container.Queries.GetQueueItemsByUserID(
 			ctx,
@@ -76,6 +78,9 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 	case common.StreamIDBroadcastFriends:
 		// Not implemented.
 		c.Container.Render.Text(w, http.StatusNotFound, "")
+	case common.StreamIDFormatFeed:
+		// TODO
+		c.Container.Render.Text(w, http.StatusBadRequest, "not yet implemented")
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}

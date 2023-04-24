@@ -3,6 +3,8 @@ package util
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -62,4 +64,20 @@ func (c Container) JSONBody(req *http.Request, s interface{}) error {
 	}
 
 	return nil
+}
+
+// Given a struct with request parameters, unmarshal the query string from the
+// given request into that struct.
+func (c Container) BodyParams(s interface{}, req *http.Request) error {
+	body, err := ioutil.ReadAll(req.Body)
+	asByte := []byte(body)
+
+	fmt.Println("%v", body)
+
+	err = urlquery.Unmarshal(asByte, s)
+	if err != nil {
+		return err
+	}
+
+	return c.Validator.Struct(s)
 }

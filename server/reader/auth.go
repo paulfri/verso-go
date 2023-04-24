@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dchest/uniuri"
@@ -18,12 +19,20 @@ type AuthErrorResponse struct {
 	Error string `json:"Error"`
 }
 
+type ClientLoginRequest struct {
+	Email    string `query:"Email"`
+	Password string `query:"Passwd"`
+}
+
 func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	email := req.URL.Query().Get("Email")
-	password := req.URL.Query().Get("Passwd")
 
-	if email == "" || password == "" {
+	body := ClientLoginRequest{}
+	c.Container.BodyParams(&body, req)
+
+	fmt.Printf("%v\n", body)
+
+	if body.Email == "" || body.Password == "" {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
 		})
@@ -31,7 +40,7 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	user, err := c.Container.Queries.GetUserByEmail(ctx, email)
+	user, err := c.Container.Queries.GetUserByEmail(ctx, body.Email)
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
@@ -39,7 +48,7 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 		})
 	}
 
-	if match(user.Password.String, password) {
+	if match(user.Password.String, body.Password) {
 		rando := uniuri.NewLen(20)
 
 		// TODO handle error
