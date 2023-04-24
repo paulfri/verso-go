@@ -7,6 +7,7 @@ import (
 
 	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/server/reader/common"
+	"github.com/versolabs/verso/server/reader/serialize"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -101,4 +102,26 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 	}
 
 	c.Container.Render.Text(w, http.StatusOK, strconv.FormatBool(true))
+}
+
+type SubscriptionListResponse struct {
+	Subscriptions []serialize.Subscription `json:"subscriptions"`
+}
+
+func (c *ReaderController) SubscriptionList(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	subscriptions, err := c.Container.Queries.GetSubscriptionsByUserID(ctx, userID)
+
+	if err != nil {
+		panic(err) // TODO: fix
+	}
+
+	serialized := serialize.SubscriptionsFromRows(subscriptions)
+
+	response := SubscriptionListResponse{
+		Subscriptions: serialized,
+	}
+
+	c.Container.Render.JSON(w, http.StatusOK, response)
 }

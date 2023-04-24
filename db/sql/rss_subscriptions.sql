@@ -18,3 +18,8 @@ select * from rss.subscriptions s
 -- name: GetSubscriptionByRSSFeedIDAndUserID :one
 select * from rss.subscriptions s
   where s.feed_id = $1 and s.user_id = $2;
+
+-- name: GetSubscriptionsByUserID :many
+select * from rss.subscriptions s
+  join rss.feeds f on f.id = s.feed_id
+  where s.user_id = $1;

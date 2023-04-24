@@ -117,3 +117,66 @@ func (q *Queries) GetSubscriptionsByRSSFeedID(ctx context.Context, feedID int64)
 	}
 	return items, nil
 }
+
+const getSubscriptionsByUserID = `-- name: GetSubscriptionsByUserID :many
+select s.id, s.uuid, s.created_at, s.updated_at, user_id, feed_id, custom_title, f.id, f.uuid, f.created_at, f.updated_at, title, url, active, last_crawled_at from rss.subscriptions s
+  join rss.feeds f on f.id = s.feed_id
+  where s.user_id = $1
+`
+
+type GetSubscriptionsByUserIDRow struct {
+	ID            int64          `json:"id"`
+	UUID          uuid.UUID      `json:"uuid"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	UserID        int64          `json:"user_id"`
+	FeedID        int64          `json:"feed_id"`
+	CustomTitle   sql.NullString `json:"custom_title"`
+	ID_2          int64          `json:"id_2"`
+	UUID_2        uuid.UUID      `json:"uuid_2"`
+	CreatedAt_2   time.Time      `json:"created_at_2"`
+	UpdatedAt_2   time.Time      `json:"updated_at_2"`
+	Title         string         `json:"title"`
+	URL           string         `json:"url"`
+	Active        bool           `json:"active"`
+	LastCrawledAt sql.NullTime   `json:"last_crawled_at"`
+}
+
+func (q *Queries) GetSubscriptionsByUserID(ctx context.Context, userID int64) ([]GetSubscriptionsByUserIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscriptionsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSubscriptionsByUserIDRow
+	for rows.Next() {
+		var i GetSubscriptionsByUserIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.FeedID,
+			&i.CustomTitle,
+			&i.ID_2,
+			&i.UUID_2,
+			&i.CreatedAt_2,
+			&i.UpdatedAt_2,
+			&i.Title,
+			&i.URL,
+			&i.Active,
+			&i.LastCrawledAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
