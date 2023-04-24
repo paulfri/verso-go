@@ -1,7 +1,10 @@
 package reader
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/versolabs/verso/db/query"
@@ -80,7 +83,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 
 type StreamMarkAllAsReadRequestBody struct {
 	StreamID  string `json:"s" validate:"required"`
-	Timestamp int64  `json:"timestamp"`
+	Timestamp int64  `json:"ts"`
 }
 
 func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
@@ -93,10 +96,27 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	c.Container.Logger.Debug().Msg(fmt.Sprintf("%v", body))
+
+	var publishedBefore sql.NullTime
+	if body.Timestamp > 0 {
+		// TODO: Is timestamp in milliseconds, microseconds, nanoseconds?
+		// Assumed milliseconds here.
+		publishedBefore = sql.NullTime{Time: time.Unix(body.Timestamp/1000, 0), Valid: true}
+	} else {
+		publishedBefore = sql.NullTime{Valid: false}
+	}
 
 	switch streamIDType := common.StreamIDType(body.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		_, err := c.Container.Queries.MarkAllQueueItemsAsRead(ctx, userID)
+		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+			ctx,
+			query.MarkAllQueueItemsAsReadParams{
+				UserID:          userID,
+				RSSFeedURL:      sql.NullString{},
+				PublishedBefore: publishedBefore,
+			},
+		)
 
 		if err != nil {
 			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
@@ -104,11 +124,12 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 		}
 	case common.StreamIDFormatFeed:
 		feedURL := common.FeedURLFromReaderStreamID(body.StreamID)
-		_, err := c.Container.Queries.MarkAllFeedItemsAsRead(
+		err := c.Container.Queries.MarkAllQueueItemsAsRead(
 			ctx,
-			query.MarkAllFeedItemsAsReadParams{
-				UserID:     userID,
-				RSSFeedURL: feedURL,
+			query.MarkAllQueueItemsAsReadParams{
+				UserID:          userID,
+				RSSFeedURL:      feedURL,
+				PublishedBefore: publishedBefore,
 			},
 		)
 
