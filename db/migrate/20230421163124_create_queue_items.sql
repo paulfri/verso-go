@@ -7,8 +7,10 @@ create table queue.items (
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
-  unread boolean not null default true,
   user_id bigint not null references identity.users(id),
+  unread boolean not null default true,
+  starred boolean not null default false,
+
   rss_item_id bigint references rss.items(id)
 );
 

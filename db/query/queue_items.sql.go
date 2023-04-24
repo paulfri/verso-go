@@ -16,7 +16,7 @@ const createQueueItem = `-- name: CreateQueueItem :one
 insert into queue.items (user_id, rss_item_id)
   values ($1, $2)
   on conflict do nothing
-  returning id, uuid, created_at, updated_at, unread, user_id, rss_item_id
+  returning id, uuid, created_at, updated_at, user_id, unread, starred, rss_item_id
 `
 
 type CreateQueueItemParams struct {
@@ -32,8 +32,9 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 		&i.UUID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Unread,
 		&i.UserID,
+		&i.Unread,
+		&i.Starred,
 		&i.RSSItemID,
 	)
 	return i, err

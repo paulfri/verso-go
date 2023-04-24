@@ -37,8 +37,9 @@ type QueueItem struct {
 	UUID      uuid.UUID     `json:"uuid"`
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
-	Unread    bool          `json:"unread"`
 	UserID    int64         `json:"user_id"`
+	Unread    bool          `json:"unread"`
+	Starred   bool          `json:"starred"`
 	RSSItemID sql.NullInt64 `json:"rss_item_id"`
 }
 
