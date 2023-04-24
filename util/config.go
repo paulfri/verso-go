@@ -10,6 +10,7 @@ type Config struct {
 	Host              string `env:"HOST"`
 	Port              string `env:"PORT" envDefault:"8080"`
 	Env               string `env:"VERSO_ENV" envDefault:"development"`
+	Debug             bool   `env:"DEBUG" envDefault:"false"`
 	BaseURL           string `env:"BASE_URL" envDefault:"http://localhost:8080"`
 	DatabaseURL       string `env:"DATABASE_URL"`
 	RedisURL          string `env:"REDIS_URL"`

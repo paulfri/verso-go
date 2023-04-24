@@ -2,7 +2,6 @@ package reader
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,7 +24,6 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	c.Container.Logger.Debug().Msg(fmt.Sprintf("%v", body))
 
 	var publishedBefore sql.NullTime
 	if body.Timestamp > 0 {

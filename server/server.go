@@ -28,7 +28,11 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r.Use(chizerolog.LoggerMiddleware(logger))
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
-		r.Use(PrintRequestBodyMiddleware)
+
+		if config.Debug {
+			r.Use(DebugRequestBodyMiddleware(logger))
+			r.Use(DebugResponseBodyMiddleware(logger))
+		}
 
 		asynq := worker.Client(config.RedisURL)
 		db, queries := db.Init(config.DatabaseURL)
