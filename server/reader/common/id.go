@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/versolabs/verso/core/helper"
@@ -94,9 +95,33 @@ func ReaderStreamIDFromUserLabel(label string) string {
 // Returns the long-form item ID for the given UUID. This is a zero-padded,
 // 16-length unsigned hex string with a static prefix.
 func LongItemID(readerID int64) string {
-	u := uint64(readerID)
-	hex := fmt.Sprintf("%x", u)
-	padded := fmt.Sprintf("%016s", hex)
+	hex := readerIDToHex(readerID)
 
-	return fmt.Sprintf("tag:google.com,2005:reader/item/%s", padded)
+	return fmt.Sprintf("tag:google.com,2005:reader/item/%s", hex)
+}
+
+func ReaderIDFromInput(input string) int64 {
+	if strings.HasPrefix(input, "tag:google.com,2005:reader/item/") {
+		fmt.Println(input[32:])
+		return readerIDFromHex(input[32:])
+	}
+
+	i, err := strconv.Atoi(input)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return int64(i)
+}
+
+func readerIDFromHex(hex string) int64 {
+	val, _ := strconv.ParseInt(hex, 16, 64)
+	sixfour := int64(val)
+
+	return sixfour
+}
+
+func readerIDToHex(readerID int64) string {
+	return strconv.FormatInt(readerID, 16)
 }

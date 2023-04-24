@@ -51,6 +51,9 @@ func Router(container *util.Container) http.Handler {
 
 		// read state
 		auth.Post("/mark-all-as-read", reader.StreamMarkAllAsRead)
+
+		// tags
+		auth.Get("/tag/list", reader.TagList)
 	})
 
 	return router

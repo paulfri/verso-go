@@ -8,7 +8,8 @@ package query
 import (
 	"context"
 	"database/sql"
-	"time"
+
+	"github.com/lib/pq"
 )
 
 const createQueueItem = `-- name: CreateQueueItem :one
@@ -38,21 +39,55 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 	return i, err
 }
 
+const getQueueItemsByReaderIDs = `-- name: GetQueueItemsByReaderIDs :many
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id
+  from rss.items ri
+  join queue.items qi on qi.rss_item_id = ri.id
+  where ri.id = any($1::bigint[])
+  order by ri.published_at desc
+`
+
+func (q *Queries) GetQueueItemsByReaderIDs(ctx context.Context, dollar_1 []int64) ([]RSSItem, error) {
+	rows, err := q.db.QueryContext(ctx, getQueueItemsByReaderIDs, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RSSItem
+	for rows.Next() {
+		var i RSSItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FeedID,
+			&i.RSSGuid,
+			&i.Title,
+			&i.Link,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.Content,
+			&i.Summary,
+			&i.PublishedAt,
+			&i.RemoteUpdatedAt,
+			&i.ReaderID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getQueueItemsByUserID = `-- name: GetQueueItemsByUserID :many
-select
-    qi.id,
-    qi.created_at,
-    qi.unread,
-    ri.reader_id,
-    ri.feed_id,
-    ri.title,
-    ri.rss_guid,
-    ri.link,
-    ri.author,
-    ri.content,
-    ri.summary,
-    ri.published_at,
-    ri.remote_updated_at
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   where qi.user_id = $1 
@@ -65,45 +100,31 @@ type GetQueueItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-type GetQueueItemsByUserIDRow struct {
-	ID              int64          `json:"id"`
-	CreatedAt       time.Time      `json:"created_at"`
-	Unread          bool           `json:"unread"`
-	ReaderID        int64          `json:"reader_id"`
-	FeedID          int64          `json:"feed_id"`
-	Title           string         `json:"title"`
-	RSSGuid         string         `json:"rss_guid"`
-	Link            string         `json:"link"`
-	Author          sql.NullString `json:"author"`
-	Content         string         `json:"content"`
-	Summary         sql.NullString `json:"summary"`
-	PublishedAt     sql.NullTime   `json:"published_at"`
-	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-}
-
-func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsByUserIDParams) ([]GetQueueItemsByUserIDRow, error) {
+func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsByUserIDParams) ([]RSSItem, error) {
 	rows, err := q.db.QueryContext(ctx, getQueueItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetQueueItemsByUserIDRow
+	var items []RSSItem
 	for rows.Next() {
-		var i GetQueueItemsByUserIDRow
+		var i RSSItem
 		if err := rows.Scan(
 			&i.ID,
+			&i.UUID,
 			&i.CreatedAt,
-			&i.Unread,
-			&i.ReaderID,
+			&i.UpdatedAt,
 			&i.FeedID,
-			&i.Title,
 			&i.RSSGuid,
+			&i.Title,
 			&i.Link,
 			&i.Author,
+			&i.AuthorEmail,
 			&i.Content,
 			&i.Summary,
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
+			&i.ReaderID,
 		); err != nil {
 			return nil, err
 		}

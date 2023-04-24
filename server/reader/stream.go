@@ -3,8 +3,10 @@ package reader
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/samber/lo"
 	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/server/reader/common"
 	"github.com/versolabs/verso/server/reader/serialize"
@@ -142,8 +144,7 @@ type StreamItemsContentsRequestParams struct {
 }
 
 func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
-	// ctx := req.Context()
-	// userID := ctx.Value(ContextUserIDKey{}).(int64)
+	ctx := req.Context()
 	params := StreamItemsContentsRequestParams{}
 	err := c.Container.BodyParams(&params, req)
 
@@ -154,32 +155,40 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		return
 	}
 
-	// switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
-	// case common.StreamIDReadingList:
-	// 	fallthrough
-	// case common.StreamIDStarred:
-	// 	items, err := c.Container.Queries.GetQueueItemsByUserID(
-	// 		ctx,
-	// 		query.GetQueueItemsByUserIDParams{
-	// 			UserID: userID,
-	// 			Limit:  DEFAULT_ITEMS_PER_PAGE,
-	// 		},
-	// 	)
+	readerIDs := lo.Map(params.Items, func(itemID string, _ int) int64 {
+		return common.ReaderIDFromInput(itemID)
+	})
 
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
+	items, err := c.Container.Queries.GetQueueItemsByReaderIDs(ctx, readerIDs)
+	if err != nil {
+		panic(err) // TODO
+	}
+	serialized := serialize.FeedItemsFromRows(items)
 
-	// 	itemRefs := serialize.FeedItemRefsFromRows(items)
+	var response serialize.StreamContentsResponse
+	if len(items) == 0 {
+		response = serialize.StreamContentsResponse{
+			ID:           "",
+			Title:        "asdf",
+			Continuation: "TOOD",
+			Self: serialize.Self{
+				Href: "http://localhost:8080/reader/api/0/stream/items/contents",
+			},
+			Updated: time.Now().Unix(),
+			Items:   serialized,
+		}
+	} else {
+		response = serialize.StreamContentsResponse{
+			ID:           fmt.Sprintf("%d", items[0].ID),
+			Title:        "asdf",
+			Continuation: "TOOD",
+			Self: serialize.Self{
+				Href: "http://localhost:8080/reader/api/0/stream/items/contents",
+			},
+			Updated: time.Now().Unix(),
+			Items:   serialized,
+		}
+	}
 
-	// 	c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{ItemRefs: itemRefs})
-	// case common.StreamIDBroadcastFriends:
-	// 	// Not implemented.
-	// 	c.Container.Render.Text(w, http.StatusNotFound, "")
-	// case common.StreamIDFormatFeed:
-	// 	// TODO
-	// 	c.Container.Render.Text(w, http.StatusBadRequest, "not yet implemented")
-	// default:
-	// 	c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
-	// }
+	c.Container.Render.JSON(w, http.StatusOK, response)
 }

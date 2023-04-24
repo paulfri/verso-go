@@ -24,6 +24,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r := chi.NewRouter()
 		r.Use(middleware.RequestID)
 		r.Use(middleware.RealIP)
+		r.Use(middleware.Recoverer)
 		r.Use(LoggerMiddleware(logger))
 		r.Use(middleware.Timeout(60 * time.Second))
 

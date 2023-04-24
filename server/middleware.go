@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"runtime/debug"
 	"time"
 
 	"github.com/go-chi/chi/middleware"
@@ -77,16 +76,6 @@ func LoggerMiddleware(logger *zerolog.Logger) func(next http.Handler) http.Handl
 
 			defer func() {
 				t2 := time.Now()
-
-				if rec := recover(); rec != nil {
-					log.Error().
-						Str("type", "error").
-						Timestamp().
-						Interface("recover_info", rec).
-						Bytes("debug_stack", debug.Stack()).
-						Msg("log system error")
-					http.Error(ww, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				}
 
 				// TODO: this isn't working
 				id := middleware.GetReqID(r.Context())

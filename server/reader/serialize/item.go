@@ -14,23 +14,33 @@ type FeedItemContent struct {
 	Content   string `json:"content"`
 }
 
+type Origin struct {
+	StreamID string `json:"streamId"`
+}
 type FeedItem struct {
-	// TODO:
-	//   categories
-	//   alternate
-	Origin        EmptyObject     `json:"origin"`
+	Origin        Origin          `json:"origin"`
 	Updated       int64           `json:"updated"`
 	ID            string          `json:"id"`
 	Author        null.String     `json:"author"`
 	Content       FeedItemContent `json:"content"`
-	TimestampUsec int64           `json:"timestampUsec"`
-	CrawlTimeMsec int64           `json:"crawlTimeMsec"`
+	Summary       FeedItemContent `json:"summary"`
+	TimestampUsec string          `json:"timestampUsec"`
+	CrawlTimeMsec string          `json:"crawlTimeMsec"`
 	Published     int64           `json:"published"`
 	Title         string          `json:"title"`
+
+	// TODO:
+	Categories  []Category `json:"categories"`
+	Alternate   []Category `json:"alternate"`
+	Comments    []Category `json:"comments"`
+	Annotations []Category `json:"annotations"`
+	LikingUsers []Category `json:"likingUsers"`
+	Enclosure   []Category `json:"enclosure"`
+	MediaGroup  Category   `json:"mediaGroup"`
 }
 
-func FeedItemsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItem {
-	return lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) FeedItem {
+func FeedItemsFromRows(items []query.RSSItem) []FeedItem {
+	return lop.Map(items, func(item query.RSSItem, _ int) FeedItem {
 		published := item.CreatedAt.Unix()
 		if item.PublishedAt.Valid {
 			published = item.PublishedAt.Time.Unix()
@@ -42,28 +52,37 @@ func FeedItemsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItem {
 		}
 
 		return FeedItem{
-			Origin: EmptyObject{},
+			Origin: Origin{
+				// StreamID: fmt.Sprintf("feed/%d", item.FeedID), // TODO url
+				StreamID: "feed/https://www.sounderatheart.com/rss/current.xml",
+			},
 			ID:     common.LongItemID(item.ReaderID),
 			Author: null.String{item.Author},
 			Content: FeedItemContent{
 				Direction: "ltr",
 				Content:   item.Content,
 			},
-			TimestampUsec: published * 10_000,
-			CrawlTimeMsec: item.CreatedAt.Unix() * 1000,
+			Summary: FeedItemContent{
+				Direction: "ltr",
+				Content:   item.Content,
+			},
+			TimestampUsec: fmt.Sprintf("%d", published*10_000),
+			CrawlTimeMsec: fmt.Sprintf("%d", item.CreatedAt.Unix()*1000),
 			Published:     published,
 			Updated:       updated,
 			Title:         item.Title,
+
+			// TODO
+			Categories:  []Category{},
+			Alternate:   []Category{},
+			Comments:    []Category{},
+			Annotations: []Category{},
+			LikingUsers: []Category{},
+			Enclosure:   []Category{},
+			MediaGroup:  Category{},
 		}
 	})
 }
-
-// * `id`: [ItemId] for the item (signed base 10 version).
-//   * `timestampUsec`: time in microseconds since the epoch that the item appeared in the direct stream that it was in.
-//   * ``directStreamIds`: array of [StreamId]s representing the direct streams that this item came from.
-// lo.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) int64 {
-// 	return item.ID
-// })
 
 type FeedItemRef struct {
 	ID              string   `json:"id"`
@@ -71,17 +90,17 @@ type FeedItemRef struct {
 	DirectStreamIds []string `json:"directStreamIds"`
 }
 
-func FeedItemRefsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItemRef {
-	return lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) FeedItemRef {
+func FeedItemRefsFromRows(items []query.RSSItem) []FeedItemRef {
+	return lop.Map(items, func(item query.RSSItem, _ int) FeedItemRef {
 		published := item.CreatedAt.Unix()
 		if item.PublishedAt.Valid {
 			published = item.PublishedAt.Time.Unix()
 		}
 
 		return FeedItemRef{
-			ID:              fmt.Sprintf("%d", item.ReaderID),
+			ID:              fmt.Sprintf("%d", item.ID),
 			TimestampUsec:   published * 10_000,
-			DirectStreamIds: []string{"user/0/state/com.google/reading-list"}, // TODO: wtf is this?
+			DirectStreamIds: []string{}, // TODO
 		}
 	})
 }

@@ -1,18 +1,5 @@
 -- name: GetQueueItemsByUserID :many
-select
-    qi.id,
-    qi.created_at,
-    qi.unread,
-    ri.reader_id,
-    ri.feed_id,
-    ri.title,
-    ri.rss_guid,
-    ri.link,
-    ri.author,
-    ri.content,
-    ri.summary,
-    ri.published_at,
-    ri.remote_updated_at
+select ri.*
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   where qi.user_id = $1 
@@ -24,6 +11,13 @@ insert into queue.items (user_id, rss_item_id)
   values ($1, $2)
   on conflict do nothing
   returning *;
+
+-- name: GetQueueItemsByReaderIDs :many
+select ri.*
+  from rss.items ri
+  join queue.items qi on qi.rss_item_id = ri.id
+  where ri.id = any($1::bigint[])
+  order by ri.published_at desc;
 
 -- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi

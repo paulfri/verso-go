@@ -6,9 +6,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/util"
-
-	sqldblogger "github.com/simukti/sqldb-logger"
-	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 )
 
 func Init(url string) (*sql.DB, *query.Queries) {
@@ -23,8 +20,8 @@ func Init(url string) (*sql.DB, *query.Queries) {
 		logger.Fatal().Err(err)
 	}
 
-	loggerAdapter := zerologadapter.New(*logger)
-	db = sqldblogger.OpenDriver(url, db.Driver(), loggerAdapter)
+	// loggerAdapter := zerologadapter.New(*logger)
+	// db = sqldblogger.OpenDriver(url, db.Driver(), loggerAdapter)
 
 	err = db.Ping()
 	if err != nil {

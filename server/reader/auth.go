@@ -52,11 +52,7 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 			query.CreateReaderTokenParams{UserID: user.ID, Identifier: rando},
 		)
 
-		c.Container.Render.JSON(w, http.StatusOK, AuthTokenResponse{
-			SID:  rando,
-			LSID: rando,
-			Auth: rando,
-		})
+		c.Container.Render.Text(w, http.StatusOK, "SID="+rando+"\nLSID="+rando+"\nAuth="+rando+"\n")
 	} else {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",

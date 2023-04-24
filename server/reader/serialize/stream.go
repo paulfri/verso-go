@@ -8,8 +8,6 @@ import (
 )
 
 type StreamContentsResponse struct {
-	Direction    string     `json:"direction"`
-	Author       string     `json:"author"`
 	Title        string     `json:"title"`
 	Updated      int64      `json:"updated"`
 	Continuation string     `json:"continuation"`
@@ -18,16 +16,14 @@ type StreamContentsResponse struct {
 	Items        []FeedItem `json:"items"`
 }
 
-func ReadingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow, baseURL string) StreamContentsResponse {
+func ReadingList(user query.IdentityUser, items []query.RSSItem, baseURL string) StreamContentsResponse {
 	serialized := FeedItemsFromRows(items)
 
-	updated := lo.MaxBy(items, func(item query.GetQueueItemsByUserIDRow, max query.GetQueueItemsByUserIDRow) bool {
+	updated := lo.MaxBy(items, func(item query.RSSItem, max query.RSSItem) bool {
 		return item.PublishedAt.Time.Unix() > max.PublishedAt.Time.Unix()
 	})
 
 	return StreamContentsResponse{
-		Direction:    "rtl",
-		Author:       user.Name,
 		Title:        fmt.Sprintf("%s's feed", user.Name),
 		Updated:      updated.PublishedAt.Time.Unix(),
 		Continuation: "page2", // TODO: paginate
