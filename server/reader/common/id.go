@@ -27,7 +27,7 @@ const (
 )
 
 func StreamIDType(streamID string) string {
-	switch streamID {
+	switch norm := strings.ReplaceAll(streamID, " ", ""); norm {
 	case StreamIDReadingList:
 		return StreamIDReadingList
 	case StreamIDBroadcastFriends:

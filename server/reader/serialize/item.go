@@ -54,7 +54,7 @@ func FeedItemsFromRows(items []query.RSSItem) []FeedItem {
 		return FeedItem{
 			Origin: Origin{
 				// StreamID: fmt.Sprintf("feed/%d", item.FeedID), // TODO url
-				StreamID: "feed/https://www.sounderatheart.com/rss/current.xml",
+				StreamID: "feed/https://www.theverge.com/rss/index.xml",
 			},
 			ID:     common.LongItemID(item.ReaderID),
 			Author: null.String{item.Author},

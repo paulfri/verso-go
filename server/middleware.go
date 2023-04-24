@@ -94,6 +94,7 @@ func LoggerMiddleware(logger *zerolog.Logger) func(next http.Handler) http.Handl
 						"latency_ms": float64(t2.Sub(t1).Nanoseconds()) / 1000000.0,
 						"bytes_in":   r.Header.Get("Content-Length"),
 						"bytes_out":  ww.BytesWritten(),
+						"query":      r.URL.Query(),
 					}).
 					Msg("incoming_request")
 			}()
