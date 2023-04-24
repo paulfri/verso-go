@@ -1,10 +1,7 @@
 package reader
 
 import (
-	"database/sql"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/versolabs/verso/db/query"
@@ -86,66 +83,52 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-type StreamMarkAllAsReadRequestBody struct {
-	StreamID  string `json:"s" validate:"required"`
-	Timestamp int64  `json:"ts"`
+type StreamItemsIDsRequestParams struct {
+	StreamID string `query:"s"`
+	// TODO implement
+	NumItems int `query:"n"`
 }
 
-func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
+type StreamItemsIDsResponse struct {
+	ItemRefs []serialize.FeedItemRef `json:"itemRefs"`
+}
+
+func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
-	body := StreamMarkAllAsReadRequestBody{}
-	err := c.Container.JSONBody(req, &body)
+	params := StreamItemsIDsRequestParams{}
+	err := c.Container.Params(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	c.Container.Logger.Debug().Msg(fmt.Sprintf("%v", body))
 
-	var publishedBefore sql.NullTime
-	if body.Timestamp > 0 {
-		// TODO: Is timestamp in milliseconds, microseconds, nanoseconds?
-		// Assumed milliseconds here.
-		publishedBefore = sql.NullTime{Time: time.Unix(body.Timestamp/1000, 0), Valid: true}
-	} else {
-		publishedBefore = sql.NullTime{Valid: false}
-	}
-
-	switch streamIDType := common.StreamIDType(body.StreamID); streamIDType {
+	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+	case common.StreamIDStarred:
+		items, err := c.Container.Queries.GetQueueItemsByUserID(
 			ctx,
-			query.MarkAllQueueItemsAsReadParams{
-				UserID:          userID,
-				RSSFeedURL:      sql.NullString{},
-				PublishedBefore: publishedBefore,
+			query.GetQueueItemsByUserIDParams{
+				UserID: userID,
+				Limit:  DEFAULT_ITEMS_PER_PAGE,
 			},
 		)
 
 		if err != nil {
-			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
-			return
+			panic(err)
 		}
+
+		itemRefs := serialize.FeedItemRefsFromRows(items)
+
+		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{ItemRefs: itemRefs})
+	case common.StreamIDBroadcastFriends:
+		// Not implemented.
+		c.Container.Render.Text(w, http.StatusNotFound, "")
 	case common.StreamIDFormatFeed:
-		feedURL := common.FeedURLFromReaderStreamID(body.StreamID)
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
-			ctx,
-			query.MarkAllQueueItemsAsReadParams{
-				UserID:          userID,
-				RSSFeedURL:      feedURL,
-				PublishedBefore: publishedBefore,
-			},
-		)
-
-		if err != nil {
-			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+		// TODO
+		c.Container.Render.Text(w, http.StatusBadRequest, "not yet implemented")
 	default:
-		c.Container.Render.Text(w, http.StatusBadRequest, "not supported yet")
-		return
+		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}
-
-	c.Container.Render.Text(w, http.StatusOK, "OK")
 }

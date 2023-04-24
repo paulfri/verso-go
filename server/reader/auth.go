@@ -1,7 +1,6 @@
 package reader
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dchest/uniuri"
@@ -10,9 +9,9 @@ import (
 )
 
 type AuthTokenResponse struct {
-	SID  *string `json:"SID"`
-	LSID *string `json:"LSID"`
-	Auth *string `json:"Auth"`
+	SID  string `json:"SID"`
+	LSID string `json:"LSID"`
+	Auth string `json:"Auth"`
 }
 
 type AuthErrorResponse struct {
@@ -26,11 +25,8 @@ type ClientLoginRequest struct {
 
 func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-
 	body := ClientLoginRequest{}
 	c.Container.BodyParams(&body, req)
-
-	fmt.Printf("%v\n", body)
 
 	if body.Email == "" || body.Password == "" {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
@@ -41,7 +37,6 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 	}
 
 	user, err := c.Container.Queries.GetUserByEmail(ctx, body.Email)
-
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
@@ -58,7 +53,9 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 		)
 
 		c.Container.Render.JSON(w, http.StatusOK, AuthTokenResponse{
-			Auth: &rando,
+			SID:  rando,
+			LSID: rando,
+			Auth: rando,
 		})
 	} else {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{

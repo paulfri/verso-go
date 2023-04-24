@@ -58,3 +58,31 @@ func FeedItemsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItem {
 		}
 	})
 }
+
+// * `id`: [ItemId] for the item (signed base 10 version).
+//   * `timestampUsec`: time in microseconds since the epoch that the item appeared in the direct stream that it was in.
+//   * ``directStreamIds`: array of [StreamId]s representing the direct streams that this item came from.
+// lo.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) int64 {
+// 	return item.ID
+// })
+
+type FeedItemRef struct {
+	ID              string   `json:"id"`
+	TimestampUsec   int64    `json:"timestampUsec"`
+	DirectStreamIds []string `json:"directStreamIds"`
+}
+
+func FeedItemRefsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItemRef {
+	return lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) FeedItemRef {
+		published := item.CreatedAt.Unix()
+		if item.PublishedAt.Valid {
+			published = item.PublishedAt.Time.Unix()
+		}
+
+		return FeedItemRef{
+			ID:              fmt.Sprintf("%d", item.ID), // TODO: figure out item IDs. signed base 10?
+			TimestampUsec:   published * 10_000,
+			DirectStreamIds: []string{"user/0/state/com.google/reading-list"}, // TODO: wtf is this?
+		}
+	})
+}

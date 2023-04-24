@@ -8,8 +8,16 @@ import (
 )
 
 const (
+	// Subscription-level
 	StreamIDReadingList      = "user/-/state/com.google/reading-list"
 	StreamIDBroadcastFriends = "user/-/state/com.google/broadcast-friends"
+
+	// Item-level
+	StreamIDStarred    = "user/-/state/com.google/starred"
+	StreamIDRead       = "user/-/state/com.google/read"
+	StreamIDKeptUnread = "user/-/state/com.google/kept-unread"
+	StreamIDBroadcast  = "user/-/state/com.google/broadcast"
+	StreamIDLiked      = "user/-/state/com.google/like"
 )
 
 const (
@@ -23,6 +31,8 @@ func StreamIDType(streamID string) string {
 		return StreamIDReadingList
 	case StreamIDBroadcastFriends:
 		return StreamIDBroadcastFriends
+	case StreamIDStarred:
+		return StreamIDStarred
 	default:
 		if FeedURLFromReaderStreamID(streamID) != "" {
 			return StreamIDFormatFeed
