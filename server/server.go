@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/ironstar-io/chizerolog"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/verso/core/command"
@@ -25,13 +24,12 @@ func Serve(config *util.Config) cli.ActionFunc {
 		r := chi.NewRouter()
 		r.Use(middleware.RequestID)
 		r.Use(middleware.RealIP)
-		r.Use(chizerolog.LoggerMiddleware(logger))
-		r.Use(middleware.Recoverer)
+		r.Use(LoggerMiddleware(logger))
 		r.Use(middleware.Timeout(60 * time.Second))
 
 		if config.Debug {
-			r.Use(DebugRequestBodyMiddleware(logger))
-			r.Use(DebugResponseBodyMiddleware(logger))
+			r.Use(DebugResponseBody(logger))
+			r.Use(DebugRequestBody(logger))
 		}
 
 		asynq := worker.Client(config.RedisURL)

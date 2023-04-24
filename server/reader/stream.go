@@ -106,6 +106,7 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 
 	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
+		fallthrough
 	case common.StreamIDStarred:
 		items, err := c.Container.Queries.GetQueueItemsByUserID(
 			ctx,
