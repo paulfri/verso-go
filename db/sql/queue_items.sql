@@ -3,6 +3,7 @@ select
     qi.id,
     qi.created_at,
     qi.unread,
+    ri.reader_id,
     ri.feed_id,
     ri.title,
     ri.rss_guid,

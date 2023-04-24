@@ -88,3 +88,15 @@ func UserLabelFromReaderStreamID(label string) string {
 func ReaderStreamIDFromUserLabel(label string) string {
 	return fmt.Sprintf(StreamIDFormatLabel, label)
 }
+
+// https://github.com/mihaip/google-reader-api/blob/master/wiki/ItemId.wiki?plain=1
+
+// Returns the long-form item ID for the given UUID. This is a zero-padded,
+// 16-length unsigned hex string with a static prefix.
+func LongItemID(readerID int64) string {
+	u := uint64(readerID)
+	hex := fmt.Sprintf("%x", u)
+	padded := fmt.Sprintf("%016s", hex)
+
+	return fmt.Sprintf("tag:google.com,2005:reader/item/%s", padded)
+}

@@ -43,6 +43,7 @@ select
     qi.id,
     qi.created_at,
     qi.unread,
+    ri.reader_id,
     ri.feed_id,
     ri.title,
     ri.rss_guid,
@@ -68,6 +69,7 @@ type GetQueueItemsByUserIDRow struct {
 	ID              int64          `json:"id"`
 	CreatedAt       time.Time      `json:"created_at"`
 	Unread          bool           `json:"unread"`
+	ReaderID        int64          `json:"reader_id"`
 	FeedID          int64          `json:"feed_id"`
 	Title           string         `json:"title"`
 	RSSGuid         string         `json:"rss_guid"`
@@ -92,6 +94,7 @@ func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsBy
 			&i.ID,
 			&i.CreatedAt,
 			&i.Unread,
+			&i.ReaderID,
 			&i.FeedID,
 			&i.Title,
 			&i.RSSGuid,
@@ -119,7 +122,7 @@ const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
   set unread = false
   where exists (
-    select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at 
+    select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at 
     from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
     where

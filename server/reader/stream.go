@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -132,4 +133,53 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}
+}
+
+type StreamItemsContentsRequestParams struct {
+	Items []string `query:"i"`
+	// || `output` || Output format. `json`, `atom` RFC 4287, `atom-hifi`
+	// || `sharers` // || `likes` // || `comments` // || `trans` // || `mediaRss`
+}
+
+func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
+	// ctx := req.Context()
+	// userID := ctx.Value(ContextUserIDKey{}).(int64)
+	params := StreamItemsContentsRequestParams{}
+	err := c.Container.BodyParams(&params, req)
+
+	fmt.Printf("%+v\n", params)
+
+	if err != nil {
+		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
+	// case common.StreamIDReadingList:
+	// 	fallthrough
+	// case common.StreamIDStarred:
+	// 	items, err := c.Container.Queries.GetQueueItemsByUserID(
+	// 		ctx,
+	// 		query.GetQueueItemsByUserIDParams{
+	// 			UserID: userID,
+	// 			Limit:  DEFAULT_ITEMS_PER_PAGE,
+	// 		},
+	// 	)
+
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+
+	// 	itemRefs := serialize.FeedItemRefsFromRows(items)
+
+	// 	c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{ItemRefs: itemRefs})
+	// case common.StreamIDBroadcastFriends:
+	// 	// Not implemented.
+	// 	c.Container.Render.Text(w, http.StatusNotFound, "")
+	// case common.StreamIDFormatFeed:
+	// 	// TODO
+	// 	c.Container.Render.Text(w, http.StatusBadRequest, "not yet implemented")
+	// default:
+	// 	c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
+	// }
 }

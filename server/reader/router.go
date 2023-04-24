@@ -47,6 +47,7 @@ func Router(container *util.Container) http.Handler {
 		// stream
 		auth.Get("/stream/contents/*", reader.StreamContents)
 		auth.Get("/stream/items/ids", reader.StreamItemsIDs)
+		auth.Post("/stream/items/contents", reader.StreamItemsContents)
 
 		// read state
 		auth.Post("/mark-all-as-read", reader.StreamMarkAllAsRead)

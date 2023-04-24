@@ -5,6 +5,7 @@ import (
 
 	lop "github.com/samber/lo/parallel"
 	"github.com/versolabs/verso/db/query"
+	"github.com/versolabs/verso/server/reader/common"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -42,9 +43,7 @@ func FeedItemsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItem {
 
 		return FeedItem{
 			Origin: EmptyObject{},
-			// TODO: Determine compatibility with Reader
-			// https://raw.githubusercontent.com/mihaip/google-reader-api/master/wiki/ItemId.wiki
-			ID:     fmt.Sprintf("tag:google.com,2005:reader/item/%016d", item.ID),
+			ID:     common.LongItemID(item.ReaderID),
 			Author: null.String{item.Author},
 			Content: FeedItemContent{
 				Direction: "ltr",
@@ -80,7 +79,7 @@ func FeedItemRefsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItemRef 
 		}
 
 		return FeedItemRef{
-			ID:              fmt.Sprintf("%d", item.ID), // TODO: figure out item IDs. signed base 10?
+			ID:              fmt.Sprintf("%d", item.ReaderID),
 			TimestampUsec:   published * 10_000,
 			DirectStreamIds: []string{"user/0/state/com.google/reading-list"}, // TODO: wtf is this?
 		}

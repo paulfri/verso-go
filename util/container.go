@@ -3,9 +3,9 @@ package util
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hetiansu5/urlquery"
@@ -70,10 +70,15 @@ func (c Container) JSONBody(req *http.Request, s interface{}) error {
 // given request into that struct.
 func (c Container) BodyParams(s interface{}, req *http.Request) error {
 	body, _ := ioutil.ReadAll(req.Body)
-	asByte := []byte(body)
 
-	fmt.Printf("%v\n", body)
+	// urlquery library doesn't support repeated params (e.g. ?a=1&a=2) instead
+	// of array params (e.g. ?a[]=1&a[]=2) so we have to do this manually.
+	// Naive implementation for just the "i" key (items).
+	withReplace := strings.ReplaceAll(string(body), "i=", "i[]=")
+	c.Logger.Warn().Msg("Modified body params to support repeated params. This is potentially dangerous.")
+	c.Logger.Warn().Msg("Modified request body:\n" + withReplace)
 
+	asByte := []byte(withReplace)
 	err := urlquery.Unmarshal(asByte, s)
 	if err != nil {
 		return err
