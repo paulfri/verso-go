@@ -16,10 +16,10 @@ type StreamContentsResponse struct {
 	Items        []FeedItem `json:"items"`
 }
 
-func ReadingList(user query.IdentityUser, items []query.RSSItem, baseURL string) StreamContentsResponse {
-	serialized := FeedItemsFromRows(items)
+func ReadingList(user query.IdentityUser, items []query.GetQueueItemsByUserIDRow, baseURL string) StreamContentsResponse {
+	serialized := FeedItemsFromUserIDRow(items)
 
-	updated := lo.MaxBy(items, func(item query.RSSItem, max query.RSSItem) bool {
+	updated := lo.MaxBy(items, func(item query.GetQueueItemsByUserIDRow, max query.GetQueueItemsByUserIDRow) bool {
 		return item.PublishedAt.Time.Unix() > max.PublishedAt.Time.Unix()
 	})
 

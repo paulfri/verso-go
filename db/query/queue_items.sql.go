@@ -8,7 +8,9 @@ package query
 import (
 	"context"
 	"database/sql"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -41,22 +43,42 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 }
 
 const getQueueItemsByReaderIDs = `-- name: GetQueueItemsByReaderIDs :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
   where ri.id = any($1::bigint[])
   order by ri.published_at desc
 `
 
-func (q *Queries) GetQueueItemsByReaderIDs(ctx context.Context, dollar_1 []int64) ([]RSSItem, error) {
+type GetQueueItemsByReaderIDsRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+}
+
+func (q *Queries) GetQueueItemsByReaderIDs(ctx context.Context, dollar_1 []int64) ([]GetQueueItemsByReaderIDsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getQueueItemsByReaderIDs, pq.Array(dollar_1))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RSSItem
+	var items []GetQueueItemsByReaderIDsRow
 	for rows.Next() {
-		var i RSSItem
+		var i GetQueueItemsByReaderIDsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -73,6 +95,7 @@ func (q *Queries) GetQueueItemsByReaderIDs(ctx context.Context, dollar_1 []int64
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
+			&i.RSSFeedURL,
 		); err != nil {
 			return nil, err
 		}
@@ -88,9 +111,10 @@ func (q *Queries) GetQueueItemsByReaderIDs(ctx context.Context, dollar_1 []int64
 }
 
 const getQueueItemsByUserID = `-- name: GetQueueItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
   where qi.user_id = $1 
   order by ri.published_at desc
   limit $2
@@ -101,15 +125,34 @@ type GetQueueItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsByUserIDParams) ([]RSSItem, error) {
+type GetQueueItemsByUserIDRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+}
+
+func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsByUserIDParams) ([]GetQueueItemsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getQueueItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RSSItem
+	var items []GetQueueItemsByUserIDRow
 	for rows.Next() {
-		var i RSSItem
+		var i GetQueueItemsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -126,6 +169,7 @@ func (q *Queries) GetQueueItemsByUserID(ctx context.Context, arg GetQueueItemsBy
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
+			&i.RSSFeedURL,
 		); err != nil {
 			return nil, err
 		}

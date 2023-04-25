@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -24,6 +25,10 @@ const (
 const (
 	StreamIDFormatFeed  = "feed/%s"
 	StreamIDFormatLabel = "user/-/label/%s"
+)
+
+const (
+	LongItemIDPrefix = "tag:google.com,2005:reader/item/"
 )
 
 func StreamIDType(streamID string) string {
@@ -97,16 +102,24 @@ func ReaderStreamIDFromUserLabel(label string) string {
 func LongItemID(readerID int64) string {
 	hex := readerIDToHex(readerID)
 
-	return fmt.Sprintf("tag:google.com,2005:reader/item/%s", hex)
+	return fmt.Sprintf(LongItemIDPrefix+"%s", hex)
 }
 
 func ReaderIDFromInput(input string) int64 {
-	if strings.HasPrefix(input, "tag:google.com,2005:reader/item/") {
-		fmt.Println(input[32:])
+	// If the input leads with the long-form prefix, parse the identifier as hex.
+	if strings.HasPrefix(input, LongItemIDPrefix) {
 		return readerIDFromHex(input[32:])
 	}
 
-	i, err := strconv.Atoi(input)
+	// Some clients zero-pad the ID, so trim the leading zeros.
+	unpad := strings.TrimLeft(input, "0")
+
+	// Some clients send short-form IDs as hex, so check for that.
+	if hasAlpha(unpad) {
+		return readerIDFromHex(unpad)
+	}
+
+	i, err := strconv.Atoi(unpad)
 
 	if err != nil {
 		panic(err)
@@ -124,4 +137,8 @@ func readerIDFromHex(hex string) int64 {
 
 func readerIDToHex(readerID int64) string {
 	return strconv.FormatInt(readerID, 16)
+}
+
+func hasAlpha(str string) bool {
+	return regexp.MustCompile(`\D`).MatchString(str)
 }

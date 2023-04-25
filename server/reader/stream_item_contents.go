@@ -12,8 +12,12 @@ import (
 
 type StreamItemsContentsRequestParams struct {
 	Items []string `query:"i"`
-	// || `output` || Output format. `json`, `atom` RFC 4287, `atom-hifi`
-	// || `sharers` // || `likes` // || `comments` // || `trans` // || `mediaRss`
+	// Output string `json:"output"` // json, atom, atom-hifi
+	// Sharers `json:"sharers"`
+	// Likes `json:"likes"`
+	// Comments `json:"comments"`
+	// Trans `json:"trans"`
+	// MediaRSS `json:"mediaRss"`
 }
 
 func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
@@ -36,7 +40,8 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 	if err != nil {
 		panic(err) // TODO
 	}
-	serialized := serialize.FeedItemsFromRows(items)
+
+	serialized := serialize.FeedItemsFromReaderIDsRows(items)
 
 	var id string
 	if len(items) > 0 {
@@ -50,7 +55,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		Title:        "asdf",
 		Continuation: "TOOD",
 		Self: serialize.Self{
-			Href: "http://localhost:8080/reader/api/0/stream/items/contents",
+			Href: "http://localhost:8080/reader/api/0/stream/items/contents", // TODO
 		},
 		Updated: time.Now().Unix(),
 		Items:   serialized,

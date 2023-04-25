@@ -1,7 +1,8 @@
 -- name: GetQueueItemsByUserID :many
-select ri.*
+select ri.*, rf.url as rss_feed_url
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
   where qi.user_id = $1 
   order by ri.published_at desc
   limit $2;
@@ -13,9 +14,10 @@ insert into queue.items (user_id, rss_item_id)
   returning *;
 
 -- name: GetQueueItemsByReaderIDs :many
-select ri.*
+select ri.*, rf.url as rss_feed_url
   from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
   where ri.id = any($1::bigint[])
   order by ri.published_at desc;
 

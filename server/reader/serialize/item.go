@@ -9,6 +9,27 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
+type FeedItemRef struct {
+	ID              string   `json:"id"`
+	TimestampUsec   int64    `json:"timestampUsec"`
+	DirectStreamIds []string `json:"directStreamIds"`
+}
+
+func FeedItemRefsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItemRef {
+	return lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) FeedItemRef {
+		published := item.CreatedAt.Unix()
+		if item.PublishedAt.Valid {
+			published = item.PublishedAt.Time.Unix()
+		}
+
+		return FeedItemRef{
+			ID:              fmt.Sprintf("%d", item.ID),
+			TimestampUsec:   published * 10_000,
+			DirectStreamIds: []string{}, // TODO
+		}
+	})
+}
+
 type FeedItemContent struct {
 	Direction string `json:"direction"`
 	Content   string `json:"content"`
@@ -17,6 +38,7 @@ type FeedItemContent struct {
 type Origin struct {
 	StreamID string `json:"streamId"`
 }
+
 type FeedItem struct {
 	Origin        Origin          `json:"origin"`
 	Updated       int64           `json:"updated"`
@@ -39,38 +61,55 @@ type FeedItem struct {
 	MediaGroup  Category   `json:"mediaGroup"`
 }
 
-func FeedItemsFromRows(items []query.RSSItem) []FeedItem {
-	return lop.Map(items, func(item query.RSSItem, _ int) FeedItem {
-		published := item.CreatedAt.Unix()
-		if item.PublishedAt.Valid {
-			published = item.PublishedAt.Time.Unix()
+func FeedItemsFromReaderIDsRows(rows []query.GetQueueItemsByReaderIDsRow) []FeedItem {
+	serializable := lop.Map(rows, func(row query.GetQueueItemsByReaderIDsRow, _ int) SerializableItem {
+		return QueueItemByReaderIDsRowToSerializableItem(row)
+	})
+
+	return FeedItemsFromSerializable(serializable)
+}
+
+func FeedItemsFromUserIDRow(rows []query.GetQueueItemsByUserIDRow) []FeedItem {
+	serializable := lop.Map(rows, func(row query.GetQueueItemsByUserIDRow, _ int) SerializableItem {
+		return QueueItemByUserIDRowToSerializableItem(row)
+	})
+
+	return FeedItemsFromSerializable(serializable)
+}
+
+func FeedItemsFromSerializable(items []SerializableItem) []FeedItem {
+	return lop.Map(items, func(item SerializableItem, _ int) FeedItem {
+		i := item.FeedItem
+
+		published := i.CreatedAt.Unix()
+		if i.PublishedAt.Valid {
+			published = i.PublishedAt.Time.Unix()
 		}
 
-		updated := item.CreatedAt.Unix()
-		if item.RemoteUpdatedAt.Valid {
-			updated = item.RemoteUpdatedAt.Time.Unix()
+		updated := i.CreatedAt.Unix()
+		if i.RemoteUpdatedAt.Valid {
+			updated = i.RemoteUpdatedAt.Time.Unix()
 		}
 
 		return FeedItem{
 			Origin: Origin{
-				// StreamID: fmt.Sprintf("feed/%d", item.FeedID), // TODO url
-				StreamID: "feed/https://www.theverge.com/rss/index.xml",
+				StreamID: common.ReaderStreamIDFromFeedURL(item.RSSFeedURL),
 			},
-			ID:     common.LongItemID(item.ReaderID),
-			Author: null.String{item.Author},
+			ID:     common.LongItemID(i.ReaderID),
+			Author: null.String{i.Author},
 			Content: FeedItemContent{
 				Direction: "ltr",
-				Content:   item.Content,
+				Content:   i.Content,
 			},
 			Summary: FeedItemContent{
 				Direction: "ltr",
-				Content:   item.Content,
+				Content:   i.Content,
 			},
 			TimestampUsec: fmt.Sprintf("%d", published*10_000),
-			CrawlTimeMsec: fmt.Sprintf("%d", item.CreatedAt.Unix()*1000),
+			CrawlTimeMsec: fmt.Sprintf("%d", i.CreatedAt.Unix()*1000),
 			Published:     published,
 			Updated:       updated,
-			Title:         item.Title,
+			Title:         i.Title,
 
 			// TODO
 			Categories:  []Category{},
@@ -80,27 +119,6 @@ func FeedItemsFromRows(items []query.RSSItem) []FeedItem {
 			LikingUsers: []Category{},
 			Enclosure:   []Category{},
 			MediaGroup:  Category{},
-		}
-	})
-}
-
-type FeedItemRef struct {
-	ID              string   `json:"id"`
-	TimestampUsec   int64    `json:"timestampUsec"`
-	DirectStreamIds []string `json:"directStreamIds"`
-}
-
-func FeedItemRefsFromRows(items []query.RSSItem) []FeedItemRef {
-	return lop.Map(items, func(item query.RSSItem, _ int) FeedItemRef {
-		published := item.CreatedAt.Unix()
-		if item.PublishedAt.Valid {
-			published = item.PublishedAt.Time.Unix()
-		}
-
-		return FeedItemRef{
-			ID:              fmt.Sprintf("%d", item.ID),
-			TimestampUsec:   published * 10_000,
-			DirectStreamIds: []string{}, // TODO
 		}
 	})
 }

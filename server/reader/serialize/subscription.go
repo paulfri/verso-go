@@ -19,18 +19,6 @@ type Subscription struct {
 	IconURL       string     `json:"iconUrl"`
 }
 
-// id: "feed/http://www.theanimationblog.com/feed/",
-// title: "The Animation Blog.com | Est. 2007",
-// categories: [{
-// 		id: "user/1005921515/label/Animation",
-// 		label: "Animation"
-// }],
-// sortid: "00DA6134",
-// firstitemmsec: 1424501776942006,
-// url: "http://www.theanimationblog.com/feed/",
-// htmlUrl: "http://www.theanimationblog.com/",
-// iconUrl: ""
-
 func SubscriptionsFromRows(rows []query.GetSubscriptionsByUserIDRow) []Subscription {
 	return lop.Map(rows, func(row query.GetSubscriptionsByUserIDRow, _ int) Subscription {
 		return Subscription{
@@ -40,7 +28,7 @@ func SubscriptionsFromRows(rows []query.GetSubscriptionsByUserIDRow) []Subscript
 			FirstItemMsec: "123123123", // TODO
 			HTMLURL:       row.URL,
 			SortID:        fmt.Sprintf("B%07d", row.ID),
-			URL:           "",
+			URL:           row.URL,
 			IconURL:       "",
 		}
 	})
