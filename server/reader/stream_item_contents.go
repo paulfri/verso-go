@@ -50,7 +50,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 	c.Container.Render.JSON(w, http.StatusOK, serialize.StreamContentsResponse{
 		ID:           id,
 		Title:        "asdf",
-		Continuation: "TOOD",
+		Continuation: "TODO",
 		Self: serialize.Self{
 			Href: "http://localhost:8080/reader/api/0/stream/items/contents", // TODO
 		},

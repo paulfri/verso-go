@@ -18,6 +18,15 @@ where qi.user_id = $1
 order by ri.published_at desc
 limit $2;
 
+-- name: GetUnreadItemsByUserID :many
+select ri.* from rss.items ri
+  join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
+where qi.user_id = $1 
+  and qi.unread = true
+order by ri.published_at desc
+limit $2;
+
 -- name: GetStarredItemsByUserID :many
 select ri.* from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id

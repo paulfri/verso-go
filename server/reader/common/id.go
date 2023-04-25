@@ -111,15 +111,14 @@ func ReaderIDFromInput(input string) int64 {
 		return readerIDFromHex(input[32:])
 	}
 
-	// Some clients zero-pad the ID, so trim the leading zeros.
-	unpad := strings.TrimLeft(input, "0")
+	// If an ID is length 16, it's a zero-padded hex string.
+	if len(input) == 16 {
+		unpad := strings.TrimLeft(input, "0")
 
-	// Some clients send short-form IDs as hex, so check for that.
-	if hasAlpha(unpad) {
 		return readerIDFromHex(unpad)
 	}
 
-	i, err := strconv.Atoi(unpad)
+	i, err := strconv.Atoi(input)
 
 	if err != nil {
 		panic(err)

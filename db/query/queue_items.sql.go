@@ -390,6 +390,60 @@ func (q *Queries) GetUnreadCountsByUserID(ctx context.Context, userID int64) ([]
 	return items, nil
 }
 
+const getUnreadItemsByUserID = `-- name: GetUnreadItemsByUserID :many
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+  join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
+where qi.user_id = $1 
+  and qi.unread = true
+order by ri.published_at desc
+limit $2
+`
+
+type GetUnreadItemsByUserIDParams struct {
+	UserID int64 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+}
+
+func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItemsByUserIDParams) ([]RSSItem, error) {
+	rows, err := q.db.QueryContext(ctx, getUnreadItemsByUserID, arg.UserID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RSSItem
+	for rows.Next() {
+		var i RSSItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FeedID,
+			&i.RSSGuid,
+			&i.Title,
+			&i.Link,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.Content,
+			&i.Summary,
+			&i.PublishedAt,
+			&i.RemoteUpdatedAt,
+			&i.ReaderID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
   set unread = false
