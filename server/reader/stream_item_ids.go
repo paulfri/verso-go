@@ -29,12 +29,29 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	// TODO: we only support one stream ID for now.
 	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		items, err := c.Container.Queries.GetQueueItemsByUserID(
+		items, err := c.Container.Queries.GetItemsByUserID(
 			ctx,
-			query.GetQueueItemsByUserIDParams{
+			query.GetItemsByUserIDParams{
+				UserID: userID,
+				Limit:  DEFAULT_ITEMS_PER_PAGE,
+			},
+		)
+
+		if err != nil {
+			panic(err) // TODO
+		}
+
+		itemRefs := serialize.FeedItemRefsFromRows(items)
+
+		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
+			ItemRefs: itemRefs,
+		})
+	case common.StreamIDRead:
+		items, err := c.Container.Queries.GetReadItemsByUserID(
+			ctx,
+			query.GetReadItemsByUserIDParams{
 				UserID: userID,
 				Limit:  DEFAULT_ITEMS_PER_PAGE,
 			},
@@ -50,9 +67,22 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 			ItemRefs: itemRefs,
 		})
 	case common.StreamIDStarred:
-		// TODO: Not implemented.
+		items, err := c.Container.Queries.GetStarredItemsByUserID(
+			ctx,
+			query.GetStarredItemsByUserIDParams{
+				UserID: userID,
+				Limit:  DEFAULT_ITEMS_PER_PAGE,
+			},
+		)
+
+		if err != nil {
+			panic(err) // TODO
+		}
+
+		itemRefs := serialize.FeedItemRefsFromRows(items)
+
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
-			ItemRefs: []serialize.FeedItemRef{},
+			ItemRefs: itemRefs,
 		})
 	case common.StreamIDBroadcastFriends:
 		// TODO: Not implemented.
@@ -60,11 +90,6 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 			ItemRefs: []serialize.FeedItemRef{},
 		})
 	case common.StreamIDFormatFeed:
-		// TODO: Not implemented.
-		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
-			ItemRefs: []serialize.FeedItemRef{},
-		})
-	case common.StreamIDRead:
 		// TODO: Not implemented.
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: []serialize.FeedItemRef{},

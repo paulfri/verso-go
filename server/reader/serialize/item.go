@@ -9,27 +9,6 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-type FeedItemRef struct {
-	ID              string   `json:"id"`
-	TimestampUsec   int64    `json:"timestampUsec"`
-	DirectStreamIds []string `json:"directStreamIds"`
-}
-
-func FeedItemRefsFromRows(items []query.GetQueueItemsByUserIDRow) []FeedItemRef {
-	return lop.Map(items, func(item query.GetQueueItemsByUserIDRow, _ int) FeedItemRef {
-		published := item.CreatedAt.Unix()
-		if item.PublishedAt.Valid {
-			published = item.PublishedAt.Time.Unix()
-		}
-
-		return FeedItemRef{
-			ID:              fmt.Sprintf("%d", item.ID),
-			TimestampUsec:   published * 10_000,
-			DirectStreamIds: []string{}, // TODO
-		}
-	})
-}
-
 type FeedItemContent struct {
 	Direction string `json:"direction"`
 	Content   string `json:"content"`
@@ -61,16 +40,16 @@ type FeedItem struct {
 	MediaGroup  Category   `json:"mediaGroup"`
 }
 
-func FeedItemsFromReaderIDsRows(rows []query.GetQueueItemsByReaderIDsRow) []FeedItem {
-	serializable := lop.Map(rows, func(row query.GetQueueItemsByReaderIDsRow, _ int) SerializableItem {
+func FeedItemsFromReaderIDsRows(rows []query.GetItemsWithURLByReaderIDsRow) []FeedItem {
+	serializable := lop.Map(rows, func(row query.GetItemsWithURLByReaderIDsRow, _ int) SerializableItem {
 		return QueueItemByReaderIDsRowToSerializableItem(row)
 	})
 
 	return FeedItemsFromSerializable(serializable)
 }
 
-func FeedItemsFromUserIDRow(rows []query.GetQueueItemsByUserIDRow) []FeedItem {
-	serializable := lop.Map(rows, func(row query.GetQueueItemsByUserIDRow, _ int) SerializableItem {
+func FeedItemsFromUserIDRow(rows []query.GetItemsWithURLByUserIDRow) []FeedItem {
+	serializable := lop.Map(rows, func(row query.GetItemsWithURLByUserIDRow, _ int) SerializableItem {
 		return QueueItemByUserIDRowToSerializableItem(row)
 	})
 

@@ -1,7 +1,6 @@
 package reader
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,8 +24,6 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 	params := StreamItemsContentsRequestParams{}
 	err := c.Container.BodyParams(&params, req)
 
-	fmt.Printf("%+v\n", params)
-
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
@@ -36,7 +33,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		return common.ReaderIDFromInput(itemID)
 	})
 
-	items, err := c.Container.Queries.GetQueueItemsByReaderIDs(ctx, readerIDs)
+	items, err := c.Container.Queries.GetItemsWithURLByReaderIDs(ctx, readerIDs)
 	if err != nil {
 		panic(err) // TODO
 	}

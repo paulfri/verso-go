@@ -56,9 +56,9 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 
 	switch streamIDType := common.StreamIDType(streamID); streamIDType {
 	case common.StreamIDReadingList:
-		items, err := c.Container.Queries.GetQueueItemsByUserID(
+		items, err := c.Container.Queries.GetItemsWithURLByUserID(
 			ctx,
-			query.GetQueueItemsByUserIDParams{
+			query.GetItemsWithURLByUserIDParams{
 				UserID: userID,
 				Limit:  DEFAULT_ITEMS_PER_PAGE,
 			},

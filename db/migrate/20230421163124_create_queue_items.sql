@@ -19,6 +19,12 @@ create index queue_items_index on queue.items (user_id);
 create unique index queue_items_user_id_rss_item_id_key
   on queue.items(user_id, rss_item_id);
 
+create index queue_items_user_id_unread
+  on queue.items (user_id, unread);
+
+create index queue_items_user_id_starred
+  on queue.items (user_id, starred);
+
 create index queue_items_rss_item_id_index
   on queue.items (created_at desc);
 

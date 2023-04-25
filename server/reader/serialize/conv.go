@@ -30,7 +30,7 @@ type SerializableItem struct {
 	RSSFeedURL string
 }
 
-func QueueItemByReaderIDsRowToSerializableItem(item query.GetQueueItemsByReaderIDsRow) SerializableItem {
+func QueueItemByReaderIDsRowToSerializableItem(item query.GetItemsWithURLByReaderIDsRow) SerializableItem {
 	return SerializableItem{
 		FeedItem: &query.RSSItem{
 			ID:              item.ReaderID,
@@ -53,7 +53,7 @@ func QueueItemByReaderIDsRowToSerializableItem(item query.GetQueueItemsByReaderI
 	}
 }
 
-func QueueItemByUserIDRowToSerializableItem(item query.GetQueueItemsByUserIDRow) SerializableItem {
+func QueueItemByUserIDRowToSerializableItem(item query.GetItemsWithURLByUserIDRow) SerializableItem {
 	return SerializableItem{
 		FeedItem: &query.RSSItem{
 			ID:              item.ReaderID,
