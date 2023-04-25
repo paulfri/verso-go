@@ -42,7 +42,7 @@ type FeedItem struct {
 
 func FeedItemsFromReaderIDsRows(rows []query.GetItemsWithURLByReaderIDsRow) []FeedItem {
 	serializable := lop.Map(rows, func(row query.GetItemsWithURLByReaderIDsRow, _ int) SerializableItem {
-		return QueueItemByReaderIDsRowToSerializableItem(row)
+		return SerializableItemFromQueueItemByReaderIDsRow(row)
 	})
 
 	return FeedItemsFromSerializable(serializable)
@@ -50,7 +50,7 @@ func FeedItemsFromReaderIDsRows(rows []query.GetItemsWithURLByReaderIDsRow) []Fe
 
 func FeedItemsFromUserIDRow(rows []query.GetItemsWithURLByUserIDRow) []FeedItem {
 	serializable := lop.Map(rows, func(row query.GetItemsWithURLByUserIDRow, _ int) SerializableItem {
-		return QueueItemByUserIDRowToSerializableItem(row)
+		return SerializableItemFromQueueItemByUserIDRow(row)
 	})
 
 	return FeedItemsFromSerializable(serializable)
@@ -58,7 +58,7 @@ func FeedItemsFromUserIDRow(rows []query.GetItemsWithURLByUserIDRow) []FeedItem 
 
 func FeedItemsFromSerializable(items []SerializableItem) []FeedItem {
 	return lop.Map(items, func(item SerializableItem, _ int) FeedItem {
-		i := item.FeedItem
+		i := item.RSSItem
 
 		published := i.CreatedAt.Unix()
 		if i.PublishedAt.Valid {

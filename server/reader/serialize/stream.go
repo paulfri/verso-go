@@ -1,10 +1,7 @@
 package serialize
 
 import (
-	"fmt"
-
 	"github.com/samber/lo"
-	"github.com/versolabs/verso/db/query"
 )
 
 type StreamContentsResponse struct {
@@ -16,24 +13,26 @@ type StreamContentsResponse struct {
 	Items        []FeedItem `json:"items"`
 }
 
-func ReadingList(user query.IdentityUser, items []query.GetItemsWithURLByUserIDRow, baseURL string) StreamContentsResponse {
-	serialized := FeedItemsFromUserIDRow(items)
+type ReadingListParams struct {
+	ID           string
+	Title        string
+	Continuation string
+	SelfURL      string
+}
 
-	updated := lo.MaxBy(items, func(item query.GetItemsWithURLByUserIDRow, max query.GetItemsWithURLByUserIDRow) bool {
-		return item.PublishedAt.Time.Unix() > max.PublishedAt.Time.Unix()
+func ReadingList(params ReadingListParams, items []SerializableItem) StreamContentsResponse {
+	serialized := FeedItemsFromSerializable(items)
+
+	mostRecent := lo.MaxBy(serialized, func(item FeedItem, max FeedItem) bool {
+		return item.Published > max.Published
 	})
 
 	return StreamContentsResponse{
-		Title:        fmt.Sprintf("%s's feed", user.Name),
-		Updated:      updated.PublishedAt.Time.Unix(),
+		Title:        params.Title,
+		Updated:      mostRecent.Published,
 		Continuation: "page2", // TODO: paginate
-		ID:           fmt.Sprintf("user/%d/state/com.google/reading-list", user.ID),
+		ID:           params.ID,
 		Items:        serialized,
-		Self: Self{
-			Href: fmt.Sprintf(
-				"%s/reader/api/0/stream/contents/user/-/state/com.google/reading-list?output=json",
-				baseURL,
-			),
-		},
+		Self:         Self{Href: params.SelfURL},
 	}
 }

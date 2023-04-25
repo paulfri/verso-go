@@ -1,7 +1,9 @@
 package reader
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/versolabs/verso/db/query"
@@ -52,7 +54,11 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	streamID := chi.URLParam(req, "*")
+	rawStreamID := chi.URLParam(req, "*")
+	streamID, err := url.QueryUnescape(rawStreamID)
+	if err != nil {
+		panic(err)
+	}
 
 	switch streamIDType := common.StreamIDType(streamID); streamIDType {
 	case common.StreamIDReadingList:
@@ -65,19 +71,63 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 		)
 
 		if err != nil {
-			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
-			return
+			panic(err)
 		}
 
-		response := serialize.ReadingList(user, items, c.Container.Config.BaseURL)
+		serializable := serialize.SerializableItemsFromQueueItemByUserIDRows(items)
+
+		response := serialize.ReadingList(
+			serialize.ReadingListParams{
+				Title: fmt.Sprintf("%s's feed", user.Name),
+				ID:    fmt.Sprintf("user/%d/state/com.google/reading-list", user.ID),
+				SelfURL: fmt.Sprintf(
+					"%s/reader/api/0/stream/contents/user/-/state/com.google/reading-list?output=json", // TODO
+					c.Container.Config.BaseURL,
+				),
+				Continuation: "page2", // TODO: paginate
+			},
+			serializable,
+		)
 
 		c.Container.Render.JSON(w, http.StatusOK, response)
 	case common.StreamIDBroadcastFriends:
 		// Not implemented.
 		c.Container.Render.Text(w, http.StatusNotFound, "")
 	case common.StreamIDFormatFeed:
-		// TODO
-		c.Container.Render.Text(w, http.StatusBadRequest, "not yet implemented")
+		items, err := c.Container.Queries.GetRecentItemsByRSSFeedURL(
+			ctx,
+			query.GetRecentItemsByRSSFeedURLParams{
+				URL:   common.FeedURLFromReaderStreamID(streamID),
+				Limit: DEFAULT_ITEMS_PER_PAGE,
+			},
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
+		feedURL := common.FeedURLFromReaderStreamID(streamID)
+
+		serializable := serialize.SerializableItemsFromRSSItemsAndFeedURL(
+			items,
+			feedURL,
+		)
+
+		response := serialize.ReadingList(
+			serialize.ReadingListParams{
+				Title: streamID, // TODO: name of feed?
+				ID:    streamID,
+				SelfURL: fmt.Sprintf(
+					"%s/reader/api/0/stream/contents/%s?output=json",
+					c.Container.Config.BaseURL,
+					streamID,
+				),
+				Continuation: "page2", // TODO: paginate
+			},
+			serializable,
+		)
+
+		c.Container.Render.JSON(w, http.StatusOK, response)
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not a stream")
 	}

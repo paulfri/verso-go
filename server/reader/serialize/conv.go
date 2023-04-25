@@ -1,6 +1,9 @@
 package serialize
 
-import "github.com/versolabs/verso/db/query"
+import (
+	lop "github.com/samber/lo/parallel"
+	"github.com/versolabs/verso/db/query"
+)
 
 // TODO: Go generics don't support shared fields so we need all this conversion
 // boilerplate. Maybe in 1.22?
@@ -26,13 +29,19 @@ import "github.com/versolabs/verso/db/query"
 //	FeedItemsFromRows[query.GetQueueItemsByUserIDRow](rows)
 
 type SerializableItem struct {
-	FeedItem   *query.RSSItem
+	RSSItem    *query.RSSItem
 	RSSFeedURL string
 }
 
-func QueueItemByReaderIDsRowToSerializableItem(item query.GetItemsWithURLByReaderIDsRow) SerializableItem {
+func SerializableItemsFromQueueItemByReaderIDsRows(rows []query.GetItemsWithURLByReaderIDsRow) []SerializableItem {
+	return lop.Map(rows, func(row query.GetItemsWithURLByReaderIDsRow, _ int) SerializableItem {
+		return SerializableItemFromQueueItemByReaderIDsRow(row)
+	})
+}
+
+func SerializableItemFromQueueItemByReaderIDsRow(item query.GetItemsWithURLByReaderIDsRow) SerializableItem {
 	return SerializableItem{
-		FeedItem: &query.RSSItem{
+		RSSItem: &query.RSSItem{
 			ID:              item.ReaderID,
 			UUID:            item.UUID,
 			CreatedAt:       item.CreatedAt,
@@ -53,9 +62,15 @@ func QueueItemByReaderIDsRowToSerializableItem(item query.GetItemsWithURLByReade
 	}
 }
 
-func QueueItemByUserIDRowToSerializableItem(item query.GetItemsWithURLByUserIDRow) SerializableItem {
+func SerializableItemsFromQueueItemByUserIDRows(rows []query.GetItemsWithURLByUserIDRow) []SerializableItem {
+	return lop.Map(rows, func(row query.GetItemsWithURLByUserIDRow, _ int) SerializableItem {
+		return SerializableItemFromQueueItemByUserIDRow(row)
+	})
+}
+
+func SerializableItemFromQueueItemByUserIDRow(item query.GetItemsWithURLByUserIDRow) SerializableItem {
 	return SerializableItem{
-		FeedItem: &query.RSSItem{
+		RSSItem: &query.RSSItem{
 			ID:              item.ReaderID,
 			UUID:            item.UUID,
 			CreatedAt:       item.CreatedAt,
@@ -73,5 +88,18 @@ func QueueItemByUserIDRowToSerializableItem(item query.GetItemsWithURLByUserIDRo
 			ReaderID:        item.ReaderID,
 		},
 		RSSFeedURL: item.RSSFeedURL,
+	}
+}
+
+func SerializableItemsFromRSSItemsAndFeedURL(items []query.RSSItem, url string) []SerializableItem {
+	return lop.Map(items, func(item query.RSSItem, _ int) SerializableItem {
+		return SerializableItemFromRSSItemAndFeedURL(item, url)
+	})
+}
+
+func SerializableItemFromRSSItemAndFeedURL(item query.RSSItem, url string) SerializableItem {
+	return SerializableItem{
+		RSSItem:    &item,
+		RSSFeedURL: url,
 	}
 }

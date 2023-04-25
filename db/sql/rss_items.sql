@@ -1,8 +1,15 @@
 -- name: GetRecentItemsByRSSFeedID :many
-select * from rss.items
-  where items.feed_id = $1
-  order by items.published_at desc
-  limit $2;
+select ri.* from rss.items ri
+where ri.feed_id = $1
+order by ri.published_at desc
+limit $2;
+
+-- name: GetRecentItemsByRSSFeedURL :many
+select ri.* from rss.items ri
+  join rss.feeds rf on rf.id = ri.feed_id
+where rf.url = $1
+order by ri.published_at desc
+limit $2;
 
 -- name: CreateRSSItem :one
 insert into rss.items as items (

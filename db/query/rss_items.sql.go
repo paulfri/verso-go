@@ -86,10 +86,10 @@ func (q *Queries) CreateRSSItem(ctx context.Context, arg CreateRSSItemParams) (R
 }
 
 const getRecentItemsByRSSFeedID = `-- name: GetRecentItemsByRSSFeedID :many
-select id, uuid, created_at, updated_at, feed_id, rss_guid, title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id from rss.items
-  where items.feed_id = $1
-  order by items.published_at desc
-  limit $2
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+where ri.feed_id = $1
+order by ri.published_at desc
+limit $2
 `
 
 type GetRecentItemsByRSSFeedIDParams struct {
@@ -99,6 +99,58 @@ type GetRecentItemsByRSSFeedIDParams struct {
 
 func (q *Queries) GetRecentItemsByRSSFeedID(ctx context.Context, arg GetRecentItemsByRSSFeedIDParams) ([]RSSItem, error) {
 	rows, err := q.db.QueryContext(ctx, getRecentItemsByRSSFeedID, arg.FeedID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RSSItem
+	for rows.Next() {
+		var i RSSItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FeedID,
+			&i.RSSGuid,
+			&i.Title,
+			&i.Link,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.Content,
+			&i.Summary,
+			&i.PublishedAt,
+			&i.RemoteUpdatedAt,
+			&i.ReaderID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRecentItemsByRSSFeedURL = `-- name: GetRecentItemsByRSSFeedURL :many
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+  join rss.feeds rf on rf.id = ri.feed_id
+where rf.url = $1
+order by ri.published_at desc
+limit $2
+`
+
+type GetRecentItemsByRSSFeedURLParams struct {
+	URL   string `json:"url"`
+	Limit int32  `json:"limit"`
+}
+
+func (q *Queries) GetRecentItemsByRSSFeedURL(ctx context.Context, arg GetRecentItemsByRSSFeedURLParams) ([]RSSItem, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentItemsByRSSFeedURL, arg.URL, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
