@@ -6,7 +6,6 @@ require (
 	github.com/PuerkitoBio/purell v1.2.0
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/dchest/uniuri v1.2.0
-	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/google/uuid v1.3.0
