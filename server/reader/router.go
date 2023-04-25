@@ -55,6 +55,7 @@ func Router(container *util.Container) http.Handler {
 
 		// tags
 		auth.Get("/tag/list", reader.TagList)
+		auth.Post("/edit-tag", reader.EditTag)
 	})
 
 	return router

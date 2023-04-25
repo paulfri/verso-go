@@ -56,12 +56,31 @@ values ($1, $2)
 on conflict do nothing
 returning *;
 
+-- name: UpdateQueueItemReadState :one
+update queue.items qi
+  set unread = $1
+from rss.items ri
+where
+  qi.rss_item_id = ri.id
+  and ri.id = @rss_item_id
+  and qi.user_id = @user_id
+returning qi.*;
+
+-- name: UpdateQueueItemStarredState :one
+update queue.items qi
+  set starred = $1
+from rss.items ri
+where
+  qi.rss_item_id = ri.id
+  and ri.id = @rss_item_id
+  and qi.user_id = @user_id
+returning qi.*;
+
 -- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
   set unread = false
   where exists (
-    select * 
-    from rss.items ri
+    select * from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
     where
       qi.rss_item_id = ri.id

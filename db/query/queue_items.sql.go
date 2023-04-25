@@ -394,8 +394,7 @@ const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
   set unread = false
   where exists (
-    select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at 
-    from rss.items ri
+    select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
     where
       qi.rss_item_id = ri.id
@@ -414,4 +413,70 @@ type MarkAllQueueItemsAsReadParams struct {
 func (q *Queries) MarkAllQueueItemsAsRead(ctx context.Context, arg MarkAllQueueItemsAsReadParams) error {
 	_, err := q.db.ExecContext(ctx, markAllQueueItemsAsRead, arg.UserID, arg.RSSFeedURL, arg.PublishedBefore)
 	return err
+}
+
+const updateQueueItemReadState = `-- name: UpdateQueueItemReadState :one
+update queue.items qi
+  set unread = $1
+from rss.items ri
+where
+  qi.rss_item_id = ri.id
+  and ri.id = $2
+  and qi.user_id = $3
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
+`
+
+type UpdateQueueItemReadStateParams struct {
+	Unread    bool  `json:"unread"`
+	RSSItemID int64 `json:"rss_item_id"`
+	UserID    int64 `json:"user_id"`
+}
+
+func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueItemReadStateParams) (QueueItem, error) {
+	row := q.db.QueryRowContext(ctx, updateQueueItemReadState, arg.Unread, arg.RSSItemID, arg.UserID)
+	var i QueueItem
+	err := row.Scan(
+		&i.ID,
+		&i.UUID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.Unread,
+		&i.Starred,
+		&i.RSSItemID,
+	)
+	return i, err
+}
+
+const updateQueueItemStarredState = `-- name: UpdateQueueItemStarredState :one
+update queue.items qi
+  set starred = $1
+from rss.items ri
+where
+  qi.rss_item_id = ri.id
+  and ri.id = $2
+  and qi.user_id = $3
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
+`
+
+type UpdateQueueItemStarredStateParams struct {
+	Starred   bool  `json:"starred"`
+	RSSItemID int64 `json:"rss_item_id"`
+	UserID    int64 `json:"user_id"`
+}
+
+func (q *Queries) UpdateQueueItemStarredState(ctx context.Context, arg UpdateQueueItemStarredStateParams) (QueueItem, error) {
+	row := q.db.QueryRowContext(ctx, updateQueueItemStarredState, arg.Starred, arg.RSSItemID, arg.UserID)
+	var i QueueItem
+	err := row.Scan(
+		&i.ID,
+		&i.UUID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.Unread,
+		&i.Starred,
+		&i.RSSItemID,
+	)
+	return i, err
 }
