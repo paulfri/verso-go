@@ -106,20 +106,56 @@ func LongItemID(readerID string) string {
 	return fmt.Sprintf(LongItemIDPrefix+"%s", readerID)
 }
 
+const INVALID_READER_ID = "0000000000000000"
+
 func ReaderIDFromInput(input string) string {
-	// If the input leads with the long-form prefix, parse the identifier as hex.
+	// Try parsing the reader ID as longform (with a hex string).
 	if strings.HasPrefix(input, LongItemIDPrefix) {
-		return fmt.Sprintf("%016s", input[32:])
+		parts := strings.SplitAfter(input, LongItemIDPrefix)
+
+		if len(parts) == 2 {
+			id := parts[1]
+
+			if isValidReaderID(id) {
+				// Valid ID after prefix.
+				return id
+			} else if isValidHexString(id) && len(id) < 16 {
+				// Provided ID not a valid hex string, but we can just pad it.
+				return fmt.Sprintf("%016s", id)
+			} else {
+				// Provided ID not a valid hex string and too long (info loss).
+				return INVALID_READER_ID
+			}
+		} else {
+			// No ID provided after longform prefix.
+			return INVALID_READER_ID
+		}
 	}
 
-	// Otherwise, check that the input is a valid hex string.
-	_, err := strconv.ParseInt(input, 16, 64)
+	// Check if it's a valid reader ID but not submitted with longform prefix.
+	if isValidReaderID(input) {
+		return input
+	}
+
+	// Parse the input as a base-10 signed int (shortform id).
+	asInt, err := strconv.ParseInt(input, 10, 64)
 	if err != nil {
-		return fmt.Sprintf("%016s", "")
+		// Not a valid int. Try to parse it as hex, like it's a longform ID that
+		// lost its prefix somehow.
+		if isValidHexString(input) {
+			// Valid hex. Return input as padded.
+			return fmt.Sprintf("%016s", input)
+		}
+
+		return INVALID_READER_ID
 	}
 
-	// Always return a zero-padded, 16-length hex string.
-	return fmt.Sprintf("%016s", input)
+	// Valid int, convert to uint.
+	asUint := uint64(asInt)
+	fmt.Println(asUint)
+
+	// Return as padded hex.
+	return fmt.Sprintf("%016x", asUint)
 }
 
 func ShortIDFromReaderID(readerID string) string {
@@ -127,4 +163,14 @@ func ShortIDFromReaderID(readerID string) string {
 	val, _ := strconv.ParseUint(readerID, 16, 64)
 
 	return fmt.Sprintf("%d", val)
+}
+
+func isValidReaderID(readerID string) bool {
+	return len(readerID) == 16 && isValidHexString(readerID)
+}
+
+func isValidHexString(readerID string) bool {
+	_, err := strconv.ParseUint(readerID, 16, 64)
+
+	return err == nil
 }

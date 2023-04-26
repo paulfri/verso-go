@@ -77,12 +77,24 @@ var readerIDFromInputCases = []struct {
 	in  string
 	out string
 }{
+	// With longform prefix, reader ID returned verbatim.
 	{"tag:google.com,2005:reader/item/14d367199b16429c", "14d367199b16429c"},
+	// With longform prefix and invalid reader ID (too short), return padded.
 	{"tag:google.com,2005:reader/item/123123", "0000000000123123"},
+	// With longform prefix and invalid reader ID (too long), return all zeroes.
+	{"tag:google.com,2005:reader/item/1111111111111111111111111", "0000000000000000"},
+	// Valid hex string of correct length without longform prefix, returned as is.
 	{"000000000000001a", "000000000000001a"},
-	{"123123", "0000000000123123"},
+	// Short-form identifier parsed as positive int and returned as padded hex string.
+	{"123123", "000000000001e0f3"},
+	// Short-form identifier parsed as negative int and returned as padded hex string.
+	{"-355401917359550817", "fb115bd6d34a8e9f"},
+	// Short-form identifier of unpadded hex, return padded.
 	{"1a", "000000000000001a"},
-	{"abc123qwer", "0000000000000000"},
+	// Not a valid hex string but correct length, return all zeroes.
+	{"asdf/abc123qwer1", "0000000000000000"},
+	// Invalid on many levels, return all zeroes.
+	{"asdf/abc123qwer9999", "0000000000000000"},
 }
 
 func TestReaderIDFromInput(t *testing.T) {
