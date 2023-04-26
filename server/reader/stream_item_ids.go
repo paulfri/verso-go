@@ -33,41 +33,26 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 
 	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		var items []query.RSSItem
+		var itemRefs []serialize.FeedItemRef
 
 		// TODO: only implements exclude tag for Read
 		if params.ExcludeTag == common.StreamIDRead {
-			items = c.getUnreadItemsByUserID(ctx, userID)
+			itemRefs = c.getUnreadItemsByUserID(ctx, userID)
 		} else {
-			items = c.getAllItemsByUserID(ctx, userID)
+			itemRefs = c.getAllItemsByUserID(ctx, userID)
 		}
-
-		itemRefs := serialize.FeedItemRefsFromRows(items)
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
 		})
 	case common.StreamIDRead:
-		items := c.getReadItemsByUserID(ctx, userID)
-		itemRefs := serialize.FeedItemRefsFromRows(items)
+		itemRefs := c.getReadItemsByUserID(ctx, userID)
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
 		})
 	case common.StreamIDStarred:
-		items, err := c.Container.Queries.GetStarredItemsByUserID(
-			ctx,
-			query.GetStarredItemsByUserIDParams{
-				UserID: userID,
-				Limit:  DEFAULT_ITEMS_PER_PAGE,
-			},
-		)
-
-		if err != nil {
-			panic(err) // TODO
-		}
-
-		itemRefs := serialize.FeedItemRefsFromRows(items)
+		itemRefs := c.getStarredItemsByUserID(ctx, userID)
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
@@ -87,7 +72,7 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (c *ReaderController) getAllItemsByUserID(ctx context.Context, userID int64) []query.RSSItem {
+func (c *ReaderController) getAllItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
 	items, err := c.Container.Queries.GetItemsByUserID(
 		ctx,
 		query.GetItemsByUserIDParams{
@@ -100,10 +85,13 @@ func (c *ReaderController) getAllItemsByUserID(ctx context.Context, userID int64
 		panic(err) // TODO
 	}
 
-	return items
+	serializable := serialize.QueryRowsToSerializableItems(items)
+	itemRefs := serialize.FeedItemRefsFromRows(serializable)
+
+	return itemRefs
 }
 
-func (c *ReaderController) getReadItemsByUserID(ctx context.Context, userID int64) []query.RSSItem {
+func (c *ReaderController) getReadItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
 	items, err := c.Container.Queries.GetReadItemsByUserID(
 		ctx,
 		query.GetReadItemsByUserIDParams{
@@ -116,10 +104,13 @@ func (c *ReaderController) getReadItemsByUserID(ctx context.Context, userID int6
 		panic(err) // TODO
 	}
 
-	return items
+	serializable := serialize.QueryRowsToSerializableItems(items)
+	itemRefs := serialize.FeedItemRefsFromRows(serializable)
+
+	return itemRefs
 }
 
-func (c *ReaderController) getUnreadItemsByUserID(ctx context.Context, userID int64) []query.RSSItem {
+func (c *ReaderController) getUnreadItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
 	items, err := c.Container.Queries.GetUnreadItemsByUserID(
 		ctx,
 		query.GetUnreadItemsByUserIDParams{
@@ -132,5 +123,29 @@ func (c *ReaderController) getUnreadItemsByUserID(ctx context.Context, userID in
 		panic(err) // TODO
 	}
 
-	return items
+	serializable := serialize.QueryRowsToSerializableItems(items)
+	itemRefs := serialize.FeedItemRefsFromRows(serializable)
+
+	return itemRefs
 }
+
+func (c *ReaderController) getStarredItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
+	items, err := c.Container.Queries.GetStarredItemsByUserID(
+		ctx,
+		query.GetStarredItemsByUserIDParams{
+			UserID: userID,
+			Limit:  DEFAULT_ITEMS_PER_PAGE,
+		},
+	)
+
+	if err != nil {
+		panic(err) // TODO
+	}
+
+	serializable := serialize.QueryRowsToSerializableItems(items)
+	itemRefs := serialize.FeedItemRefsFromRows(serializable)
+
+	return itemRefs
+}
+
+// Don't know how to begin to explain this

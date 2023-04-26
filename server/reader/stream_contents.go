@@ -74,7 +74,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 			panic(err)
 		}
 
-		serializable := serialize.SerializableItemsFromQueueItemByUserIDRows(items)
+		serializable := serialize.QueryRowsToSerializableItems(items)
 
 		response := serialize.ReadingList(
 			serialize.ReadingListParams{
@@ -106,12 +106,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 			panic(err)
 		}
 
-		feedURL := common.FeedURLFromReaderStreamID(streamID)
-
-		serializable := serialize.SerializableItemsFromRSSItemsAndFeedURL(
-			items,
-			feedURL,
-		)
+		serializable := serialize.QueryRowsToSerializableItems(items)
 
 		response := serialize.ReadingList(
 			serialize.ReadingListParams{

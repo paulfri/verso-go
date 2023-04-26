@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/server/reader/common"
 	"github.com/versolabs/verso/server/reader/serialize"
 )
@@ -23,6 +24,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 	ctx := req.Context()
 	params := StreamItemsContentsRequestParams{}
 	err := c.Container.BodyParams(&params, req)
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -33,12 +35,19 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		return common.ReaderIDFromInput(itemID)
 	})
 
-	items, err := c.Container.Queries.GetItemsWithURLByReaderIDs(ctx, readerIDs)
+	items, err := c.Container.Queries.GetItemsWithContentDataByReaderIDs(
+		ctx,
+		query.GetItemsWithContentDataByReaderIDsParams{
+			Column1: readerIDs,
+			UserID:  userID,
+		},
+	)
 	if err != nil {
 		panic(err) // TODO
 	}
 
-	serialized := serialize.FeedItemsFromReaderIDsRows(items)
+	serializable := serialize.QueryRowsToSerializableItems(items)
+	serialized := serialize.FeedItemsFromSerializable(serializable)
 
 	var id string
 	if len(items) > 0 {

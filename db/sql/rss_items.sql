@@ -1,11 +1,12 @@
 -- name: GetRecentItemsByRSSFeedID :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url from rss.items ri
+  join rss.feeds rf on ri.feed_id = rf.id
 where ri.feed_id = $1
 order by ri.published_at desc
 limit $2;
 
 -- name: GetRecentItemsByRSSFeedURL :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url from rss.items ri
   join rss.feeds rf on rf.id = ri.feed_id
 where rf.url = $1
 order by ri.published_at desc

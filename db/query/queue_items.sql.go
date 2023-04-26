@@ -44,7 +44,8 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 
 const getItemsByUserID = `-- name: GetItemsByUserID :many
 
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -57,56 +58,7 @@ type GetItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-// TODO: Lots of repetition in these queries which is leading to a lot of
-// boilerplate in Go. Can we do better?
-func (q *Queries) GetItemsByUserID(ctx context.Context, arg GetItemsByUserIDParams) ([]RSSItem, error) {
-	rows, err := q.db.QueryContext(ctx, getItemsByUserID, arg.UserID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []RSSItem
-	for rows.Next() {
-		var i RSSItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.UUID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.FeedID,
-			&i.RSSGuid,
-			&i.Title,
-			&i.Link,
-			&i.Author,
-			&i.AuthorEmail,
-			&i.Content,
-			&i.Summary,
-			&i.PublishedAt,
-			&i.RemoteUpdatedAt,
-			&i.ReaderID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getItemsWithURLByReaderIDs = `-- name: GetItemsWithURLByReaderIDs :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url from rss.items ri
-  join queue.items qi on qi.rss_item_id = ri.id
-  join rss.feeds rf on ri.feed_id = rf.id
-where ri.id = any($1::bigint[])
-order by ri.published_at desc
-`
-
-type GetItemsWithURLByReaderIDsRow struct {
+type GetItemsByUserIDRow struct {
 	ID              int64          `json:"id"`
 	UUID            uuid.UUID      `json:"uuid"`
 	CreatedAt       time.Time      `json:"created_at"`
@@ -123,17 +75,22 @@ type GetItemsWithURLByReaderIDsRow struct {
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
 	ReaderID        int64          `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
 }
 
-func (q *Queries) GetItemsWithURLByReaderIDs(ctx context.Context, dollar_1 []int64) ([]GetItemsWithURLByReaderIDsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getItemsWithURLByReaderIDs, pq.Array(dollar_1))
+// TODO: Lots of repetition in these queries which is leading to a lot of
+// boilerplate in Go. Can we do better?
+func (q *Queries) GetItemsByUserID(ctx context.Context, arg GetItemsByUserIDParams) ([]GetItemsByUserIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetItemsWithURLByReaderIDsRow
+	var items []GetItemsByUserIDRow
 	for rows.Next() {
-		var i GetItemsWithURLByReaderIDsRow
+		var i GetItemsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -151,6 +108,90 @@ func (q *Queries) GetItemsWithURLByReaderIDs(ctx context.Context, dollar_1 []int
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
 			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getItemsWithContentDataByReaderIDs = `-- name: GetItemsWithContentDataByReaderIDs :many
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
+  join queue.items qi on qi.rss_item_id = ri.id
+  join rss.feeds rf on ri.feed_id = rf.id
+where
+  ri.id = any($1::bigint[]) -- TODO: Can't name arg due to bug in sqlc.
+  and qi.user_id = $2
+order by ri.published_at desc
+`
+
+type GetItemsWithContentDataByReaderIDsParams struct {
+	Column1 []int64 `json:"column_1"`
+	UserID  int64   `json:"user_id"`
+}
+
+type GetItemsWithContentDataByReaderIDsRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
+}
+
+func (q *Queries) GetItemsWithContentDataByReaderIDs(ctx context.Context, arg GetItemsWithContentDataByReaderIDsParams) ([]GetItemsWithContentDataByReaderIDsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getItemsWithContentDataByReaderIDs, pq.Array(arg.Column1), arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetItemsWithContentDataByReaderIDsRow
+	for rows.Next() {
+		var i GetItemsWithContentDataByReaderIDsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UUID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FeedID,
+			&i.RSSGuid,
+			&i.Title,
+			&i.Link,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.Content,
+			&i.Summary,
+			&i.PublishedAt,
+			&i.RemoteUpdatedAt,
+			&i.ReaderID,
+			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
 		); err != nil {
 			return nil, err
 		}
@@ -166,7 +207,8 @@ func (q *Queries) GetItemsWithURLByReaderIDs(ctx context.Context, dollar_1 []int
 }
 
 const getItemsWithURLByUserID = `-- name: GetItemsWithURLByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url from rss.items ri
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -196,6 +238,9 @@ type GetItemsWithURLByUserIDRow struct {
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
 	ReaderID        int64          `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
 }
 
 func (q *Queries) GetItemsWithURLByUserID(ctx context.Context, arg GetItemsWithURLByUserIDParams) ([]GetItemsWithURLByUserIDRow, error) {
@@ -224,6 +269,9 @@ func (q *Queries) GetItemsWithURLByUserID(ctx context.Context, arg GetItemsWithU
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
 			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
 		); err != nil {
 			return nil, err
 		}
@@ -239,7 +287,8 @@ func (q *Queries) GetItemsWithURLByUserID(ctx context.Context, arg GetItemsWithU
 }
 
 const getReadItemsByUserID = `-- name: GetReadItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -253,15 +302,37 @@ type GetReadItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUserIDParams) ([]RSSItem, error) {
+type GetReadItemsByUserIDRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
+}
+
+func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUserIDParams) ([]GetReadItemsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getReadItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RSSItem
+	var items []GetReadItemsByUserIDRow
 	for rows.Next() {
-		var i RSSItem
+		var i GetReadItemsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -278,6 +349,10 @@ func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUs
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
+			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
 		); err != nil {
 			return nil, err
 		}
@@ -293,7 +368,8 @@ func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUs
 }
 
 const getStarredItemsByUserID = `-- name: GetStarredItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -307,15 +383,37 @@ type GetStarredItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetStarredItemsByUserID(ctx context.Context, arg GetStarredItemsByUserIDParams) ([]RSSItem, error) {
+type GetStarredItemsByUserIDRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
+}
+
+func (q *Queries) GetStarredItemsByUserID(ctx context.Context, arg GetStarredItemsByUserIDParams) ([]GetStarredItemsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getStarredItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RSSItem
+	var items []GetStarredItemsByUserIDRow
 	for rows.Next() {
-		var i RSSItem
+		var i GetStarredItemsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -332,6 +430,10 @@ func (q *Queries) GetStarredItemsByUserID(ctx context.Context, arg GetStarredIte
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
+			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
 		); err != nil {
 			return nil, err
 		}
@@ -391,7 +493,8 @@ func (q *Queries) GetUnreadCountsByUserID(ctx context.Context, userID int64) ([]
 }
 
 const getUnreadItemsByUserID = `-- name: GetUnreadItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id from rss.items ri
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -405,15 +508,37 @@ type GetUnreadItemsByUserIDParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItemsByUserIDParams) ([]RSSItem, error) {
+type GetUnreadItemsByUserIDRow struct {
+	ID              int64          `json:"id"`
+	UUID            uuid.UUID      `json:"uuid"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	FeedID          int64          `json:"feed_id"`
+	RSSGuid         string         `json:"rss_guid"`
+	Title           string         `json:"title"`
+	Link            string         `json:"link"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	Content         string         `json:"content"`
+	Summary         sql.NullString `json:"summary"`
+	PublishedAt     sql.NullTime   `json:"published_at"`
+	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
+	ReaderID        int64          `json:"reader_id"`
+	RSSFeedURL      string         `json:"rss_feed_url"`
+	UserID          int64          `json:"user_id"`
+	Unread          bool           `json:"unread"`
+	Starred         bool           `json:"starred"`
+}
+
+func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItemsByUserIDParams) ([]GetUnreadItemsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getUnreadItemsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RSSItem
+	var items []GetUnreadItemsByUserIDRow
 	for rows.Next() {
-		var i RSSItem
+		var i GetUnreadItemsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UUID,
@@ -430,6 +555,10 @@ func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItems
 			&i.PublishedAt,
 			&i.RemoteUpdatedAt,
 			&i.ReaderID,
+			&i.RSSFeedURL,
+			&i.UserID,
+			&i.Unread,
+			&i.Starred,
 		); err != nil {
 			return nil, err
 		}

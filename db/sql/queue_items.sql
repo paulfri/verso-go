@@ -2,7 +2,8 @@
 -- boilerplate in Go. Can we do better?
 
 -- name: GetItemsByUserID :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -10,7 +11,8 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetReadItemsByUserID :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -19,7 +21,8 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetUnreadItemsByUserID :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -28,7 +31,8 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetStarredItemsByUserID :many
-select ri.* from rss.items ri
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
@@ -37,18 +41,22 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetItemsWithURLByUserID :many
-select ri.*, rf.url as rss_feed_url from rss.items ri
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
 order by ri.published_at desc
 limit $2;
 
--- name: GetItemsWithURLByReaderIDs :many
-select ri.*, rf.url as rss_feed_url from rss.items ri
+-- name: GetItemsWithContentDataByReaderIDs :many
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
-where ri.id = any($1::bigint[])
+where
+  ri.id = any($1::bigint[]) -- TODO: Can't name arg due to bug in sqlc.
+  and qi.user_id = $2
 order by ri.published_at desc;
 
 -- name: GetUnreadCountsByUserID :many

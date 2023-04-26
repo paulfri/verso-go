@@ -58,11 +58,6 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 	params := EditTagRequestParams{}
 	err := c.Container.BodyParams(&params, req)
 
-	fmt.Printf("%+v\n", params)
-	fmt.Printf("%+v\n", params)
-	fmt.Printf("%+v\n", params)
-	fmt.Printf("%+v\n", params)
-
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
 		return
@@ -77,12 +72,6 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 	// See note in EditTagRequestParams.
 	item := params.ItemID[0]
 	itemID := common.ReaderIDFromInput(item)
-
-	fmt.Println(itemID)
-	fmt.Println(itemID)
-	fmt.Println(itemID)
-	fmt.Println(itemID)
-	fmt.Println(itemID)
 
 	if params.AddTag != "" {
 		err = c.addTag(ctx, itemID, userID, params.AddTag)
