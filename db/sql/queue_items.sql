@@ -95,7 +95,7 @@ returning qi.*;
 
 -- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
-  set read = false
+  set read = true
   where exists (
     select * from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
@@ -109,7 +109,7 @@ update queue.items qi
 -- the alternative (ANSI) implementation above.
 -- https://github.com/kyleconroy/sqlc/issues/1100
 -- update queue.items qi
---   set qi.read = true
+--   set read = true
 --   from rss.items ri
 --     join rss.feeds rf on rf.id = ri.feed_id
 --   where
