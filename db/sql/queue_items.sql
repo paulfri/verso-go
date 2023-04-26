@@ -2,7 +2,7 @@
 -- boilerplate in Go. Can we do better?
 
 -- name: GetItemsByUserID :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -11,27 +11,27 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetReadItemsByUserID :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
-  and qi.unread = false
+  and qi.read = true
 order by ri.published_at desc
 limit $2;
 
 -- name: GetUnreadItemsByUserID :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
-  and qi.unread = true
+  and qi.read = false
 order by ri.published_at desc
 limit $2;
 
 -- name: GetStarredItemsByUserID :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -41,7 +41,7 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetItemsWithURLByUserID :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -50,7 +50,7 @@ order by ri.published_at desc
 limit $2;
 
 -- name: GetItemsWithContentDataByReaderIDs :many
-select ri.*, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.*, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -64,7 +64,7 @@ select rf.id, rf.url, count(*), max(ri.published_at) as newest from queue.items 
   join rss.items ri on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where user_id = $1
-  and unread = true
+  and qi.read = false
 group by rf.id;
 
 -- name: CreateQueueItem :one
@@ -75,7 +75,7 @@ returning *;
 
 -- name: UpdateQueueItemReadState :one
 update queue.items qi
-  set unread = $1
+  set read = $1
 from rss.items ri
 where
   qi.rss_item_id = ri.id
@@ -95,7 +95,7 @@ returning qi.*;
 
 -- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
-  set unread = false
+  set read = false
   where exists (
     select * from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
@@ -109,7 +109,7 @@ update queue.items qi
 -- the alternative (ANSI) implementation above.
 -- https://github.com/kyleconroy/sqlc/issues/1100
 -- update queue.items qi
---   set qi.unread = false
+--   set qi.read = true
 --   from rss.items ri
 --     join rss.feeds rf on rf.id = ri.feed_id
 --   where

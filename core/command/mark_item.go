@@ -12,7 +12,7 @@ func (c *Command) MarkUnread(ctx context.Context, readerID string, userID int64)
 		query.UpdateQueueItemReadStateParams{
 			ReaderID: readerID,
 			UserID:   userID,
-			Unread:   true,
+			Read:     false,
 		},
 	)
 
@@ -25,7 +25,7 @@ func (c *Command) MarkRead(ctx context.Context, readerID string, userID int64) e
 		query.UpdateQueueItemReadStateParams{
 			ReaderID: readerID,
 			UserID:   userID,
-			Unread:   false,
+			Read:     true,
 		},
 	)
 

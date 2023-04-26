@@ -18,7 +18,7 @@ const createQueueItem = `-- name: CreateQueueItem :one
 insert into queue.items (user_id, rss_item_id)
 values ($1, $2)
 on conflict do nothing
-returning id, uuid, created_at, updated_at, user_id, unread, starred, rss_item_id
+returning id, uuid, created_at, updated_at, user_id, read, starred, rss_item_id
 `
 
 type CreateQueueItemParams struct {
@@ -35,7 +35,7 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
-		&i.Unread,
+		&i.Read,
 		&i.Starred,
 		&i.RSSItemID,
 	)
@@ -44,7 +44,7 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 
 const getItemsByUserID = `-- name: GetItemsByUserID :many
 
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -76,7 +76,7 @@ type GetItemsByUserIDRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -109,7 +109,7 @@ func (q *Queries) GetItemsByUserID(ctx context.Context, arg GetItemsByUserIDPara
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -126,7 +126,7 @@ func (q *Queries) GetItemsByUserID(ctx context.Context, arg GetItemsByUserIDPara
 }
 
 const getItemsWithContentDataByReaderIDs = `-- name: GetItemsWithContentDataByReaderIDs :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -159,7 +159,7 @@ type GetItemsWithContentDataByReaderIDsRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -190,7 +190,7 @@ func (q *Queries) GetItemsWithContentDataByReaderIDs(ctx context.Context, arg Ge
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -207,7 +207,7 @@ func (q *Queries) GetItemsWithContentDataByReaderIDs(ctx context.Context, arg Ge
 }
 
 const getItemsWithURLByUserID = `-- name: GetItemsWithURLByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -239,7 +239,7 @@ type GetItemsWithURLByUserIDRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -270,7 +270,7 @@ func (q *Queries) GetItemsWithURLByUserID(ctx context.Context, arg GetItemsWithU
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -287,12 +287,12 @@ func (q *Queries) GetItemsWithURLByUserID(ctx context.Context, arg GetItemsWithU
 }
 
 const getReadItemsByUserID = `-- name: GetReadItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
-  and qi.unread = false
+  and qi.read = true
 order by ri.published_at desc
 limit $2
 `
@@ -320,7 +320,7 @@ type GetReadItemsByUserIDRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -351,7 +351,7 @@ func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUs
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -368,7 +368,7 @@ func (q *Queries) GetReadItemsByUserID(ctx context.Context, arg GetReadItemsByUs
 }
 
 const getStarredItemsByUserID = `-- name: GetStarredItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
@@ -401,7 +401,7 @@ type GetStarredItemsByUserIDRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -432,7 +432,7 @@ func (q *Queries) GetStarredItemsByUserID(ctx context.Context, arg GetStarredIte
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -453,7 +453,7 @@ select rf.id, rf.url, count(*), max(ri.published_at) as newest from queue.items 
   join rss.items ri on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where user_id = $1
-  and unread = true
+  and qi.read = false
 group by rf.id
 `
 
@@ -493,12 +493,12 @@ func (q *Queries) GetUnreadCountsByUserID(ctx context.Context, userID int64) ([]
 }
 
 const getUnreadItemsByUserID = `-- name: GetUnreadItemsByUserID :many
-select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.unread, qi.starred
+select ri.id, ri.uuid, ri.created_at, ri.updated_at, ri.feed_id, ri.rss_guid, ri.title, ri.link, ri.author, ri.author_email, ri.content, ri.summary, ri.published_at, ri.remote_updated_at, ri.reader_id, rf.url as rss_feed_url, qi.user_id, qi.read, qi.starred
 from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where qi.user_id = $1 
-  and qi.unread = true
+  and qi.read = false
 order by ri.published_at desc
 limit $2
 `
@@ -526,7 +526,7 @@ type GetUnreadItemsByUserIDRow struct {
 	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
-	Unread          bool           `json:"unread"`
+	Read            bool           `json:"read"`
 	Starred         bool           `json:"starred"`
 }
 
@@ -557,7 +557,7 @@ func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItems
 			&i.ReaderID,
 			&i.RSSFeedURL,
 			&i.UserID,
-			&i.Unread,
+			&i.Read,
 			&i.Starred,
 		); err != nil {
 			return nil, err
@@ -575,7 +575,7 @@ func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItems
 
 const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
-  set unread = false
+  set read = false
   where exists (
     select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
@@ -600,23 +600,23 @@ func (q *Queries) MarkAllQueueItemsAsRead(ctx context.Context, arg MarkAllQueueI
 
 const updateQueueItemReadState = `-- name: UpdateQueueItemReadState :one
 update queue.items qi
-  set unread = $1
+  set read = $1
 from rss.items ri
 where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.read, qi.starred, qi.rss_item_id
 `
 
 type UpdateQueueItemReadStateParams struct {
-	Unread   bool   `json:"unread"`
+	Read     bool   `json:"read"`
 	ReaderID string `json:"reader_id"`
 	UserID   int64  `json:"user_id"`
 }
 
 func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueItemReadStateParams) (QueueItem, error) {
-	row := q.db.QueryRowContext(ctx, updateQueueItemReadState, arg.Unread, arg.ReaderID, arg.UserID)
+	row := q.db.QueryRowContext(ctx, updateQueueItemReadState, arg.Read, arg.ReaderID, arg.UserID)
 	var i QueueItem
 	err := row.Scan(
 		&i.ID,
@@ -624,7 +624,7 @@ func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueI
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
-		&i.Unread,
+		&i.Read,
 		&i.Starred,
 		&i.RSSItemID,
 	)
@@ -639,7 +639,7 @@ where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.read, qi.starred, qi.rss_item_id
 `
 
 type UpdateQueueItemStarredStateParams struct {
@@ -657,7 +657,7 @@ func (q *Queries) UpdateQueueItemStarredState(ctx context.Context, arg UpdateQue
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
-		&i.Unread,
+		&i.Read,
 		&i.Starred,
 		&i.RSSItemID,
 	)
