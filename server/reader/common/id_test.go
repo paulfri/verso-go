@@ -73,11 +73,26 @@ func TestFeedURLFromReaderStreamID(t *testing.T) {
 	}
 }
 
-func TestReaderIDFromInput(t *testing.T) {
-	id := ReaderIDFromInput("tag:google.com,2005:reader/item/14d367199b16429c")
-	var expect string = "1500656460518277788"
+var readerIDFromInputCases = []struct {
+	in  string
+	out string
+}{
+	{"tag:google.com,2005:reader/item/14d367199b16429c", "14d367199b16429c"},
+	{"tag:google.com,2005:reader/item/123123", "0000000000123123"},
+	{"000000000000001a", "000000000000001a"},
+	{"123123", "0000000000123123"},
+	{"1a", "000000000000001a"},
+	{"abc123qwer", "0000000000000000"},
+}
 
-	if id != expect {
-		t.Errorf("got %v, wanted %v", id, expect)
+func TestReaderIDFromInput(t *testing.T) {
+	for _, test := range readerIDFromInputCases {
+		t.Run(test.in, func(t *testing.T) {
+			res := ReaderIDFromInput(test.in)
+
+			if res != test.out {
+				t.Errorf("failed: got %q, want %q", res, test.out)
+			}
+		})
 	}
 }

@@ -97,7 +97,11 @@ func ReaderStreamIDFromUserLabel(label string) string {
 // https://github.com/mihaip/google-reader-api/blob/master/wiki/ItemId.wiki?plain=1
 
 // Returns the long-form item ID for the given UUID. This is a zero-padded,
-// 16-length unsigned hex string with a static prefix.
+// 16-length hex string with a static prefix.
+//
+// In the original Reader API, this was stored as a 64-bit unsigned integer.
+// This is an annoying conversion to do all over the place, so we just store
+// it as a string.
 func LongItemID(readerID string) string {
 	return fmt.Sprintf(LongItemIDPrefix+"%s", readerID)
 }
@@ -105,13 +109,17 @@ func LongItemID(readerID string) string {
 func ReaderIDFromInput(input string) string {
 	// If the input leads with the long-form prefix, parse the identifier as hex.
 	if strings.HasPrefix(input, LongItemIDPrefix) {
-		return input[32:]
+		return fmt.Sprintf("%016s", input[32:])
 	}
 
-	// Otherwise, parse the input as an integer, and convert it to hex.
-	val, _ := strconv.ParseInt(input, 16, 64)
+	// Otherwise, check that the input is a valid hex string.
+	_, err := strconv.ParseInt(input, 16, 64)
+	if err != nil {
+		return fmt.Sprintf("%016s", "")
+	}
 
-	return strconv.FormatInt(int64(val), 16)
+	// Always return a zero-padded, 16-length hex string.
+	return fmt.Sprintf("%016s", input)
 }
 
 func ShortIDFromReaderID(readerID string) string {
