@@ -95,6 +95,8 @@ var readerIDFromInputCases = []struct {
 	{"asdf/abc123qwer1", "0000000000000000"},
 	// Invalid on many levels, return all zeroes.
 	{"asdf/abc123qwer9999", "0000000000000000"},
+	// Max value.
+	{"9223372036854775807", "7fffffffffffffff"},
 }
 
 func TestReaderIDFromInput(t *testing.T) {

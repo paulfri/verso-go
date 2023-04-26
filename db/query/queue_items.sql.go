@@ -575,7 +575,7 @@ func (q *Queries) GetUnreadItemsByUserID(ctx context.Context, arg GetUnreadItems
 
 const markAllQueueItemsAsRead = `-- name: MarkAllQueueItemsAsRead :exec
 update queue.items qi
-  set read = false
+  set read = true
   where exists (
     select ri.id, ri.uuid, ri.created_at, ri.updated_at, feed_id, rss_guid, ri.title, link, author, author_email, content, summary, published_at, remote_updated_at, reader_id, rf.id, rf.uuid, rf.created_at, rf.updated_at, rf.title, url, active, last_crawled_at from rss.items ri
       join rss.feeds rf on rf.id = ri.feed_id
