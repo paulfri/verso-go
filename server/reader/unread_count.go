@@ -31,12 +31,12 @@ func (c *ReaderController) UnreadCount(w http.ResponseWriter, req *http.Request)
 
 	unreadCounts := lop.Map(counts, func(row query.GetUnreadCountsByUserIDRow, _ int) UnreadCount {
 		newest := row.Newest.(time.Time)
-		newestUnixNano := newest.UnixNano()
+		newestUsec := newest.Unix() * 1_000_000
 
 		return UnreadCount{
 			Count:                   row.Count,
 			ID:                      common.ReaderStreamIDFromFeedURL(row.URL),
-			NewestItemTimestampUSec: fmt.Sprintf("%d", newestUnixNano),
+			NewestItemTimestampUSec: fmt.Sprintf("%d", newestUsec),
 		}
 	})
 

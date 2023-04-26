@@ -19,7 +19,6 @@ type Origin struct {
 
 type FeedItem struct {
 	Origin        Origin          `json:"origin"`
-	Updated       int64           `json:"updated"`
 	ID            string          `json:"id"`
 	Author        null.String     `json:"author"`
 	Content       FeedItemContent `json:"content"`
@@ -27,6 +26,7 @@ type FeedItem struct {
 	TimestampUsec string          `json:"timestampUsec"`
 	CrawlTimeMsec string          `json:"crawlTimeMsec"`
 	Published     int64           `json:"published"`
+	Updated       int64           `json:"updated"`
 	Title         string          `json:"title"`
 	Categories    []string        `json:"categories"`
 
@@ -76,8 +76,8 @@ func FeedItemsFromSerializable(items []SerializableItem) []FeedItem {
 				Direction: "ltr",
 				Content:   item.Content,
 			},
-			TimestampUsec: fmt.Sprintf("%d", published*10_000),
-			CrawlTimeMsec: fmt.Sprintf("%d", item.CreatedAt.Unix()*1000),
+			TimestampUsec: fmt.Sprintf("%d", published*1_000_000),
+			CrawlTimeMsec: fmt.Sprintf("%d", published*1_000),
 			Published:     published,
 			Updated:       updated,
 			Title:         item.Title,
