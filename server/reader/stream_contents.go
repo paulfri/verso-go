@@ -18,7 +18,7 @@ const (
 	Descending SortOrderValue = "a"
 )
 
-const DEFAULT_ITEMS_PER_PAGE = 20
+const DEFAULT_ITEMS_PER_PAGE = 1000
 
 type StreamContentsRequestParams struct {
 	// r: sort criteria. Items are sorted by date (descending by default), r=o inverts the order.
