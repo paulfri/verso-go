@@ -55,7 +55,7 @@ from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where
-  ri.id = any($1::bigint[]) -- TODO: Can't name arg due to bug in sqlc.
+  ri.reader_id = any($1::text[]) -- TODO: Can't name arg due to bug in sqlc.
   and qi.user_id = $2
 order by ri.published_at desc;
 
@@ -79,7 +79,7 @@ update queue.items qi
 from rss.items ri
 where
   qi.rss_item_id = ri.id
-  and ri.id = @rss_item_id
+  and ri.reader_id = @reader_id
   and qi.user_id = @user_id
 returning qi.*;
 
@@ -89,7 +89,7 @@ update queue.items qi
 from rss.items ri
 where
   qi.rss_item_id = ri.id
-  and ri.id = @rss_item_id
+  and ri.reader_id = @reader_id
   and qi.user_id = @user_id
 returning qi.*;
 

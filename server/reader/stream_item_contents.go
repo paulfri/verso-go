@@ -31,7 +31,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		return
 	}
 
-	readerIDs := lo.Map(params.Items, func(itemID string, _ int) int64 {
+	readerIDs := lo.Map(params.Items, func(itemID string, _ int) string {
 		return common.ReaderIDFromInput(itemID)
 	})
 
@@ -51,7 +51,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 
 	var id string
 	if len(items) > 0 {
-		id = common.LongItemID(items[0].ID)
+		id = common.LongItemID(items[0].ReaderID)
 	} else {
 		id = ""
 	}

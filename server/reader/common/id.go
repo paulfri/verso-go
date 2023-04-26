@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -99,45 +98,25 @@ func ReaderStreamIDFromUserLabel(label string) string {
 
 // Returns the long-form item ID for the given UUID. This is a zero-padded,
 // 16-length unsigned hex string with a static prefix.
-func LongItemID(readerID int64) string {
-	hex := readerIDToHex(readerID)
-
-	return fmt.Sprintf(LongItemIDPrefix+"%s", hex)
+func LongItemID(readerID string) string {
+	return fmt.Sprintf(LongItemIDPrefix+"%s", readerID)
 }
 
-func ReaderIDFromInput(input string) int64 {
+func ReaderIDFromInput(input string) string {
 	// If the input leads with the long-form prefix, parse the identifier as hex.
 	if strings.HasPrefix(input, LongItemIDPrefix) {
-		return readerIDFromHex(input[32:])
+		return input[32:]
 	}
 
-	// If an ID is length 16, it's a zero-padded hex string.
-	if len(input) == 16 {
-		unpad := strings.TrimLeft(input, "0")
+	// Otherwise, parse the input as an integer, and convert it to hex.
+	val, _ := strconv.ParseInt(input, 16, 64)
 
-		return readerIDFromHex(unpad)
-	}
-
-	i, err := strconv.Atoi(input)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return int64(i)
+	return strconv.FormatInt(int64(val), 16)
 }
 
-func readerIDFromHex(hex string) int64 {
-	val, _ := strconv.ParseInt(hex, 16, 64)
-	sixfour := int64(val)
+func ShortIDFromReaderID(readerID string) string {
+	// Convert the hex string to an unsigned integer.
+	val, _ := strconv.ParseUint(readerID, 16, 64)
 
-	return sixfour
-}
-
-func readerIDToHex(readerID int64) string {
-	return strconv.FormatInt(readerID, 16)
-}
-
-func hasAlpha(str string) bool {
-	return regexp.MustCompile(`\D`).MatchString(str)
+	return fmt.Sprintf("%d", val)
 }

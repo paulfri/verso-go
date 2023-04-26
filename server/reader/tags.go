@@ -44,10 +44,7 @@ func (c *ReaderController) TagList(w http.ResponseWriter, req *http.Request) {
 //	}
 
 type EditTagRequestParams struct {
-	// This endpoint only accepts one ItemID, but because the middleware modifies
-	// the request body to convert `i` to `i[]` to support other endpoints, this
-	// struct takes an array.
-	ItemID    []string `query:"i" validate:"required"`
+	ItemIDs   []string `query:"i" validate:"required"`
 	AddTag    string   `query:"a" validate:"required_without=RemoveTag"`
 	RemoveTag string   `query:"r" validate:"required_without=AddTag"`
 }
@@ -69,14 +66,15 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// See note in EditTagRequestParams.
-	item := params.ItemID[0]
-	itemID := common.ReaderIDFromInput(item)
+	// TODO: batch this
+	for _, item := range params.ItemIDs {
+		readerID := common.ReaderIDFromInput(item)
 
-	if params.AddTag != "" {
-		err = c.addTag(ctx, itemID, userID, params.AddTag)
-	} else {
-		err = c.removeTag(ctx, itemID, userID, params.RemoveTag)
+		if params.AddTag != "" {
+			err = c.addTag(ctx, readerID, userID, params.AddTag)
+		} else {
+			err = c.removeTag(ctx, readerID, userID, params.RemoveTag)
+		}
 	}
 
 	if err != nil && err != sql.ErrNoRows {
@@ -86,23 +84,23 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 	c.Container.Render.Text(w, http.StatusOK, "OK")
 }
 
-func (c *ReaderController) addTag(ctx context.Context, itemID int64, userID int64, tag string) error {
+func (c *ReaderController) addTag(ctx context.Context, readerID string, userID int64, tag string) error {
 	switch tag {
 	case common.StreamIDRead:
-		return c.Container.Command.MarkRead(ctx, itemID, userID)
+		return c.Container.Command.MarkRead(ctx, readerID, userID)
 	case common.StreamIDStarred:
-		return c.Container.Command.MarkStarred(ctx, itemID, userID)
+		return c.Container.Command.MarkStarred(ctx, readerID, userID)
 	default:
 		return fmt.Errorf("unknown tag: %s", tag)
 	}
 }
 
-func (c *ReaderController) removeTag(ctx context.Context, itemID int64, userID int64, tag string) error {
+func (c *ReaderController) removeTag(ctx context.Context, readerID string, userID int64, tag string) error {
 	switch tag {
 	case common.StreamIDRead:
-		return c.Container.Command.MarkUnread(ctx, itemID, userID)
+		return c.Container.Command.MarkUnread(ctx, readerID, userID)
 	case common.StreamIDStarred:
-		return c.Container.Command.MarkUnstarred(ctx, itemID, userID)
+		return c.Container.Command.MarkUnstarred(ctx, readerID, userID)
 	default:
 		return fmt.Errorf("unknown tag: %s", tag)
 	}

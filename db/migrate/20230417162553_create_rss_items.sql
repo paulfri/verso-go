@@ -17,7 +17,7 @@ create table rss.items (
   summary text,
   published_at timestamp with time zone,
   remote_updated_at timestamp with time zone,
-  reader_id bigint unique not null
+  reader_id text unique not null constraint reader_id_length check (char_length(reader_id) = 16)
 );
 
 create trigger rss_items_touch_updated_at
@@ -29,12 +29,12 @@ create unique index rss_items_rss_feed_id_rss_guid_key
 create index rss_items_published_at_index
   on rss.items (published_at desc);
 
--- Reader compatibility requires an int64 identifier. This insert trigger
--- generates a new one derived from the UUID rather than expose the serial ID.
 create function generate_reader_id()
 returns trigger as $$
 begin
-  new.reader_id = ('x' || translate(new.uuid::text, '-', ''))::bit(64)::bigint;
+  -- reader_id is stored as a 16-length zero-added hex representation of a
+  -- 64-bit integer (bigint)
+  new.reader_id = lpad(to_hex((random() * 9223372036854775807)::bigint), 16, '0');
 
   return new;
 end;

@@ -22,7 +22,8 @@ type UnreadCountResponse struct {
 }
 
 func (c *ReaderController) UnreadCount(w http.ResponseWriter, req *http.Request) {
-	counts, err := c.Container.Queries.GetUnreadCountsByUserID(req.Context(), 1)
+	ctx := req.Context()
+	counts, err := c.Container.Queries.GetUnreadCountsByUserID(ctx, 1)
 
 	if err != nil {
 		panic(err) // TODO
@@ -38,6 +39,8 @@ func (c *ReaderController) UnreadCount(w http.ResponseWriter, req *http.Request)
 			NewestItemTimestampUSec: fmt.Sprintf("%d", newestUnixNano),
 		}
 	})
+
+	// TODO: unread counts for tags
 
 	c.Container.Render.JSON(w, http.StatusOK, UnreadCountResponse{
 		Max:          1000, // TODO

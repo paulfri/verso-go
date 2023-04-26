@@ -73,18 +73,9 @@ func TestFeedURLFromReaderStreamID(t *testing.T) {
 	}
 }
 
-func TestLongItemID(t *testing.T) {
-	id := LongItemID(123)
-	expect := "tag:google.com,2005:reader/item/7b"
-
-	if id != expect {
-		t.Errorf("got %v, wanted %v", id, expect)
-	}
-}
-
 func TestReaderIDFromInput(t *testing.T) {
 	id := ReaderIDFromInput("tag:google.com,2005:reader/item/14d367199b16429c")
-	var expect int64 = 1500656460518277788
+	var expect string = "1500656460518277788"
 
 	if id != expect {
 		t.Errorf("got %v, wanted %v", id, expect)

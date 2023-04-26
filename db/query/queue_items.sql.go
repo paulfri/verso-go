@@ -73,7 +73,7 @@ type GetItemsByUserIDRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -131,14 +131,14 @@ from rss.items ri
   join queue.items qi on qi.rss_item_id = ri.id
   join rss.feeds rf on ri.feed_id = rf.id
 where
-  ri.id = any($1::bigint[]) -- TODO: Can't name arg due to bug in sqlc.
+  ri.reader_id = any($1::text[]) -- TODO: Can't name arg due to bug in sqlc.
   and qi.user_id = $2
 order by ri.published_at desc
 `
 
 type GetItemsWithContentDataByReaderIDsParams struct {
-	Column1 []int64 `json:"column_1"`
-	UserID  int64   `json:"user_id"`
+	Column1 []string `json:"column_1"`
+	UserID  int64    `json:"user_id"`
 }
 
 type GetItemsWithContentDataByReaderIDsRow struct {
@@ -156,7 +156,7 @@ type GetItemsWithContentDataByReaderIDsRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -236,7 +236,7 @@ type GetItemsWithURLByUserIDRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -317,7 +317,7 @@ type GetReadItemsByUserIDRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -398,7 +398,7 @@ type GetStarredItemsByUserIDRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -523,7 +523,7 @@ type GetUnreadItemsByUserIDRow struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	UserID          int64          `json:"user_id"`
 	Unread          bool           `json:"unread"`
@@ -604,19 +604,19 @@ update queue.items qi
 from rss.items ri
 where
   qi.rss_item_id = ri.id
-  and ri.id = $2
+  and ri.reader_id = $2
   and qi.user_id = $3
 returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
 `
 
 type UpdateQueueItemReadStateParams struct {
-	Unread    bool  `json:"unread"`
-	RSSItemID int64 `json:"rss_item_id"`
-	UserID    int64 `json:"user_id"`
+	Unread   bool   `json:"unread"`
+	ReaderID string `json:"reader_id"`
+	UserID   int64  `json:"user_id"`
 }
 
 func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueItemReadStateParams) (QueueItem, error) {
-	row := q.db.QueryRowContext(ctx, updateQueueItemReadState, arg.Unread, arg.RSSItemID, arg.UserID)
+	row := q.db.QueryRowContext(ctx, updateQueueItemReadState, arg.Unread, arg.ReaderID, arg.UserID)
 	var i QueueItem
 	err := row.Scan(
 		&i.ID,
@@ -637,19 +637,19 @@ update queue.items qi
 from rss.items ri
 where
   qi.rss_item_id = ri.id
-  and ri.id = $2
+  and ri.reader_id = $2
   and qi.user_id = $3
 returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.unread, qi.starred, qi.rss_item_id
 `
 
 type UpdateQueueItemStarredStateParams struct {
-	Starred   bool  `json:"starred"`
-	RSSItemID int64 `json:"rss_item_id"`
-	UserID    int64 `json:"user_id"`
+	Starred  bool   `json:"starred"`
+	ReaderID string `json:"reader_id"`
+	UserID   int64  `json:"user_id"`
 }
 
 func (q *Queries) UpdateQueueItemStarredState(ctx context.Context, arg UpdateQueueItemStarredStateParams) (QueueItem, error) {
-	row := q.db.QueryRowContext(ctx, updateQueueItemStarredState, arg.Starred, arg.RSSItemID, arg.UserID)
+	row := q.db.QueryRowContext(ctx, updateQueueItemStarredState, arg.Starred, arg.ReaderID, arg.UserID)
 	var i QueueItem
 	err := row.Scan(
 		&i.ID,

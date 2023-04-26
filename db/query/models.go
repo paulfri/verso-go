@@ -69,7 +69,7 @@ type RSSItem struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 }
 
 type RSSItemVersion struct {

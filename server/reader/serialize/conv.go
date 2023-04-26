@@ -46,7 +46,7 @@ type SerializableItem struct {
 	Summary         sql.NullString `json:"summary"`
 	PublishedAt     sql.NullTime   `json:"published_at"`
 	RemoteUpdatedAt sql.NullTime   `json:"remote_updated_at"`
-	ReaderID        int64          `json:"reader_id"`
+	ReaderID        string         `json:"reader_id"`
 	UserID          int64          `json:"user_id"`
 	RSSFeedURL      string         `json:"rss_feed_url"`
 	Unread          bool           `json:"unread"`
