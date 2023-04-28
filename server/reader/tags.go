@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	lop "github.com/samber/lo/parallel"
+	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/server/reader/common"
 )
 
@@ -19,8 +21,31 @@ type TagList struct {
 }
 
 func (c *ReaderController) TagList(w http.ResponseWriter, req *http.Request) {
+	userID := req.Context().Value(ContextUserIDKey{}).(int64)
+
+	tagRows, err := c.Container.Queries.GetTagsByUserID(req.Context(), userID)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var tags []Tag
+	tags = append(tags, Tag{
+		ID:     "user/-/state/com.google/starred",
+		SortID: "A0000001",
+	})
+
+	userTags := lop.Map(tagRows, func(row query.TaxonomyTag, index int) Tag {
+		return Tag{
+			ID:     fmt.Sprintf("user/-/label/%s", row.Name),
+			SortID: fmt.Sprintf("A%07d", index+len(tags)+1),
+		}
+	})
+
+	tags = append(tags, userTags...)
+
 	c.Container.Render.JSON(w, http.StatusOK, TagList{
-		Tags: []Tag{},
+		Tags: tags,
 	})
 }
 

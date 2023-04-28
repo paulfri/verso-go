@@ -101,7 +101,7 @@ type TaxonomyRssFeedTag struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	TagID     int64     `json:"tag_id"`
-	RssFeedID int64     `json:"rss_feed_id"`
+	RSSFeedID int64     `json:"rss_feed_id"`
 }
 
 type TaxonomyTag struct {

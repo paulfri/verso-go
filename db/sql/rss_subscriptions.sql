@@ -20,6 +20,13 @@ select * from rss.subscriptions s
   where s.feed_id = $1 and s.user_id = $2;
 
 -- name: GetSubscriptionsByUserID :many
-select * from rss.subscriptions s
+select
+  s.*,
+  t.name,
+  f.url as rss_feed_url,
+  coalesce(s.custom_title, f.title) as title
+from rss.subscriptions s
   join rss.feeds f on f.id = s.feed_id
+  left outer join taxonomy.rss_feed_tags ft on f.id = ft.rss_feed_id
+  left outer join taxonomy.tags t on t.id = ft.tag_id
   where s.user_id = $1;

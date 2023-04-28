@@ -119,27 +119,29 @@ func (q *Queries) GetSubscriptionsByRSSFeedID(ctx context.Context, feedID int64)
 }
 
 const getSubscriptionsByUserID = `-- name: GetSubscriptionsByUserID :many
-select s.id, s.uuid, s.created_at, s.updated_at, user_id, feed_id, custom_title, f.id, f.uuid, f.created_at, f.updated_at, title, url, active, last_crawled_at from rss.subscriptions s
+select
+  s.id, s.uuid, s.created_at, s.updated_at, s.user_id, s.feed_id, s.custom_title,
+  t.name,
+  f.url as rss_feed_url,
+  coalesce(s.custom_title, f.title) as title
+from rss.subscriptions s
   join rss.feeds f on f.id = s.feed_id
+  left outer join taxonomy.rss_feed_tags ft on f.id = ft.rss_feed_id
+  left outer join taxonomy.tags t on t.id = ft.tag_id
   where s.user_id = $1
 `
 
 type GetSubscriptionsByUserIDRow struct {
-	ID            int64          `json:"id"`
-	UUID          uuid.UUID      `json:"uuid"`
-	CreatedAt     time.Time      `json:"created_at"`
-	UpdatedAt     time.Time      `json:"updated_at"`
-	UserID        int64          `json:"user_id"`
-	FeedID        int64          `json:"feed_id"`
-	CustomTitle   sql.NullString `json:"custom_title"`
-	ID_2          int64          `json:"id_2"`
-	UUID_2        uuid.UUID      `json:"uuid_2"`
-	CreatedAt_2   time.Time      `json:"created_at_2"`
-	UpdatedAt_2   time.Time      `json:"updated_at_2"`
-	Title         string         `json:"title"`
-	URL           string         `json:"url"`
-	Active        bool           `json:"active"`
-	LastCrawledAt sql.NullTime   `json:"last_crawled_at"`
+	ID          int64          `json:"id"`
+	UUID        uuid.UUID      `json:"uuid"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	UserID      int64          `json:"user_id"`
+	FeedID      int64          `json:"feed_id"`
+	CustomTitle sql.NullString `json:"custom_title"`
+	Name        sql.NullString `json:"name"`
+	RSSFeedURL  string         `json:"rss_feed_url"`
+	Title       string         `json:"title"`
 }
 
 func (q *Queries) GetSubscriptionsByUserID(ctx context.Context, userID int64) ([]GetSubscriptionsByUserIDRow, error) {
@@ -159,14 +161,9 @@ func (q *Queries) GetSubscriptionsByUserID(ctx context.Context, userID int64) ([
 			&i.UserID,
 			&i.FeedID,
 			&i.CustomTitle,
-			&i.ID_2,
-			&i.UUID_2,
-			&i.CreatedAt_2,
-			&i.UpdatedAt_2,
+			&i.Name,
+			&i.RSSFeedURL,
 			&i.Title,
-			&i.URL,
-			&i.Active,
-			&i.LastCrawledAt,
 		); err != nil {
 			return nil, err
 		}

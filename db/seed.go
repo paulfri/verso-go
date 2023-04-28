@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
+	"log"
 
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/verso/db/query"
@@ -29,20 +29,25 @@ func Seed(config *util.Config) cli.ActionFunc {
 			URL:   "https://soundofhockey.com/feed/",
 		})
 
-		password, err3 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
-		user, err4 := queries.CreateUser(ctx, query.CreateUserParams{
+		_, err3 := queries.CreateRSSFeed(ctx, query.CreateRSSFeedParams{
+			Title: "Paul's blog",
+			URL:   "https://blog.paulfri.xyz/atom.xml",
+		})
+
+		password, err4 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
+		user, err5 := queries.CreateUser(ctx, query.CreateUserParams{
 			Email:     "paul@verso.so",
 			Name:      "Paul Friedman",
 			Password:  sql.NullString{String: string(password), Valid: true},
 			Superuser: true,
 		})
 
-		_, err5 := queries.CreateReaderToken(ctx, query.CreateReaderTokenParams{
+		_, err6 := queries.CreateReaderToken(ctx, query.CreateReaderTokenParams{
 			UserID:     user.ID,
 			Identifier: "F2vwA2wKSHISLXT7slqt",
 		})
 
-		_, err6 := queries.CreateRSSSubscription(
+		_, err7 := queries.CreateRSSSubscription(
 			ctx,
 			query.CreateRSSSubscriptionParams{
 				UserID: user.ID,
@@ -50,11 +55,26 @@ func Seed(config *util.Config) cli.ActionFunc {
 			},
 		)
 
-		err := errors.Join(err1, err2, err3, err4, err5, err6)
+		tag, err8 := queries.CreateTag(
+			ctx,
+			query.CreateTagParams{
+				UserID: user.ID,
+				Name:   "soccer",
+			},
+		)
+
+		_, err9 := queries.CreateRSSFeedTag(
+			ctx,
+			query.CreateRSSFeedTagParams{
+				TagID:     tag.ID,
+				RSSFeedID: feed.ID,
+			},
+		)
+
+		err := errors.Join(err1, err2, err3, err4, err5, err6, err7, err8, err9)
 
 		if err != nil {
-			fmt.Println(err)
-			panic(1)
+			log.Fatalf("failed to seed database: %v", err)
 		}
 
 		return nil
