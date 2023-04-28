@@ -32,7 +32,5 @@ create trigger rss_item_versions_insert_on_item_update
 -- +goose StatementEnd
 
 -- +goose Down
--- +goose StatementBegin
 drop trigger rss_item_versions_insert_on_item_update on rss.items;
 drop function create_rss_item_version();
--- +goose StatementEnd

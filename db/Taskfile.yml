@@ -48,6 +48,12 @@ tasks:
     cmds:
       - goose up
 
+  migrate:lint:
+    desc: Lint migrations.
+    dir: ./migrate
+    cmds:
+      - squawk *.sql
+
   rollback:
     desc: Roll back the last migration. Irreversible.
     dir: ./migrate
