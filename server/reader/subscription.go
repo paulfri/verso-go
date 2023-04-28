@@ -23,7 +23,7 @@ type SubscriptionQuickAddResponse struct {
 
 func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
 	params := SubscriptionQuickAddRequestParams{}
-	err := c.Container.Params(&params, req)
+	err := c.Container.BodyParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
