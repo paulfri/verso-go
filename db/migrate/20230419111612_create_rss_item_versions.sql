@@ -15,7 +15,8 @@ create table rss.item_versions (
   remote_updated_at timestamp with time zone
 );
 
-create index rss_item_versions_item_id_fkey on rss.item_versions (item_id);
+create index rss_item_versions_item_id_fkey
+  on rss.item_versions (item_id);
 
 create trigger rss_item_versions_touch_updated_at
   before update on rss.item_versions for each row

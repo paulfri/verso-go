@@ -11,6 +11,9 @@ create table identity.reader_tokens (
   revoked_at timestamp
 );
 
+create index identity_reader_tokens_user_id_fkey
+  on identity.reader_tokens (user_id);
+
 create trigger identity_reader_tokens_touch_updated_at
   before update on identity.reader_tokens for each row
   execute procedure touch_updated_at();

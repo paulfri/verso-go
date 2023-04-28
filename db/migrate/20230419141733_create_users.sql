@@ -14,6 +14,9 @@ create table identity.users (
   superuser bool not null default false
 );
 
+create index identity_users_superuser_idx
+  on identity.users (superuser);
+
 create trigger identity_users_touch_updated_at
   before update on identity.users for each row
   execute procedure touch_updated_at();

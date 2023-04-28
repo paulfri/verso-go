@@ -17,16 +17,14 @@ create table rss.items (
   summary text,
   published_at timestamp with time zone,
   remote_updated_at timestamp with time zone,
-  reader_id text unique not null constraint reader_id_length check (char_length(reader_id) = 16)
+  reader_id text unique not null constraint reader_id_length_check
+    check (char_length(reader_id) = 16)
 );
-
-create trigger rss_items_touch_updated_at
-  before update on rss.items for each row
-  execute procedure touch_updated_at();
 
 create unique index rss_items_rss_feed_id_rss_guid_key
   on rss.items (feed_id, rss_guid);
-create index rss_items_published_at_index
+
+create index rss_items_published_at_idx
   on rss.items (published_at desc);
 
 create function generate_reader_id()
@@ -56,6 +54,10 @@ $$ language plpgsql;
 create trigger rss_items_generate_reader_id
   before insert on rss.items for each row
   execute procedure generate_reader_id();
+
+create trigger rss_items_touch_updated_at
+  before update on rss.items for each row
+  execute procedure touch_updated_at();
 -- +goose StatementEnd
 
 -- +goose Down
