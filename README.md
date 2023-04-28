@@ -27,9 +27,3 @@ task db:migrate
 task db:reset
 task db:gen -- migration_name
 ```
-
-## Compiling SQL queries
-
-```
-task db:compile
-```
