@@ -30,3 +30,10 @@ from rss.subscriptions s
   left outer join taxonomy.rss_feed_tags ft on f.id = ft.rss_feed_id
   left outer join taxonomy.tags t on t.id = ft.tag_id
   where s.user_id = $1;
+
+-- name: DeleteSubscriptionByRSSFeedURLAndUserID :exec
+delete from rss.subscriptions s
+using rss.feeds f
+where s.feed_id = f.id
+  and f.url = @rss_feed_url
+  and s.user_id = $1;

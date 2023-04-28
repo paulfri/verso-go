@@ -15,19 +15,20 @@ import (
 )
 
 const createQueueItem = `-- name: CreateQueueItem :one
-insert into queue.items (user_id, rss_item_id)
-values ($1, $2)
+insert into queue.items (user_id, rss_item_id, subscription_id)
+values ($1, $2, $3)
 on conflict do nothing
-returning id, uuid, created_at, updated_at, user_id, rss_item_id, read, starred
+returning id, uuid, created_at, updated_at, user_id, rss_item_id, subscription_id, read, starred
 `
 
 type CreateQueueItemParams struct {
-	UserID    int64         `json:"user_id"`
-	RSSItemID sql.NullInt64 `json:"rss_item_id"`
+	UserID         int64 `json:"user_id"`
+	RSSItemID      int64 `json:"rss_item_id"`
+	SubscriptionID int64 `json:"subscription_id"`
 }
 
 func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams) (QueueItem, error) {
-	row := q.db.QueryRowContext(ctx, createQueueItem, arg.UserID, arg.RSSItemID)
+	row := q.db.QueryRowContext(ctx, createQueueItem, arg.UserID, arg.RSSItemID, arg.SubscriptionID)
 	var i QueueItem
 	err := row.Scan(
 		&i.ID,
@@ -36,6 +37,7 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.RSSItemID,
+		&i.SubscriptionID,
 		&i.Read,
 		&i.Starred,
 	)
@@ -606,7 +608,7 @@ where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.read, qi.starred
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.subscription_id, qi.read, qi.starred
 `
 
 type UpdateQueueItemReadStateParams struct {
@@ -625,6 +627,7 @@ func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueI
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.RSSItemID,
+		&i.SubscriptionID,
 		&i.Read,
 		&i.Starred,
 	)
@@ -639,7 +642,7 @@ where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.read, qi.starred
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.subscription_id, qi.read, qi.starred
 `
 
 type UpdateQueueItemStarredStateParams struct {
@@ -658,6 +661,7 @@ func (q *Queries) UpdateQueueItemStarredState(ctx context.Context, arg UpdateQue
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.RSSItemID,
+		&i.SubscriptionID,
 		&i.Read,
 		&i.Starred,
 	)

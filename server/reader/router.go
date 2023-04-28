@@ -43,6 +43,7 @@ func Router(container *util.Container) http.Handler {
 		auth.Post("/subscription/quickadd", reader.SubscriptionQuickAdd)
 		auth.Get("/subscribed", reader.SubscriptionExists)
 		auth.Get("/subscription/list", reader.SubscriptionList)
+		auth.Post("/subscription/edit", reader.SubscriptionEdit)
 
 		// stream
 		auth.Get("/stream/contents/*", reader.StreamContents)

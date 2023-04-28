@@ -91,8 +91,9 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		for _, subscription := range subscribers {
 			// TODO: handle error
 			worker.Container.Queries.CreateQueueItem(ctx, query.CreateQueueItemParams{
-				UserID:    subscription.UserID,
-				RSSItemID: sql.NullInt64{Int64: rssItem.ID, Valid: true},
+				UserID:         subscription.UserID,
+				RSSItemID:      rssItem.ID,
+				SubscriptionID: subscription.ID,
 			})
 		}
 

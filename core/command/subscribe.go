@@ -105,8 +105,9 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 		// TODO: Bulk insert items.
 		for _, item := range items {
 			_, err := withTx.CreateQueueItem(ctx, query.CreateQueueItemParams{
-				UserID:    userID,
-				RSSItemID: sql.NullInt64{Int64: item.ID, Valid: true},
+				UserID:         userID,
+				RSSItemID:      item.ID,
+				SubscriptionID: subscription.ID,
 			})
 
 			// Ignore if the user already has this feed's items in their queue.

@@ -57,6 +57,24 @@ func (q *Queries) CreateRSSSubscription(ctx context.Context, arg CreateRSSSubscr
 	return i, err
 }
 
+const deleteSubscriptionByRSSFeedURLAndUserID = `-- name: DeleteSubscriptionByRSSFeedURLAndUserID :exec
+delete from rss.subscriptions s
+using rss.feeds f
+where s.feed_id = f.id
+  and f.url = $2
+  and s.user_id = $1
+`
+
+type DeleteSubscriptionByRSSFeedURLAndUserIDParams struct {
+	UserID     int64  `json:"user_id"`
+	RSSFeedURL string `json:"rss_feed_url"`
+}
+
+func (q *Queries) DeleteSubscriptionByRSSFeedURLAndUserID(ctx context.Context, arg DeleteSubscriptionByRSSFeedURLAndUserIDParams) error {
+	_, err := q.db.ExecContext(ctx, deleteSubscriptionByRSSFeedURLAndUserID, arg.UserID, arg.RSSFeedURL)
+	return err
+}
+
 const getSubscriptionByRSSFeedIDAndUserID = `-- name: GetSubscriptionByRSSFeedIDAndUserID :one
 select id, uuid, created_at, updated_at, user_id, feed_id, custom_title from rss.subscriptions s
   where s.feed_id = $1 and s.user_id = $2

@@ -68,8 +68,8 @@ where user_id = $1
 group by rf.id;
 
 -- name: CreateQueueItem :one
-insert into queue.items (user_id, rss_item_id)
-values ($1, $2)
+insert into queue.items (user_id, rss_item_id, subscription_id)
+values ($1, $2, $3)
 on conflict do nothing
 returning *;
 

@@ -139,3 +139,44 @@ func (c *ReaderController) SubscriptionList(w http.ResponseWriter, req *http.Req
 
 	c.Container.Render.JSON(w, http.StatusOK, response)
 }
+
+type SubscriptionEditParams struct {
+	Action    string `query:"ac" validate:"required,eq=subscribe|eq=edit|eq=unsubscribe"`
+	StreamID  string `query:"s" validate:"required,startswith=feed/"`
+	Title     string `query:"t"`
+	AddTag    string `query:"a"`
+	RemoveTag string `query:"r"`
+}
+
+func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	params := SubscriptionEditParams{}
+	err := c.Container.BodyParams(&params, req)
+
+	if err != nil {
+		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	feedURL := common.FeedURLFromReaderStreamID(params.StreamID)
+
+	switch params.Action {
+	case "subscribe":
+		break // TODO
+	case "edit":
+		break // TODO
+	case "unsubscribe":
+		c.Container.Queries.DeleteSubscriptionByRSSFeedURLAndUserID(
+			ctx,
+			query.DeleteSubscriptionByRSSFeedURLAndUserIDParams{
+				UserID:     userID,
+				RSSFeedURL: feedURL,
+			},
+		)
+	default:
+		break
+	}
+
+	c.Container.Render.Text(w, http.StatusOK, "OK")
+}

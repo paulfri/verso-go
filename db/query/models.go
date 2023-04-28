@@ -33,14 +33,15 @@ type IdentityUser struct {
 }
 
 type QueueItem struct {
-	ID        int64         `json:"id"`
-	UUID      uuid.UUID     `json:"uuid"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
-	UserID    int64         `json:"user_id"`
-	RSSItemID sql.NullInt64 `json:"rss_item_id"`
-	Read      bool          `json:"read"`
-	Starred   bool          `json:"starred"`
+	ID             int64     `json:"id"`
+	UUID           uuid.UUID `json:"uuid"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	UserID         int64     `json:"user_id"`
+	RSSItemID      int64     `json:"rss_item_id"`
+	SubscriptionID int64     `json:"subscription_id"`
+	Read           bool      `json:"read"`
+	Starred        bool      `json:"starred"`
 }
 
 type RSSFeed struct {

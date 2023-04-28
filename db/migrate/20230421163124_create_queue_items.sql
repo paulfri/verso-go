@@ -7,8 +7,11 @@ create table queue.items (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
+  -- user_id denormalized for simplicity and performance
+  -- unique on user, rss_item should avoid the main pitfalls
   user_id bigint not null references identity.users(id) on delete cascade,
-  rss_item_id bigint references rss.items(id) on delete cascade,
+  rss_item_id bigint not null references rss.items(id) on delete cascade,
+  subscription_id bigint not null references rss.subscriptions(id) on delete cascade,
 
   -- maybe: read_at (recently read), read_version (updated items)
   read boolean not null default false,
@@ -16,11 +19,14 @@ create table queue.items (
   starred boolean not null default false
 );
 
+create unique index concurrently if not exists queue_items_user_id_rss_item_id_key
+  on queue.items(user_id, rss_item_id);
+
+create index concurrently if not exists queue_items_subscription_id
+  on queue.items(subscription_id);
+
 create index concurrently if not exists queue_items_user_id_fkey
   on queue.items (user_id);
-
-create unique index queue_items_user_id_rss_item_id_key
-  on queue.items(user_id, rss_item_id);
 
 create index concurrently if not exists queue_items_user_id_read
   on queue.items (user_id, read);
