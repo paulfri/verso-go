@@ -4,8 +4,8 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
-	// sqldblogger "github.com/simukti/sqldb-logger"
-	// "github.com/simukti/sqldb-logger/logadapter/zerologadapter"
+	sqldblogger "github.com/simukti/sqldb-logger"
+	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/util"
 )
@@ -22,10 +22,8 @@ func Init(url string) (*sql.DB, *query.Queries) {
 		logger.Fatal().Err(err)
 	}
 
-	// if config.DEBUG_SQL {
-	// 	loggerAdapter := zerologadapter.New(*logger)
-	// 	db = sqldblogger.OpenDriver(url, db.Driver(), loggerAdapter)
-	// }
+	loggerAdapter := zerologadapter.New(*logger)
+	db = sqldblogger.OpenDriver(url, db.Driver(), loggerAdapter)
 
 	err = db.Ping()
 	if err != nil {

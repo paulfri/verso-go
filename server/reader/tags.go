@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	lop "github.com/samber/lo/parallel"
 	"github.com/versolabs/verso/db/query"
@@ -48,25 +49,6 @@ func (c *ReaderController) TagList(w http.ResponseWriter, req *http.Request) {
 		Tags: tags,
 	})
 }
-
-// {
-//     "tags": [
-//         {
-//             "id": "user/1/state/com.google/starred",
-//             "sortid": "A0000001"
-
-//         },
-//         {
-//             "id": "user/1/states/com.google/broadcast",
-//             "sortid": "A0000002"
-
-//	        },
-//	        {
-//	            "id": "user/1/label/Tech",
-//	            "sortid": "A0000003"
-//	        },
-//	    ]
-//	}
 
 type EditTagRequestParams struct {
 	ItemIDs   []string `query:"i" validate:"required"`
@@ -129,4 +111,39 @@ func (c *ReaderController) removeTag(ctx context.Context, readerID string, userI
 	default:
 		return fmt.Errorf("unknown tag: %s", tag)
 	}
+}
+
+type DisableTagRequestParams struct {
+	Tag string `query:"s" validate:"required"`
+}
+
+func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	params := DisableTagRequestParams{}
+	err := c.Container.BodyParams(&params, req)
+
+	if err != nil {
+		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = c.Container.Validator.Struct(params)
+	if err != nil {
+		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tagWithoutPrefix, _ := strings.CutPrefix(params.Tag, "user/-/label/")
+
+	err = c.Container.Queries.DeleteTagByNameAndUserID(ctx, query.DeleteTagByNameAndUserIDParams{
+		Name:   tagWithoutPrefix,
+		UserID: userID,
+	})
+
+	if err != nil && err != sql.ErrNoRows {
+		panic(err)
+	}
+
+	c.Container.Render.Text(w, http.StatusOK, "OK")
 }
