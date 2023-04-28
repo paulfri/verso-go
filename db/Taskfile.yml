@@ -10,6 +10,11 @@ tasks:
     cmds:
       - sqlc generate
 
+  compile:watch:
+    desc: Watch for SQL query changes and recompile.
+    cmds:
+      - wgo -file '.sql$' sqlc generate
+
   drop:
     desc: Drop the database. Irreversible.
     dir: ./migrate

@@ -13,6 +13,7 @@ tasks:
     deps:
       - server
       - worker
+      - db:compile:watch
 
   server:
     desc: Run the HTTP server.
@@ -20,7 +21,7 @@ tasks:
       - serve
       - s
     cmds:
-      - air
+      - wgo run main.go server
 
   worker:
     desc: Run the background worker.
@@ -28,4 +29,4 @@ tasks:
       - work
       - w
     cmds:
-      - air -c .air.worker.toml
+      - wgo run main.go worker

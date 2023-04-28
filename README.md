@@ -7,9 +7,9 @@ Syndication summarized.
 ## Dependencies
 
 ```
-brew install golang goose go-task sqlc postgresql redis
+brew install golang goose go-task postgresql redis sqlc
 
-go install github.com/cosmtrek/air@latest
+go install github.com/bokwoon95/wgo@latest
 ```
 
 ## Usage
