@@ -152,7 +152,6 @@ func ReaderIDFromInput(input string) string {
 
 	// Valid int, convert to uint.
 	asUint := uint64(asInt)
-	fmt.Println(asUint)
 
 	// Return as padded hex.
 	return fmt.Sprintf("%016x", asUint)
