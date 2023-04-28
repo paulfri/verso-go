@@ -6,7 +6,7 @@ create table identity.reader_tokens (
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
-  user_id bigint references identity.users(id) not null,
+  user_id bigint not null references identity.users(id) on delete cascade,
   identifier text unique not null,
   revoked_at timestamp
 );

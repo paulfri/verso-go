@@ -18,7 +18,7 @@ const createQueueItem = `-- name: CreateQueueItem :one
 insert into queue.items (user_id, rss_item_id)
 values ($1, $2)
 on conflict do nothing
-returning id, uuid, created_at, updated_at, user_id, read, starred, rss_item_id
+returning id, uuid, created_at, updated_at, user_id, rss_item_id, read, starred
 `
 
 type CreateQueueItemParams struct {
@@ -35,9 +35,9 @@ func (q *Queries) CreateQueueItem(ctx context.Context, arg CreateQueueItemParams
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.RSSItemID,
 		&i.Read,
 		&i.Starred,
-		&i.RSSItemID,
 	)
 	return i, err
 }
@@ -606,7 +606,7 @@ where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.read, qi.starred, qi.rss_item_id
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.read, qi.starred
 `
 
 type UpdateQueueItemReadStateParams struct {
@@ -624,9 +624,9 @@ func (q *Queries) UpdateQueueItemReadState(ctx context.Context, arg UpdateQueueI
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.RSSItemID,
 		&i.Read,
 		&i.Starred,
-		&i.RSSItemID,
 	)
 	return i, err
 }
@@ -639,7 +639,7 @@ where
   qi.rss_item_id = ri.id
   and ri.reader_id = $2
   and qi.user_id = $3
-returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.read, qi.starred, qi.rss_item_id
+returning qi.id, qi.uuid, qi.created_at, qi.updated_at, qi.user_id, qi.rss_item_id, qi.read, qi.starred
 `
 
 type UpdateQueueItemStarredStateParams struct {
@@ -657,9 +657,9 @@ func (q *Queries) UpdateQueueItemStarredState(ctx context.Context, arg UpdateQue
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.RSSItemID,
 		&i.Read,
 		&i.Starred,
-		&i.RSSItemID,
 	)
 	return i, err
 }

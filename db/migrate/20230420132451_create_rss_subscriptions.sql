@@ -6,8 +6,8 @@ create table rss.subscriptions (
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
-  user_id bigint references identity.users(id) not null,
-  feed_id bigint references rss.feeds(id) not null,
+  user_id bigint not null references identity.users(id) on delete cascade,
+  feed_id bigint not null references rss.feeds(id) on delete cascade,
   custom_title text
 );
 

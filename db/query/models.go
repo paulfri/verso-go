@@ -38,9 +38,9 @@ type QueueItem struct {
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
 	UserID    int64         `json:"user_id"`
+	RSSItemID sql.NullInt64 `json:"rss_item_id"`
 	Read      bool          `json:"read"`
 	Starred   bool          `json:"starred"`
-	RSSItemID sql.NullInt64 `json:"rss_item_id"`
 }
 
 type RSSFeed struct {
@@ -93,4 +93,22 @@ type RSSSubscription struct {
 	UserID      int64          `json:"user_id"`
 	FeedID      int64          `json:"feed_id"`
 	CustomTitle sql.NullString `json:"custom_title"`
+}
+
+type TaxonomyRssFeedTag struct {
+	ID        int64     `json:"id"`
+	UUID      uuid.UUID `json:"uuid"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	TagID     int64     `json:"tag_id"`
+	RssFeedID int64     `json:"rss_feed_id"`
+}
+
+type TaxonomyTag struct {
+	ID        int64     `json:"id"`
+	UUID      uuid.UUID `json:"uuid"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UserID    int64     `json:"user_id"`
+	Name      string    `json:"name"`
 }

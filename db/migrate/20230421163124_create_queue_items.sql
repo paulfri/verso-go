@@ -7,14 +7,13 @@ create table queue.items (
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
 
-  user_id bigint not null references identity.users(id),
+  user_id bigint not null references identity.users(id) on delete cascade,
+  rss_item_id bigint references rss.items(id) on delete cascade,
 
   -- maybe: read_at (recently read), read_version (updated items)
   read boolean not null default false,
   -- maybe: starred_at
-  starred boolean not null default false,
-
-  rss_item_id bigint references rss.items(id)
+  starred boolean not null default false
 );
 
 create index queue_items_user_id_fkey
