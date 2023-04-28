@@ -88,3 +88,22 @@ func (q *Queries) GetTagsByUserID(ctx context.Context, userID int64) ([]Taxonomy
 	}
 	return items, nil
 }
+
+const renameTagByNameAndUserID = `-- name: RenameTagByNameAndUserID :exec
+update taxonomy.tags
+  set name = $3::text
+where
+  name = $1
+  and user_id = $2
+`
+
+type RenameTagByNameAndUserIDParams struct {
+	Name    string `json:"name"`
+	UserID  int64  `json:"user_id"`
+	NewName string `json:"new_name"`
+}
+
+func (q *Queries) RenameTagByNameAndUserID(ctx context.Context, arg RenameTagByNameAndUserIDParams) error {
+	_, err := q.db.ExecContext(ctx, renameTagByNameAndUserID, arg.Name, arg.UserID, arg.NewName)
+	return err
+}

@@ -57,6 +57,7 @@ func Router(container *util.Container) http.Handler {
 		auth.Get("/tag/list", reader.TagList)
 		auth.Post("/edit-tag", reader.EditTag)
 		auth.Post("/disable-tag", reader.DisableTag)
+		auth.Post("/rename-tag", reader.RenameTag)
 	})
 
 	return router

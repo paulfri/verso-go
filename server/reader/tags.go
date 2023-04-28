@@ -147,3 +147,41 @@ func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) 
 
 	c.Container.Render.Text(w, http.StatusOK, "OK")
 }
+
+type RenameTagRequestParams struct {
+	Tag     string `query:"s" validate:"required"`
+	NewName string `query:"dest" validate:"required"`
+}
+
+func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	params := RenameTagRequestParams{}
+	err := c.Container.BodyParams(&params, req)
+
+	if err != nil {
+		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = c.Container.Validator.Struct(params)
+	if err != nil {
+		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tagWithoutPrefix, _ := strings.CutPrefix(params.Tag, "user/-/label/")
+	newTagWithoutPrefix, _ := strings.CutPrefix(params.NewName, "user/-/label/")
+
+	err = c.Container.Queries.RenameTagByNameAndUserID(ctx, query.RenameTagByNameAndUserIDParams{
+		UserID:  userID,
+		Name:    tagWithoutPrefix,
+		NewName: newTagWithoutPrefix,
+	})
+
+	if err != nil && err != sql.ErrNoRows {
+		panic(err)
+	}
+
+	c.Container.Render.Text(w, http.StatusOK, "OK")
+}
