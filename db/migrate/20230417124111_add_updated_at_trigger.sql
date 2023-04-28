@@ -10,6 +10,4 @@ $$ language 'plpgsql';
 -- +goose StatementEnd
 
 -- +goose Down
--- +goose StatementBegin
 drop function touch_updated_at();
--- +goose StatementEnd

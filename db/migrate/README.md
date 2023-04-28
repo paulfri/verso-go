@@ -12,8 +12,8 @@ See `task --list-all` for commands.
 ```sql
 id bigint primary key generated always as identity,
 uuid uuid unique not null default gen_random_uuid(),
-created_at timestamp not null default now(),
-updated_at timestamp not null default now(),
+created_at timestamptz not null default now(),
+updated_at timestamptz not null default now(),
 ```
 
 3. Indexes are named `{tablename}_{columnname(s)}_{suffix}`, where `suffix` is

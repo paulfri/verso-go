@@ -1,0 +1,5 @@
+pg_version = "14.6"
+assume_in_transaction = true
+excluded_rules = [
+  "ban-drop-table",
+]
