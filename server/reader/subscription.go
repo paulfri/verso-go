@@ -34,9 +34,8 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 
 	subscription, err := c.Container.Command.SubscribeToFeedByURL(ctx, params.Quickadd, userID)
-	feed, err2 := c.Container.Queries.GetRSSFeed(ctx, subscription.FeedID)
 
-	if err != nil && err2 != nil {
+	if err != nil {
 		c.Container.Render.JSON(
 			w,
 			http.StatusBadRequest,
@@ -46,21 +45,36 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 				StreamID:   null.String{},
 			},
 		)
-	} else {
-		streamID := common.ReaderStreamIDFromFeedURL(feed.URL)
-		asSQL := sql.NullString{String: streamID, Valid: true}
-		asNullable := null.String{asSQL}
+		return
+	}
 
+	feed, err2 := c.Container.Queries.GetRSSFeed(ctx, subscription.FeedID)
+
+	if err2 != nil {
 		c.Container.Render.JSON(
 			w,
-			http.StatusOK,
+			http.StatusBadRequest,
 			SubscriptionQuickAddResponse{
-				NumResults: 1,
+				NumResults: 0,
 				Query:      params.Quickadd,
-				StreamID:   asNullable,
+				StreamID:   null.String{},
 			},
 		)
+		return
 	}
+
+	streamID := common.ReaderStreamIDFromFeedURL(feed.URL)
+	asSQL := sql.NullString{String: streamID, Valid: true}
+
+	c.Container.Render.JSON(
+		w,
+		http.StatusOK,
+		SubscriptionQuickAddResponse{
+			NumResults: 1,
+			Query:      params.Quickadd,
+			StreamID:   null.String{asSQL},
+		},
+	)
 }
 
 type SubscriptionExistsRequestParams struct {

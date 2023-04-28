@@ -31,6 +31,7 @@ func Work(config *util.Config) cli.ActionFunc {
 				DB:      database,
 				Queries: queries,
 				Render:  render.New(),
+				Logger:  util.Logger(),
 			},
 		}
 

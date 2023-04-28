@@ -30,7 +30,14 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 
 	// Fetch the feed and parse it.
 	parser := gofeed.NewParser()
-	remoteFeed, _ := parser.ParseURL(thisFeed.URL)
+	remoteFeed, err := parser.ParseURL(thisFeed.URL)
+
+	if err != nil {
+		// Parsing error. This will get re-enqueued, so failing is fine.
+		// TODO: Store parsing errors for investigation.
+		worker.Container.Logger.Error().Msgf("Failed to parse feed: %v", err.Error())
+		return nil
+	}
 
 	items := remoteFeed.Items
 	if len(items) == 0 {
