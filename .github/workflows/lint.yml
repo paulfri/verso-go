@@ -27,5 +27,6 @@ jobs:
         if: steps.modified.outputs.any_changed == 'true'
 
       - name: Lint migrations
+        if: steps.modified.outputs.any_changed == 'true'
         run: |
           squawk --config db/migrate/.squawk.toml --verbose ${{ steps.modified.outputs.all_changed_files }}
