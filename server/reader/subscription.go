@@ -23,7 +23,7 @@ type SubscriptionQuickAddResponse struct {
 
 func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
 	params := SubscriptionQuickAddRequestParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -152,7 +152,7 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := SubscriptionEditParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -163,9 +163,11 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 
 	switch params.Action {
 	case "subscribe":
-		break // TODO
+		c.Container.Render.Text(w, http.StatusBadRequest, err.Error()) // TODO
+		return
 	case "edit":
-		break // TODO
+		c.Container.Render.Text(w, http.StatusBadRequest, err.Error()) // TODO
+		return
 	case "unsubscribe":
 		c.Container.Queries.DeleteSubscriptionByRSSFeedURLAndUserID(
 			ctx,

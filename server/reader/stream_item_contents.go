@@ -23,7 +23,7 @@ type StreamItemsContentsRequestParams struct {
 func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	params := StreamItemsContentsRequestParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 
 	if err != nil {

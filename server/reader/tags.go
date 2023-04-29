@@ -60,7 +60,7 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := EditTagRequestParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
@@ -121,7 +121,7 @@ func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) 
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := DisableTagRequestParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
@@ -157,7 +157,7 @@ func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := RenameTagRequestParams{}
-	err := c.Container.BodyParams(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
@@ -180,7 +180,7 @@ func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
 	})
 
 	if err != nil && err != sql.ErrNoRows {
-		panic(err)
+		panic(err) // TODO
 	}
 
 	c.Container.Render.Text(w, http.StatusOK, "OK")

@@ -86,3 +86,12 @@ func (c Container) BodyParams(s interface{}, req *http.Request) error {
 
 	return c.Validator.Struct(s)
 }
+
+func (c Container) BodyOrQueryParams(s interface{}, req *http.Request) error {
+	err := c.BodyParams(s, req)
+	if err != nil {
+		return c.Params(s, req)
+	}
+
+	return nil
+}
