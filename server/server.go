@@ -19,6 +19,7 @@ import (
 
 func Serve(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
+		airbrake := util.Airbrake(config)
 		logger := util.Logger()
 
 		r := chi.NewRouter()
@@ -33,6 +34,9 @@ func Serve(config *util.Config) cli.ActionFunc {
 			r.Use(DebugRequestBody(logger))
 		}
 
+		// Error notifier middleware goes last.
+		r.Use(NotifyAirbrake(airbrake))
+
 		asynq := worker.Client(config.RedisURL)
 		db, queries := db.Init(config.DatabaseURL, config.DatabaseMigrate)
 
@@ -43,6 +47,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		}
 
 		container := util.Container{
+			Airbrake:  airbrake,
 			Asynq:     asynq,
 			Command:   command,
 			Config:    config,

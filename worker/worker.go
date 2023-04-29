@@ -1,8 +1,10 @@
 package worker
 
 import (
+	"context"
 	"log"
 
+	"github.com/airbrake/gobrake/v5"
 	"github.com/hibiken/asynq"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
@@ -17,9 +19,16 @@ type Worker struct {
 
 func Work(config *util.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
+		airbrake := util.Airbrake(config)
+		notifier := notify(airbrake)
+		handler := asynq.ErrorHandlerFunc(notifier)
+
 		srv := asynq.NewServer(
 			asynq.RedisClientOpt{Addr: config.RedisURL},
-			asynq.Config{Concurrency: config.WorkerConcurrency},
+			asynq.Config{
+				Concurrency:  config.WorkerConcurrency,
+				ErrorHandler: handler,
+			},
 		)
 
 		database, queries := db.Init(config.DatabaseURL, false)
@@ -27,6 +36,7 @@ func Work(config *util.Config) cli.ActionFunc {
 
 		worker := Worker{
 			Container: &util.Container{
+
 				Asynq:   client,
 				DB:      database,
 				Queries: queries,
@@ -46,5 +56,11 @@ func Work(config *util.Config) cli.ActionFunc {
 		}
 
 		return nil
+	}
+}
+
+func notify(airbrake *gobrake.Notifier) asynq.ErrorHandlerFunc {
+	return func(ctx context.Context, task *asynq.Task, err error) {
+		airbrake.Notify(err, nil)
 	}
 }

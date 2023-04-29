@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/airbrake/gobrake/v5"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/verso/core/action"
@@ -20,17 +19,6 @@ func main() {
 	_ = godotenv.Load()
 
 	config := util.GetConfig()
-
-	if config.AirbrakeProjectKey != "" {
-		var airbrake = gobrake.NewNotifierWithOptions(&gobrake.NotifierOptions{
-			ProjectId:   int64(config.AirbrakeProjectID),
-			ProjectKey:  config.AirbrakeProjectKey,
-			Environment: config.Env,
-		})
-
-		defer airbrake.Close()
-		defer airbrake.NotifyOnPanic()
-	}
 
 	app := &cli.App{
 		Commands: []*cli.Command{

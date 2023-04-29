@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/airbrake/gobrake/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/hetiansu5/urlquery"
 	"github.com/hibiken/asynq"
@@ -17,6 +18,7 @@ import (
 )
 
 type Container struct {
+	Airbrake  *gobrake.Notifier
 	Asynq     *asynq.Client
 	Command   *command.Command
 	Config    *Config
