@@ -34,7 +34,7 @@ func Serve(config *util.Config) cli.ActionFunc {
 		}
 
 		asynq := worker.Client(config.RedisURL)
-		db, queries := db.Init(config.DatabaseURL)
+		db, queries := db.Init(config.DatabaseURL, config.DatabaseMigrate)
 
 		command := &command.Command{
 			Asynq:   asynq,

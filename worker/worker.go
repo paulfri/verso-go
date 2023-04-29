@@ -22,7 +22,7 @@ func Work(config *util.Config) cli.ActionFunc {
 			asynq.Config{Concurrency: config.WorkerConcurrency},
 		)
 
-		database, queries := db.Init(config.DatabaseURL)
+		database, queries := db.Init(config.DatabaseURL, false)
 		client := Client(config.RedisURL)
 
 		worker := Worker{

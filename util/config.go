@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
+	BaseURL           string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	DatabaseMigrate   bool   `env:"DATABASE_MIGRATE" envDefault:"false"`
+	DatabaseURL       string `env:"DATABASE_URL"`
+	Debug             bool   `env:"DEBUG" envDefault:"false"`
+	Env               string `env:"VERSO_ENV" envDefault:"development"`
 	Host              string `env:"HOST"`
 	Port              string `env:"PORT" envDefault:"8080"`
-	Env               string `env:"VERSO_ENV" envDefault:"development"`
-	Debug             bool   `env:"DEBUG" envDefault:"false"`
-	BaseURL           string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	DatabaseURL       string `env:"DATABASE_URL"`
 	RedisURL          string `env:"REDIS_URL"`
 	WorkerConcurrency int    `env:"WORKER_CONCURRENCY" envDefault:"10"`
 }

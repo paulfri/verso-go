@@ -10,7 +10,7 @@ import (
 	"github.com/versolabs/verso/util"
 )
 
-func Init(url string) (*sql.DB, *query.Queries) {
+func Init(url string, migrate bool) (*sql.DB, *query.Queries) {
 	logger := util.Logger()
 
 	if logger == nil {
@@ -28,6 +28,10 @@ func Init(url string) (*sql.DB, *query.Queries) {
 	err = db.Ping()
 	if err != nil {
 		logger.Fatal().Err(err)
+	}
+
+	if migrate {
+		runMigrations(db)
 	}
 
 	return db, query.New(db)
