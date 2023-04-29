@@ -54,6 +54,8 @@ func Serve(config *util.Config) cli.ActionFunc {
 		}
 
 		r.Get("/ping", ping)
+		r.Get("/panic", testPanic)
+
 		r.Mount("/", reader.LoginRouter(&container))
 		r.Mount("/reader/api/0", reader.Router(&container))
 
