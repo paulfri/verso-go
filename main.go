@@ -14,10 +14,9 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env: %+v\n", err)
-	}
+	// Load environment from .env file, if present. Production environments are
+	// configured without the use of this file.
+	_ = godotenv.Load()
 
 	config := util.GetConfig()
 
