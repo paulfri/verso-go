@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/hibiken/asynq"
@@ -14,7 +13,6 @@ import (
 )
 
 func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
-	return errors.New("asdfasdf")
 	var p tasks.FeedParsePayload
 
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
