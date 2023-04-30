@@ -19,30 +19,29 @@ tasks:
     desc: Drop the database. Irreversible.
     dir: ./migrate
     ignore_error: true
+    preconditions:
+      - sh: '[ "$VERSO_ENV" = "development" ] || [ "$VERSO_ENV" = "test" ]'
+        msg: "Command can only be run in development or test"
     cmds:
-      # TODO: database name; env check
-      - psql postgres -c 'drop database verso_dev;'
+      - psql postgres --command 'drop database {{.DATABASE_NAME}}';
 
   create:
     desc: Create the database.
     dir: ./migrate
     cmds:
-      # TODO: database name
-      - psql postgres -c 'create database verso_dev;'
+      - psql postgres --command 'create database {{.DATABASE_NAME}};'
 
   seed:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      # TODO: database name
-      - psql -d verso_dev -f db/seed.sql
+      - psql --quiet --output=/dev/null --dbname={{.DATABASE_NAME}} --file db/seed.sql
 
   seed:dump:
     desc: Dumps the dev database to a seed file.
     dir: ..
     cmds:
-      # TODO: database name
-      - pg_dump --data-only verso_dev > db/seed.sql
+      - pg_dump --data-only --exclude-table=goose_db_version {{.DATABASE_NAME}} > db/seed.sql
 
   gen:
     desc: Generate a new migration.
