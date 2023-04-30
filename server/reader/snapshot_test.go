@@ -1,6 +1,8 @@
 package reader
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +18,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/unrolled/render"
 	"github.com/versolabs/verso/db"
+	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/util"
 	"github.com/versolabs/verso/worker"
 )
@@ -36,40 +39,52 @@ type test struct {
 	Requests []request `toml:"requests"`
 }
 
-type config struct {
+type testConfig struct {
 	Tests []test `toml:"tests"`
 }
 
 // Snapshot regression testing for the Reader API.
 func TestSnapshot(t *testing.T) {
-	var conf config
-	_, err := toml.DecodeFile(testConfigFile, &conf)
+	err := godotenv.Load("../../.env.test")
+	if err != nil {
+		panic(err)
+	}
 
+	var testconf testConfig
+	_, err = toml.DecodeFile(testConfigFile, &testconf)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	container := initTestContainer()
-	router := Router(container)
-	server := httptest.NewServer(router)
-	defer server.Close()
-
-	makeReq := func(req request) *http.Request {
-		r, err := http.NewRequest(req.Method, server.URL+req.Path, strings.NewReader(req.Body))
-
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if req.Auth {
-			r.Header.Add("Authorization", "GoogleLogin auth=F2vwA2wKSHISLXT7slqt")
-		}
-
-		return r
-	}
-
-	for _, tt := range conf.Tests {
+	for _, tt := range testconf.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
+
+			config := util.GetConfig()
+			ctx := context.Background()
+			db, queries := db.Init(config.DatabaseURL, false)
+			tx, err := db.BeginTx(ctx, nil)
+			if err != nil {
+				panic(err)
+			}
+			queries = queries.WithTx(tx)
+
+			container := initTestContainer(db, queries)
+			server := httptest.NewServer(Router(container))
+			defer server.Close()
+
+			makeReq := func(req request) *http.Request {
+				r, err := http.NewRequest(req.Method, server.URL+req.Path, strings.NewReader(req.Body))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if req.Auth {
+					r.Header.Add("Authorization", "GoogleLogin auth=F2vwA2wKSHISLXT7slqt")
+				}
+
+				return r
+			}
+
 			// Generate requests from configuration.
 			reqs := lo.Map(tt.Requests, func(r request, i int) *http.Request {
 				return makeReq(r)
@@ -89,19 +104,15 @@ func TestSnapshot(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			// Roll back the database.
+			tx.Rollback()
 		})
 	}
 }
 
-func initTestContainer() *util.Container {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		panic(err)
-	}
-
+func initTestContainer(db *sql.DB, queries *query.Queries) *util.Container {
 	config := util.GetConfig()
-
-	db, queries := db.Init(config.DatabaseURL, false)
 
 	return &util.Container{
 		Asynq:     worker.Client(config.RedisURL),

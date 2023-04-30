@@ -2,7 +2,7 @@ package util
 
 import (
 	"database/sql"
-	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -27,6 +27,23 @@ type Container struct {
 	Render    *render.Render
 	Validator *validator.Validate
 	Logger    *zerolog.Logger
+}
+
+type ContextDBQueriesKey struct{}
+
+func (c *Container) GetQueries(req *http.Request) *query.Queries {
+	if req.Context().Value(ContextDBQueriesKey{}) != nil {
+		queries := req.Context().Value(ContextDBQueriesKey{}).(*query.Queries)
+		fmt.Printf("%+v\n", queries)
+		fmt.Printf("%+v\n", queries)
+		fmt.Printf("%+v\n", queries)
+		fmt.Printf("%+v\n", queries)
+		fmt.Printf("%+v\n", queries)
+		fmt.Printf("%+v\n", queries)
+		return queries
+	}
+
+	return c.Queries
 }
 
 // Given a struct with request parameters, unmarshal the query string from the
@@ -55,17 +72,6 @@ func (c Container) Form(req *http.Request, s interface{}) error {
 	}
 
 	return c.Validator.Struct(s)
-}
-
-func (c Container) JSONBody(req *http.Request, s interface{}) error {
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(s)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Given a struct with request parameters, unmarshal the query string from the

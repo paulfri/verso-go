@@ -26,9 +26,9 @@ func Router(container *util.Container) http.Handler {
 	reader := ReaderController{Container: container}
 
 	router := chi.NewRouter()
+
 	router.Get("/status", reader.MetaStatus)
 	router.Post("/accounts/ClientLogin", reader.ClientLogin)
-
 	router.With(reader.AuthMiddleware).Route("/", func(auth chi.Router) {
 		auth.Get("/ping", reader.MetaPing)
 
