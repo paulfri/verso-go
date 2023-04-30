@@ -14,6 +14,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -21,5 +32,7 @@ jobs:
           go-version: "1.20"
       - run: git config --global url."https://${{ secrets.TOKEN }}:@github.com/".insteadOf "https://github.com"
       - run: go mod download
+      - run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+      - run: task db:reset
       - run: go build -v ./...
       - run: go test -v ./...

@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 	"github.com/versolabs/verso/core/action"
-	"github.com/versolabs/verso/db"
 	"github.com/versolabs/verso/server"
 	"github.com/versolabs/verso/util"
 	"github.com/versolabs/verso/worker"
@@ -33,11 +32,6 @@ func main() {
 				Aliases: []string{"w"},
 				Usage:   "Run the background worker",
 				Action:  worker.Work(&config),
-			},
-			{
-				Name:   "seed",
-				Usage:  "Seed the database with test fixtures",
-				Action: db.Seed(&config),
 			},
 			{
 				Name:   "crawl",

@@ -23,6 +23,13 @@ tasks:
     cmds:
       - wgo run main.go server
 
+  test:
+    desc: Run the test suite.
+    aliases:
+      - t
+    cmds:
+      - go test -v ./...
+
   worker:
     desc: Run the background worker.
     aliases:

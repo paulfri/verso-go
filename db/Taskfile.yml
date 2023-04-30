@@ -34,7 +34,15 @@ tasks:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      - go run main.go seed
+      # TODO: database name
+      - psql -d verso_dev -f db/seed.sql
+
+  seed:dump:
+    desc: Dumps the dev database to a seed file.
+    dir: ..
+    cmds:
+      # TODO: database name
+      - pg_dump --data-only verso_dev > db/seed.sql
 
   gen:
     desc: Generate a new migration.
