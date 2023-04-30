@@ -2,7 +2,6 @@ package reader
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/bradleyjkemp/cupaloy/v2"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/samber/lo"
 	"github.com/unrolled/render"
@@ -27,8 +27,8 @@ type request struct {
 	Method string `toml:"method"`
 	Path   string `toml:"path"`
 	Auth   bool   `toml:"auth"`
-	// Query string `yaml:"query"` // TODO
-	// Body string `yaml:"query"` // TODO
+	Body   string `toml:"body"`
+	// Query string `toml:"query"` // TODO
 }
 
 type test struct {
@@ -54,14 +54,17 @@ func TestSnapshot(t *testing.T) {
 	server := httptest.NewServer(router)
 	defer server.Close()
 
-	makeReq := func(method, url string, auth bool, body io.Reader) *http.Request {
-		r, err := http.NewRequest(method, url, body)
-		if auth {
-			r.Header.Add("Authorization", "GoogleLogin auth=F2vwA2wKSHISLXT7slqt")
-		}
+	makeReq := func(req request) *http.Request {
+		r, err := http.NewRequest(req.Method, server.URL+req.Path, strings.NewReader(req.Body))
+
 		if err != nil {
 			t.Fatal(err)
 		}
+
+		if req.Auth {
+			r.Header.Add("Authorization", "GoogleLogin auth=F2vwA2wKSHISLXT7slqt")
+		}
+
 		return r
 	}
 
@@ -69,7 +72,7 @@ func TestSnapshot(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			// Generate requests from configuration.
 			reqs := lo.Map(tt.Requests, func(r request, i int) *http.Request {
-				return makeReq(r.Method, server.URL+r.Path, r.Auth, nil)
+				return makeReq(r)
 			})
 
 			// Execute the configured requests.
@@ -101,10 +104,13 @@ func initTestContainer() *util.Container {
 	db, queries := db.Init(config.DatabaseURL, false)
 
 	return &util.Container{
-		Asynq:   worker.Client(config.RedisURL),
-		DB:      db,
-		Queries: queries,
-		Render:  render.New(),
+		Asynq:     worker.Client(config.RedisURL),
+		Config:    &config,
+		DB:        db,
+		Logger:    util.Logger(),
+		Queries:   queries,
+		Render:    render.New(),
+		Validator: validator.New(),
 	}
 }
 
@@ -127,7 +133,7 @@ func dumpRequest(req *http.Request, index int) string {
 	}
 
 	// Dump request and response to snapshot output.
-	out := fmt.Sprintf("%v\n%v", string(reqDump), string(resDump))
+	out := fmt.Sprintf("%v\n\n%v", string(reqDump), string(resDump))
 
 	// Stabilize the snapshot.
 	out = regexp.MustCompile("Host: .*").ReplaceAllString(out, "Host: localhost:8080")

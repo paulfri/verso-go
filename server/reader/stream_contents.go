@@ -41,7 +41,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}
-	err := c.Container.Params(&params, req)
+	err := c.Container.BodyParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())

@@ -3,6 +3,7 @@ module github.com/versolabs/verso
 go 1.18
 
 require (
+	github.com/BurntSushi/toml v1.2.1
 	github.com/PuerkitoBio/purell v1.2.0
 	github.com/airbrake/gobrake/v5 v5.6.1
 	github.com/caarlos0/env/v8 v8.0.0
