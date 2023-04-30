@@ -5,11 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-
-	"github.com/unrolled/render"
-	"github.com/versolabs/verso/db"
-	"github.com/versolabs/verso/util"
-	"github.com/versolabs/verso/worker"
 )
 
 func authenticatedTestRequest(method string, path string, _body io.Reader, token string) *http.Request {
@@ -20,17 +15,17 @@ func authenticatedTestRequest(method string, path string, _body io.Reader, token
 	return req
 }
 
-func initTestContainer() *util.Container {
-	config := util.GetConfig()
-	db, queries := db.Init(config.DatabaseURL, false)
+// func initTestContainer() *util.Container {
+// 	config := util.GetConfig()
+// 	db, queries := db.Init(config.DatabaseURL, false)
 
-	return &util.Container{
-		Asynq:   worker.Client(config.RedisURL),
-		DB:      db,
-		Queries: queries,
-		Render:  render.New(),
-	}
-}
+// 	return &util.Container{
+// 		Asynq:   worker.Client(config.RedisURL),
+// 		DB:      db,
+// 		Queries: queries,
+// 		Render:  render.New(),
+// 	}
+// }
 
 func initTestController() *ReaderController {
 	return &ReaderController{
