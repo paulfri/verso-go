@@ -58,16 +58,19 @@ func TestSnapshot(t *testing.T) {
 
 	for _, tt := range testconf.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
-
 			config := util.GetConfig()
 			ctx := context.Background()
+
+			// Build container with a database transaction. The transaction is rolled
+			// back at the end of every test to prevent side effects from persisting
+			// between tests.
 			db, queries := db.Init(config.DatabaseURL, false)
 			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {
 				panic(err)
 			}
-			queries = queries.WithTx(tx)
 
+			queries = queries.WithTx(tx)
 			container := initTestContainer(db, queries)
 			server := httptest.NewServer(Router(container))
 			defer server.Close()
