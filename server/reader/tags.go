@@ -23,8 +23,9 @@ type TagList struct {
 
 func (c *ReaderController) TagList(w http.ResponseWriter, req *http.Request) {
 	userID := req.Context().Value(ContextUserIDKey{}).(int64)
+	queries := c.Container.GetQueries(req)
 
-	tagRows, err := c.Container.Queries.GetTagsByUserID(req.Context(), userID)
+	tagRows, err := queries.GetTagsByUserID(req.Context(), userID)
 
 	if err != nil {
 		panic(err)
@@ -122,6 +123,7 @@ func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) 
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := DisableTagRequestParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
@@ -136,7 +138,7 @@ func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) 
 
 	tagWithoutPrefix, _ := strings.CutPrefix(params.Tag, "user/-/label/")
 
-	err = c.Container.Queries.DeleteTagByNameAndUserID(ctx, query.DeleteTagByNameAndUserIDParams{
+	err = queries.DeleteTagByNameAndUserID(ctx, query.DeleteTagByNameAndUserIDParams{
 		Name:   tagWithoutPrefix,
 		UserID: userID,
 	})
@@ -157,6 +159,7 @@ func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := RenameTagRequestParams{}
+	queries := c.Container.GetQueries(req)
 	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
@@ -173,7 +176,7 @@ func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
 	tagWithoutPrefix, _ := strings.CutPrefix(params.Tag, "user/-/label/")
 	newTagWithoutPrefix, _ := strings.CutPrefix(params.NewName, "user/-/label/")
 
-	err = c.Container.Queries.RenameTagByNameAndUserID(ctx, query.RenameTagByNameAndUserIDParams{
+	err = queries.RenameTagByNameAndUserID(ctx, query.RenameTagByNameAndUserIDParams{
 		UserID:  userID,
 		Name:    tagWithoutPrefix,
 		NewName: newTagWithoutPrefix,

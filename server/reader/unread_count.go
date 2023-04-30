@@ -23,7 +23,9 @@ type UnreadCountResponse struct {
 
 func (c *ReaderController) UnreadCount(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	counts, err := c.Container.Queries.GetUnreadCountsByUserID(ctx, 1)
+	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	queries := c.Container.GetQueries(req)
+	counts, err := queries.GetUnreadCountsByUserID(ctx, userID)
 
 	if err != nil {
 		panic(err) // TODO

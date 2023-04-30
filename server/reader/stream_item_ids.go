@@ -1,7 +1,6 @@
 package reader
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/versolabs/verso/db/query"
@@ -37,22 +36,22 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 
 		// TODO: only implements exclude tag for Read
 		if params.ExcludeTag == common.StreamIDRead {
-			itemRefs = c.getUnreadItemsByUserID(ctx, userID)
+			itemRefs = c.getUnreadItemsByUserID(req, userID)
 		} else {
-			itemRefs = c.getAllItemsByUserID(ctx, userID)
+			itemRefs = c.getAllItemsByUserID(req, userID)
 		}
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
 		})
 	case common.StreamIDRead:
-		itemRefs := c.getReadItemsByUserID(ctx, userID)
+		itemRefs := c.getReadItemsByUserID(req, userID)
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
 		})
 	case common.StreamIDStarred:
-		itemRefs := c.getStarredItemsByUserID(ctx, userID)
+		itemRefs := c.getStarredItemsByUserID(req, userID)
 
 		c.Container.Render.JSON(w, http.StatusOK, StreamItemsIDsResponse{
 			ItemRefs: itemRefs,
@@ -72,8 +71,11 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (c *ReaderController) getAllItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
-	items, err := c.Container.Queries.GetItemsByUserID(
+func (c *ReaderController) getAllItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
+
+	items, err := queries.GetItemsByUserID(
 		ctx,
 		query.GetItemsByUserIDParams{
 			UserID: userID,
@@ -91,8 +93,11 @@ func (c *ReaderController) getAllItemsByUserID(ctx context.Context, userID int64
 	return itemRefs
 }
 
-func (c *ReaderController) getReadItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
-	items, err := c.Container.Queries.GetReadItemsByUserID(
+func (c *ReaderController) getReadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
+
+	items, err := queries.GetReadItemsByUserID(
 		ctx,
 		query.GetReadItemsByUserIDParams{
 			UserID: userID,
@@ -110,8 +115,11 @@ func (c *ReaderController) getReadItemsByUserID(ctx context.Context, userID int6
 	return itemRefs
 }
 
-func (c *ReaderController) getUnreadItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
-	items, err := c.Container.Queries.GetUnreadItemsByUserID(
+func (c *ReaderController) getUnreadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
+
+	items, err := queries.GetUnreadItemsByUserID(
 		ctx,
 		query.GetUnreadItemsByUserIDParams{
 			UserID: userID,
@@ -129,8 +137,11 @@ func (c *ReaderController) getUnreadItemsByUserID(ctx context.Context, userID in
 	return itemRefs
 }
 
-func (c *ReaderController) getStarredItemsByUserID(ctx context.Context, userID int64) []serialize.FeedItemRef {
-	items, err := c.Container.Queries.GetStarredItemsByUserID(
+func (c *ReaderController) getStarredItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
+
+	items, err := queries.GetStarredItemsByUserID(
 		ctx,
 		query.GetStarredItemsByUserIDParams{
 			UserID: userID,
@@ -147,5 +158,3 @@ func (c *ReaderController) getStarredItemsByUserID(ctx context.Context, userID i
 
 	return itemRefs
 }
-
-// Don't know how to begin to explain this

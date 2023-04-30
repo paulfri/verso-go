@@ -19,7 +19,8 @@ type UserResponse struct {
 func (c *ReaderController) User(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
-	user, _ := c.Container.Queries.GetUser(ctx, userID.(int64))
+	queries := c.Container.GetQueries(req)
+	user, _ := queries.GetUser(ctx, userID.(int64))
 
 	c.Container.Render.JSON(w, http.StatusOK, UserResponse{
 		UserID:              user.UUID.String(),
@@ -78,7 +79,8 @@ func (c *ReaderController) UserFriendList(w http.ResponseWriter, req *http.Reque
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	strUserID := fmt.Sprintf("%d", userID)
 	idSlice := [1]string{strUserID}
-	user, _ := c.Container.Queries.GetUser(ctx, userID)
+	queries := c.Container.GetQueries(req)
+	user, _ := queries.GetUser(ctx, userID)
 
 	c.Container.Render.JSON(w, http.StatusOK, UserFriend{
 		ContactID:   strUserID,
