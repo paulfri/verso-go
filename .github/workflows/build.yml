@@ -19,6 +19,8 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: verso_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -30,9 +32,10 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
+      - run: cp .env.test .env
       - run: git config --global url."https://${{ secrets.TOKEN }}:@github.com/".insteadOf "https://github.com"
       - run: go mod download
       - run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-      - run: task db:reset
+      - run: ./bin/task db:reset
       - run: go build -v ./...
       - run: go test -v ./...
