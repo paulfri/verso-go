@@ -1,11 +1,24 @@
 [[tests]]
 name = "TestStatus"
+[[tests.requests]]
 method = "GET"
 path = "/status"
 auth = false
 
 [[tests]]
 name = "TestPing"
+[[tests.requests]]
+method = "GET"
+path = "/ping"
+auth = true
+
+[[tests]]
+name = "TestMultiplePing"
+[[tests.requests]]
+method = "GET"
+path = "/ping"
+auth = true
+[[tests.requests]]
 method = "GET"
 path = "/ping"
 auth = true

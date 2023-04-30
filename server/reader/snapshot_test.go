@@ -7,11 +7,13 @@ import (
 	"net/http/httptest"
 	"net/http/httputil"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/BurntSushi/toml"
 	"github.com/bradleyjkemp/cupaloy/v2"
 	"github.com/joho/godotenv"
+	"github.com/samber/lo"
 	"github.com/unrolled/render"
 	"github.com/versolabs/verso/db"
 	"github.com/versolabs/verso/util"
@@ -21,13 +23,17 @@ import (
 const snapshotDirectory = "__snapshots__"
 const testConfigFile = "./snapshot.toml"
 
-type test struct {
-	Name   string `toml:"name"`
+type request struct {
 	Method string `toml:"method"`
 	Path   string `toml:"path"`
 	Auth   bool   `toml:"auth"`
-	// Query string `yaml:"query"`
-	// Body string `yaml:"query"`
+	// Query string `yaml:"query"` // TODO
+	// Body string `yaml:"query"` // TODO
+}
+
+type test struct {
+	Name     string    `toml:"name"`
+	Requests []request `toml:"requests"`
 }
 
 type config struct {
@@ -48,7 +54,7 @@ func TestSnapshot(t *testing.T) {
 	server := httptest.NewServer(router)
 	defer server.Close()
 
-	request := func(method, url string, auth bool, body io.Reader) *http.Request {
+	makeReq := func(method, url string, auth bool, body io.Reader) *http.Request {
 		r, err := http.NewRequest(method, url, body)
 		if auth {
 			r.Header.Add("Authorization", "GoogleLogin auth=F2vwA2wKSHISLXT7slqt")
@@ -61,37 +67,22 @@ func TestSnapshot(t *testing.T) {
 
 	for _, tt := range conf.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			req := request(tt.Method, server.URL+tt.Path, tt.Auth, nil)
+			// Generate requests from configuration.
+			reqs := lo.Map(tt.Requests, func(r request, i int) *http.Request {
+				return makeReq(r.Method, server.URL+r.Path, r.Auth, nil)
+			})
 
-			reqDump, err := httputil.DumpRequestOut(req, true)
-			if err != nil {
-				t.Fatal(err)
-			}
+			// Execute the configured requests.
+			dumps := lo.Map(reqs, dumpRequest)
 
-			res, err := http.DefaultClient.Do(req)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			defer res.Body.Close()
-
-			resDump, err := httputil.DumpResponse(res, true)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// Dump request and response to snapshot output.
-			out := fmt.Sprintf("%v\n%v", string(reqDump), string(resDump))
-
-			// Stabilize the snapshot.
-			out = regexp.MustCompile("Host: .*").ReplaceAllString(out, "Host: localhost:8080")
-			out = regexp.MustCompile("Date: .*").ReplaceAllString(out, "Date: Thu, 1 Jan 1970 00:00:00 GMT")
+			// Join the requests into a single snapshot.
+			snapshot := strings.Join(dumps, "\n\n")
 
 			// Configure snapshotter with subdirectory.
 			snap := cupaloy.New(cupaloy.SnapshotSubdirectory(snapshotDirectory))
 
 			// Create snapshot.
-			err = snap.SnapshotWithName(tt.Name, out)
+			err = snap.SnapshotWithName(tt.Name, snapshot)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -115,4 +106,32 @@ func initTestContainer() *util.Container {
 		Queries: queries,
 		Render:  render.New(),
 	}
+}
+
+func dumpRequest(req *http.Request, index int) string {
+	reqDump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		panic(err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	defer res.Body.Close()
+
+	resDump, err := httputil.DumpResponse(res, true)
+	if err != nil {
+		panic(err)
+	}
+
+	// Dump request and response to snapshot output.
+	out := fmt.Sprintf("%v\n%v", string(reqDump), string(resDump))
+
+	// Stabilize the snapshot.
+	out = regexp.MustCompile("Host: .*").ReplaceAllString(out, "Host: localhost:8080")
+	out = regexp.MustCompile("Date: .*").ReplaceAllString(out, "Date: Thu, 1 Jan 1970 00:00:00 GMT")
+
+	return out
 }
