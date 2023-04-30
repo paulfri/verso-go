@@ -2,7 +2,6 @@ package util
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -34,12 +33,6 @@ type ContextDBQueriesKey struct{}
 func (c *Container) GetQueries(req *http.Request) *query.Queries {
 	if req.Context().Value(ContextDBQueriesKey{}) != nil {
 		queries := req.Context().Value(ContextDBQueriesKey{}).(*query.Queries)
-		fmt.Printf("%+v\n", queries)
-		fmt.Printf("%+v\n", queries)
-		fmt.Printf("%+v\n", queries)
-		fmt.Printf("%+v\n", queries)
-		fmt.Printf("%+v\n", queries)
-		fmt.Printf("%+v\n", queries)
 		return queries
 	}
 

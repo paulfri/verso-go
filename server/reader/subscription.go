@@ -31,6 +31,7 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 	}
 
 	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 
 	subscription, err := c.Container.Command.SubscribeToFeedByURL(ctx, params.Quickadd, userID)
@@ -48,7 +49,7 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 		return
 	}
 
-	feed, err2 := c.Container.Queries.GetRSSFeed(ctx, subscription.FeedID)
+	feed, err2 := queries.GetRSSFeed(ctx, subscription.FeedID)
 
 	if err2 != nil {
 		c.Container.Render.JSON(
@@ -86,6 +87,7 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := SubscriptionExistsRequestParams{}
 	err := c.Container.Params(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -93,14 +95,14 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 	}
 
 	url := common.FeedURLFromReaderStreamID(params.StreamID)
-	feed, err := c.Container.Queries.GetRSSFeedByURL(ctx, url)
+	feed, err := queries.GetRSSFeedByURL(ctx, url)
 
 	if err == sql.ErrNoRows {
 		c.Container.Render.Text(w, http.StatusOK, strconv.FormatBool(false))
 		return
 	}
 
-	_, err = c.Container.Queries.GetSubscriptionByRSSFeedIDAndUserID(
+	_, err = queries.GetSubscriptionByRSSFeedIDAndUserID(
 		ctx,
 		query.GetSubscriptionByRSSFeedIDAndUserIDParams{
 			FeedID: feed.ID,
@@ -125,7 +127,8 @@ type SubscriptionListResponse struct {
 func (c *ReaderController) SubscriptionList(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
-	subscriptions, err := c.Container.Queries.GetSubscriptionsByUserID(ctx, userID)
+	queries := c.Container.GetQueries(req)
+	subscriptions, err := queries.GetSubscriptionsByUserID(ctx, userID)
 
 	if err != nil {
 		panic(err) // TODO: fix
@@ -153,6 +156,7 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := SubscriptionEditParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -169,7 +173,7 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error()) // TODO
 		return
 	case "unsubscribe":
-		c.Container.Queries.DeleteSubscriptionByRSSFeedURLAndUserID(
+		queries.DeleteSubscriptionByRSSFeedURLAndUserID(
 			ctx,
 			query.DeleteSubscriptionByRSSFeedURLAndUserIDParams{
 				UserID:     userID,
