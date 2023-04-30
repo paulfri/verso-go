@@ -3,6 +3,8 @@ version: "3"
 env:
   POSTGRES_HOST: localhost
   POSTGRES_PORT: 5432
+  PGUSER: postgres
+  PGPASSWORD: postgres
 
 tasks:
   compile:
@@ -27,19 +29,19 @@ tasks:
       - sh: '[ "$VERSO_ENV" = "development" ] || [ "$VERSO_ENV" = "test" ]'
         msg: "Command can only be run in development or test"
     cmds:
-      - psql postgres --command 'drop database {{.DATABASE_NAME}}';
+      - psql postgres --host localhost --port 5432 --command 'drop database {{.DATABASE_NAME}}';
 
   create:
     desc: Create the database.
     dir: ./migrate
     cmds:
-      - psql postgres --command 'create database {{.DATABASE_NAME}};'
+      - psql postgres --host localhost --port 5432 --command 'create database {{.DATABASE_NAME}};'
 
   seed:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      - psql --quiet --output=/dev/null --dbname={{.DATABASE_NAME}} --file db/seed.sql
+      - psql --quiet --output=/dev/null --host localhost --dbname={{.DATABASE_NAME}} --file db/seed.sql
 
   seed:dump:
     desc: Dumps the dev database to a seed file.
@@ -84,7 +86,6 @@ tasks:
       - task: drop
       - task: create
       - task: migrate
-      - task: compile
       - task: seed
 
   status:

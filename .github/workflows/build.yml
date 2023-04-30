@@ -38,6 +38,7 @@ jobs:
       - run: git config --global url."https://${{ secrets.TOKEN }}:@github.com/".insteadOf "https://github.com"
       - run: go mod download
       - run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+      - run: go install github.com/pressly/goose/v3/cmd/goose@latest
       - run: ./bin/task db:reset
       - run: go build -v ./...
       - run: go test -v ./...
