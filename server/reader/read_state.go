@@ -19,6 +19,7 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamMarkAllAsReadRequestParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -36,7 +37,7 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 
 	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+		err := queries.MarkAllQueueItemsAsRead(
 			ctx,
 			query.MarkAllQueueItemsAsReadParams{
 				UserID:          userID,
@@ -51,7 +52,7 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 		}
 	case common.StreamIDFormatFeed:
 		feedURL := common.FeedURLFromReaderStreamID(params.StreamID)
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+		err := queries.MarkAllQueueItemsAsRead(
 			ctx,
 			query.MarkAllQueueItemsAsReadParams{
 				UserID:          userID,

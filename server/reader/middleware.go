@@ -22,8 +22,9 @@ func (c *ReaderController) AuthMiddleware(next http.Handler) http.Handler {
 			identifier := split[1]
 
 			if identifier != "" {
-				token, err := c.Container.Queries.GetReaderTokenByIdentifier(
-					req.Context(),
+				queries := c.Container.GetQueries(req)
+				token, err := queries.GetReaderTokenByIdentifier(
+					ctx,
 					identifier,
 				)
 

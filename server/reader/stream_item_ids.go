@@ -24,7 +24,7 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamItemsIDsRequestParams{}
-	err := c.Container.Params(&params, req)
+	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
