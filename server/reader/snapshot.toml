@@ -1,0 +1,11 @@
+[[tests]]
+name = "TestStatus"
+method = "GET"
+path = "/status"
+auth = false
+
+[[tests]]
+name = "TestPing"
+method = "GET"
+path = "/ping"
+auth = true

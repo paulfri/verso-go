@@ -36,8 +36,8 @@ func Seed(config *util.Config) cli.ActionFunc {
 
 		password, err4 := bcrypt.GenerateFromPassword([]byte(DEFAULT_PASSWORD), 8)
 		user, err5 := queries.CreateUser(ctx, query.CreateUserParams{
-			Email:     "paul@verso.so",
-			Name:      "Paul Friedman",
+			Email:     "test@verso.so",
+			Name:      "Verso Test",
 			Password:  sql.NullString{String: string(password), Valid: true},
 			Superuser: true,
 		})
