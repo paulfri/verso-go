@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/core/command"
 	"github.com/versolabs/verso/db"
 	vm "github.com/versolabs/verso/middleware"
@@ -18,21 +19,21 @@ import (
 	"github.com/versolabs/verso/worker"
 )
 
-func Serve(config *util.Config) cli.ActionFunc {
+func Serve(config *config.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
 		router := Router(config)
-		bind := fmt.Sprintf("%s:%s", config.Host, config.Port)
+		bind := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 		http.ListenAndServe(bind, router)
 
 		return nil
 	}
 }
 
-func Router(config *util.Config) *chi.Mux {
+func Router(config *config.Config) *chi.Mux {
 	airbrake := util.Airbrake(config)
 	logger := util.Logger()
 	asynq := worker.Client(config.RedisURL)
-	db, queries := db.Init(config.DatabaseURL, config.DatabaseMigrate)
+	db, queries := db.Init(config.Database.URL(), config.Database.Migrate)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

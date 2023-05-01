@@ -1,0 +1,9 @@
+env = "test"
+
+[database]
+host = "localhost"
+port = 5432
+database = "verso_ci"
+user = "verso"
+password = "verso"
+ssl_disabled = true
