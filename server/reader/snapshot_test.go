@@ -14,7 +14,6 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/bradleyjkemp/cupaloy/v2"
 	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 	"github.com/samber/lo"
 	"github.com/unrolled/render"
 	"github.com/versolabs/verso/config"
@@ -46,13 +45,8 @@ type testConfig struct {
 
 // Snapshot regression testing for the Reader API.
 func TestSnapshot(t *testing.T) {
-	err := godotenv.Load("../../.env.test")
-	if err != nil {
-		panic(err)
-	}
-
 	var testconf testConfig
-	_, err = toml.DecodeFile(testConfigFile, &testconf)
+	_, err := toml.DecodeFile(testConfigFile, &testconf)
 	if err != nil {
 		t.Fatal(err)
 	}
