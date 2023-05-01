@@ -3,12 +3,16 @@ version: "3"
 vars:
   GOOSE_DBSTRING:
     sh: go run ../main.go config goose
-  DATABASE_NAME:
+  DATABASE_URL:
     sh: go run ../main.go config database
+  DATABASE_NAME:
+    sh: go run ../main.go config dbname
 
 env:
   GOOSE_DRIVER: postgres
   GOOSE_DBSTRING: "{{ .GOOSE_DBSTRING }}"
+  PGUSER: postgres
+  PGPASSWORD: postgres
 
 tasks:
   compile:
@@ -33,25 +37,27 @@ tasks:
       - sh: '[ "$VERSO_ENV" != "production" ]'
         msg: "Command cannot be run in production."
     cmds:
-      - psql postgres --host localhost --command 'drop database {{.DATABASE_NAME}}';
+      # TODO: Parameterized arguments. Can't add/drop with full URL.
+      - psql --host=localhost --command 'drop database {{.DATABASE_NAME}}';
 
   create:
     desc: Create the database.
     dir: ./migrate
     cmds:
-      - psql postgres --host localhost --command 'create database {{.DATABASE_NAME}};'
+      # TODO: Parameterized arguments. Can't add/drop with full URL.
+      - psql --host=localhost --command 'create database {{.DATABASE_NAME}};'
 
   seed:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      - psql --quiet --output=/dev/null --host localhost --dbname={{.DATABASE_NAME}} --file db/seed.sql
+      - psql {{.DATABASE_URL}} --quiet --output=/dev/null --file db/seed.sql
 
   seed:dump:
-    desc: Dumps the dev database to a seed file.
+    desc: Dumps the database to a seed file.
     dir: ..
     cmds:
-      - pg_dump --data-only --exclude-table=goose_db_version {{.DATABASE_NAME}} > db/seed.sql
+      - pg_dump {{.DATABASE_URL}} --data-only --exclude-table=goose_db_version > db/seed.sql
 
   gen:
     desc: Generate a new migration.
