@@ -23,7 +23,7 @@ require (
 	github.com/simukti/sqldb-logger v0.0.0-20230108155151-646c1a075551
 	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/unrolled/render v1.6.0
-	github.com/urfave/cli/v2 v2.25.1
+	github.com/urfave/cli/v2 v2.25.3
 	golang.org/x/crypto v0.8.0
 	gopkg.in/guregu/null.v4 v4.0.0
 )
