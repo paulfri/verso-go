@@ -17,6 +17,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/samber/lo"
 	"github.com/unrolled/render"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/db"
 	"github.com/versolabs/verso/db/query"
 	"github.com/versolabs/verso/util"
@@ -58,13 +59,13 @@ func TestSnapshot(t *testing.T) {
 
 	for _, tt := range testconf.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			config := util.GetConfig()
+			config := config.GetConfig()
 			ctx := context.Background()
 
 			// Build container with a database transaction. The transaction is rolled
 			// back at the end of every test to prevent side effects from persisting
 			// between tests.
-			db, queries := db.Init(config.DatabaseURL, false)
+			db, queries := db.Init(config.Database.URL(), false)
 			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {
 				panic(err)
@@ -115,11 +116,11 @@ func TestSnapshot(t *testing.T) {
 }
 
 func initTestContainer(db *sql.DB, queries *query.Queries) *util.Container {
-	config := util.GetConfig()
+	config := config.GetConfig()
 
 	return &util.Container{
 		Asynq:     worker.Client(config.RedisURL),
-		Config:    &config,
+		Config:    config,
 		DB:        db,
 		Logger:    util.Logger(),
 		Queries:   queries,

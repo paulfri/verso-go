@@ -1,10 +1,14 @@
 version: "3"
 
+vars:
+  GOOSE_DBSTRING:
+    sh: go run ../main.go config goose
+  DATABASE_NAME:
+    sh: go run ../main.go config database
+
 env:
-  POSTGRES_HOST: localhost
-  POSTGRES_PORT: 5432
-  PGUSER: postgres
-  PGPASSWORD: postgres
+  GOOSE_DRIVER: postgres
+  GOOSE_DBSTRING: "{{ .GOOSE_DBSTRING }}"
 
 tasks:
   compile:
@@ -26,16 +30,16 @@ tasks:
     dir: ./migrate
     ignore_error: true
     preconditions:
-      - sh: '[ "$VERSO_ENV" = "development" ] || [ "$VERSO_ENV" = "test" ]'
-        msg: "Command can only be run in development or test"
+      - sh: '[ "$VERSO_ENV" != "production" ]'
+        msg: "Command cannot be run in production."
     cmds:
-      - psql postgres --host localhost --port 5432 --command 'drop database {{.DATABASE_NAME}}';
+      - psql postgres --host localhost --command 'drop database {{.DATABASE_NAME}}';
 
   create:
     desc: Create the database.
     dir: ./migrate
     cmds:
-      - psql postgres --host localhost --port 5432 --command 'create database {{.DATABASE_NAME}};'
+      - psql postgres --host localhost --command 'create database {{.DATABASE_NAME}};'
 
   seed:
     desc: Seed the database with fixture data.

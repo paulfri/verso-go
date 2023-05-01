@@ -12,6 +12,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/core/command"
 	"github.com/versolabs/verso/db/query"
 )
@@ -20,7 +21,7 @@ type Container struct {
 	Airbrake  *gobrake.Notifier
 	Asynq     *asynq.Client
 	Command   *command.Command
-	Config    *Config
+	Config    *config.Config
 	DB        *sql.DB
 	Queries   *query.Queries
 	Render    *render.Render
