@@ -1,6 +1,6 @@
 module github.com/versolabs/verso
 
-go 1.18
+go 1.20
 
 require (
 	github.com/PuerkitoBio/purell v1.2.0
