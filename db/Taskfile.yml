@@ -51,7 +51,12 @@ tasks:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      - psql {{.DATABASE_URL}} --quiet --output=/dev/null --file db/seed.sql
+      # First command disables reader ID trigger to ensure snapshot consistency.
+      # Probably a better solution for this.
+      - >-
+        psql {{.DATABASE_URL}} --quiet --output=/dev/null
+        --command "alter table rss.items disable trigger all"
+        --file db/seed.sql
 
   seed:dump:
     desc: Dumps the database to a seed file.
