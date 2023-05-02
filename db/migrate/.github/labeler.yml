@@ -1,0 +1,6 @@
+migration:
+  - db/migrate/*
+
+config:
+  - config/*
+  - "**/Taskfile.yml"
