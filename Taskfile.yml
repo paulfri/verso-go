@@ -39,6 +39,7 @@ tasks:
       - snapshot
     env:
       UPDATE_SNAPSHOTS: true
+      VERSO_ENV: test
     deps:
       - default
 
