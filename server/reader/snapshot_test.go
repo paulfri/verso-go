@@ -59,7 +59,7 @@ func TestSnapshot(t *testing.T) {
 			// Build container with a database transaction. The transaction is rolled
 			// back at the end of every test to prevent side effects from persisting
 			// between tests.
-			db, queries := db.Init(config.Database.URL(), false)
+			db, queries := db.Init(config.Database.URL, false)
 			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {
 				panic(err)

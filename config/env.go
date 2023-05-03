@@ -16,7 +16,7 @@ type environment struct {
 	// secrets.
 	AirbrakeProjectID  int64  `env:"AIRBRAKE_PROJECT_ID"`
 	AirbrakeProjectKey string `env:"AIRBRAKE_PROJECT_KEY"`
-	DatabaseURL        string `env:"DATABASE_URL"`
+	DatabaseConn       string `env:"DATABASE_CONN"`
 	RedisURL           string `env:"REDIS_URL"`
 }
 

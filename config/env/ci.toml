@@ -6,4 +6,4 @@ port = 5432
 database = "verso_ci"
 user = "postgres"
 password = "postgres"
-ssl_disabled = true
+ssl_mode = "disable"

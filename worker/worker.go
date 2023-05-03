@@ -32,7 +32,7 @@ func Work(config *config.Config) cli.ActionFunc {
 			},
 		)
 
-		database, queries := db.Init(config.Database.URL(), false)
+		database, queries := db.Init(config.Database.URL, false)
 		client := Client(config.RedisURL)
 
 		worker := Worker{
