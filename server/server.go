@@ -21,8 +21,11 @@ import (
 
 func Serve(config *config.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
+		logger := util.Logger()
 		router := Router(config)
 		bind := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
+
+		logger.Printf("Starting server on %s", bind)
 		http.ListenAndServe(bind, router)
 
 		return nil
