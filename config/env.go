@@ -10,7 +10,8 @@ import (
 // This is only for parsing environment-configurable configuration for
 // templatized TOML config files.
 type environment struct {
-	Env string `env:"VERSO_ENV" envDefault:"development"`
+	Env  string `env:"VERSO_ENV" envDefault:"development"`
+	Port int    `env:"PORT" envDefault:"8080"`
 
 	// Only includes options that are configurable by the environment, i.e.,
 	// secrets.
