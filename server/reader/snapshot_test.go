@@ -59,7 +59,7 @@ func TestSnapshot(t *testing.T) {
 			// Build container with a database transaction. The transaction is rolled
 			// back at the end of every test to prevent side effects from persisting
 			// between tests.
-			db, queries := db.Init(config.Database.URL(), false)
+			db, queries := db.Init(config.Database.URL, false)
 			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {
 				panic(err)
@@ -113,7 +113,7 @@ func initTestContainer(db *sql.DB, queries *query.Queries) *util.Container {
 	config := config.GetConfig()
 
 	return &util.Container{
-		Asynq:     worker.Client(config.RedisURL),
+		Asynq:     worker.Client(config.Worker.RedisURL),
 		Config:    config,
 		DB:        db,
 		Logger:    util.Logger(),

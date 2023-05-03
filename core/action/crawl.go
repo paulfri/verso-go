@@ -11,7 +11,7 @@ import (
 
 func Crawl(config *config.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
-		client := worker.Client(config.RedisURL)
+		client := worker.Client(config.Worker.RedisURL)
 		feedID := cliContext.Args().Get(0)
 
 		i, err := strconv.ParseInt(feedID, 10, 64)

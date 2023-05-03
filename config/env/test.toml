@@ -10,4 +10,4 @@ port = 5432
 database = "verso_test"
 user = "verso"
 password = "verso"
-ssl_disabled = true
+ssl_mode = "disable"

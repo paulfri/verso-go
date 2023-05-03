@@ -1,7 +1,5 @@
 package config
 
-import "fmt"
-
 func GetConfig() *Config {
 	env := getEnv()
 	conf := loadConfig(env)
@@ -16,10 +14,9 @@ type Config struct {
 	Worker   workerConfig
 
 	// TODO implement - ported from env
-	BaseURL  string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	Debug    bool   `env:"DEBUG" envDefault:"false"`
-	Env      string `env:"VERSO_ENV" envDefault:"development"`
-	RedisURL string `env:"REDIS_URL"`
+	BaseURL string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	Debug   bool   `env:"DEBUG" envDefault:"false"`
+	Env     string `env:"VERSO_ENV" envDefault:"development"`
 }
 
 type airbrakeConfig struct {
@@ -28,13 +25,15 @@ type airbrakeConfig struct {
 }
 
 type databaseConfig struct {
-	Host        string `toml:"host"`
-	Port        int    `toml:"port"`
-	Database    string `toml:"database"`
-	User        string `toml:"user"`
-	Password    string `toml:"password"`
-	SSLDisabled bool   `toml:"ssl_disabled,omitempty"`
-	Migrate     bool   `toml:"migrate, omitempty"`
+	Host     string `toml:"host"`
+	Port     int    `toml:"port"`
+	Database string `toml:"database"`
+	User     string `toml:"user"`
+	Password string `toml:"password"`
+	SSLMode  string `toml:"ssl_mode"`
+	Migrate  bool   `toml:"migrate, omitempty"`
+	Conn     string `toml:"conn"`
+	URL      string `toml:"url"`
 }
 
 type serverConfig struct {
@@ -43,22 +42,6 @@ type serverConfig struct {
 }
 
 type workerConfig struct {
-	Concurrency int `toml:"concurrency"`
-}
-
-func (c *databaseConfig) URL() string {
-	var sslMode string
-	if c.SSLDisabled {
-		sslMode = "?sslmode=disable"
-	}
-
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s%s",
-		c.User,
-		c.Password,
-		c.Host,
-		c.Port,
-		c.Database,
-		sslMode,
-	)
+	Concurrency int    `toml:"concurrency"`
+	RedisURL    string `toml:"redis_url"`
 }

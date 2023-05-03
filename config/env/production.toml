@@ -3,16 +3,13 @@
 env = "production"
 
 [database]
-host = "{{.DatabaseHost}}"
-port = {{.DatabasePort}}
-database = "{{.DatabaseName}}"
-user = "{{.DatabaseUser}}"
-password = "{{.DatabasePassword}}"
+conn = "{{.DatabaseConn}}"
 migrate = true
 
 [airbrake]
-project_id = "{{.AirbrakeProjectID}}"
+project_id = {{.AirbrakeProjectID}}
 project_key = "{{.AirbrakeProjectKey}}"
 
 [worker]
 concurrency = 10
+redis_url = "{{.RedisURL}}"

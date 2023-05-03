@@ -25,15 +25,15 @@ func Work(config *config.Config) cli.ActionFunc {
 		handler := asynq.ErrorHandlerFunc(notifier)
 
 		srv := asynq.NewServer(
-			asynq.RedisClientOpt{Addr: config.RedisURL},
+			asynq.RedisClientOpt{Addr: config.Worker.RedisURL},
 			asynq.Config{
 				Concurrency:  config.Worker.Concurrency,
 				ErrorHandler: handler,
 			},
 		)
 
-		database, queries := db.Init(config.Database.URL(), false)
-		client := Client(config.RedisURL)
+		database, queries := db.Init(config.Database.URL, false)
+		client := Client(config.Worker.RedisURL)
 
 		worker := Worker{
 			Container: &util.Container{

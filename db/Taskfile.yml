@@ -2,9 +2,9 @@ version: "3"
 
 vars:
   GOOSE_DBSTRING:
-    sh: go run ../main.go config goose
+    sh: go run ../main.go config dbconn
   DATABASE_URL:
-    sh: go run ../main.go config database
+    sh: go run ../main.go config dburl
   DATABASE_NAME:
     sh: go run ../main.go config dbname
 
