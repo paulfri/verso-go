@@ -12,3 +12,4 @@ project_key = "{{.AirbrakeProjectKey}}"
 
 [worker]
 concurrency = 10
+redis_url = "{{.RedisURL}}"

@@ -113,7 +113,7 @@ func initTestContainer(db *sql.DB, queries *query.Queries) *util.Container {
 	config := config.GetConfig()
 
 	return &util.Container{
-		Asynq:     worker.Client(config.RedisURL),
+		Asynq:     worker.Client(config.Worker.RedisURL),
 		Config:    config,
 		DB:        db,
 		Logger:    util.Logger(),

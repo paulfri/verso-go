@@ -32,7 +32,7 @@ func Serve(config *config.Config) cli.ActionFunc {
 func Router(config *config.Config) *chi.Mux {
 	airbrake := util.Airbrake(config)
 	logger := util.Logger()
-	asynq := worker.Client(config.RedisURL)
+	asynq := worker.Client(config.Worker.RedisURL)
 	db, queries := db.Init(config.Database.URL, config.Database.Migrate)
 
 	r := chi.NewRouter()

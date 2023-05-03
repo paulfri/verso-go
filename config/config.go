@@ -14,10 +14,9 @@ type Config struct {
 	Worker   workerConfig
 
 	// TODO implement - ported from env
-	BaseURL  string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	Debug    bool   `env:"DEBUG" envDefault:"false"`
-	Env      string `env:"VERSO_ENV" envDefault:"development"`
-	RedisURL string `env:"REDIS_URL"`
+	BaseURL string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	Debug   bool   `env:"DEBUG" envDefault:"false"`
+	Env     string `env:"VERSO_ENV" envDefault:"development"`
 }
 
 type airbrakeConfig struct {
@@ -43,5 +42,6 @@ type serverConfig struct {
 }
 
 type workerConfig struct {
-	Concurrency int `toml:"concurrency"`
+	Concurrency int    `toml:"concurrency"`
+	RedisURL    string `toml:"redis_url"`
 }
