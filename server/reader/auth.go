@@ -25,6 +25,7 @@ type ClientLoginRequest struct {
 
 func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
+	queries := c.Container.GetQueries(req)
 	body := ClientLoginRequest{}
 	c.Container.BodyParams(&body, req)
 
@@ -36,7 +37,7 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	user, err := c.Container.Queries.GetUserByEmail(ctx, body.Email)
+	user, err := queries.GetUserByEmail(ctx, body.Email)
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, AuthErrorResponse{
 			Error: "BadAuthentication",
@@ -47,7 +48,7 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 		rando := uniuri.NewLen(20)
 
 		// TODO handle error
-		c.Container.Queries.CreateReaderToken(
+		queries.CreateReaderToken(
 			ctx,
 			query.CreateReaderTokenParams{UserID: user.ID, Identifier: rando},
 		)

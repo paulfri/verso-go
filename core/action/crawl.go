@@ -4,14 +4,14 @@ import (
 	"strconv"
 
 	"github.com/urfave/cli/v2"
-	"github.com/versolabs/verso/util"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/worker"
 	"github.com/versolabs/verso/worker/tasks"
 )
 
-func Crawl(config *util.Config) cli.ActionFunc {
+func Crawl(config *config.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
-		client := worker.Client(config.RedisURL)
+		client := worker.Client(config.Worker.RedisURL)
 		feedID := cliContext.Args().Get(0)
 
 		i, err := strconv.ParseInt(feedID, 10, 64)

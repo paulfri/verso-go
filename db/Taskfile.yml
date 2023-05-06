@@ -1,5 +1,19 @@
 version: "3"
 
+vars:
+  GOOSE_DBSTRING:
+    sh: go run ../main.go config dbconn
+  DATABASE_URL:
+    sh: go run ../main.go config dburl
+  DATABASE_NAME:
+    sh: go run ../main.go config dbname
+
+env:
+  GOOSE_DRIVER: postgres
+  GOOSE_DBSTRING: "{{ .GOOSE_DBSTRING }}"
+  PGUSER: postgres
+  PGPASSWORD: postgres
+
 tasks:
   compile:
     desc: Generate Go code from SQL queries.
@@ -19,22 +33,36 @@ tasks:
     desc: Drop the database. Irreversible.
     dir: ./migrate
     ignore_error: true
+    preconditions:
+      - sh: '[ "$VERSO_ENV" != "production" ]'
+        msg: "Command cannot be run in production."
     cmds:
-      # TODO: database name; env check
-      - psql postgres -c 'drop database verso_dev;'
+      # TODO: Parameterized arguments. Can't add/drop with full URL.
+      - psql --host=localhost --command 'drop database {{.DATABASE_NAME}}';
 
   create:
     desc: Create the database.
     dir: ./migrate
     cmds:
-      # TODO: database name
-      - psql postgres -c 'create database verso_dev;'
+      # TODO: Parameterized arguments. Can't add/drop with full URL.
+      - psql --host=localhost --command 'create database {{.DATABASE_NAME}};'
 
   seed:
     desc: Seed the database with fixture data.
     dir: ..
     cmds:
-      - go run main.go seed
+      # First command disables reader ID trigger to ensure snapshot consistency.
+      # Probably a better solution for this.
+      - >-
+        psql {{.DATABASE_URL}} --quiet --output=/dev/null
+        --command "alter table rss.items disable trigger all"
+        --file db/seed.sql
+
+  seed:dump:
+    desc: Dumps the database to a seed file.
+    dir: ..
+    cmds:
+      - pg_dump {{.DATABASE_URL}} --data-only --exclude-table=goose_db_version > db/seed.sql
 
   gen:
     desc: Generate a new migration.
@@ -73,7 +101,6 @@ tasks:
       - task: drop
       - task: create
       - task: migrate
-      - task: compile
       - task: seed
 
   status:

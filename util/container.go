@@ -2,7 +2,6 @@ package util
 
 import (
 	"database/sql"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/core/command"
 	"github.com/versolabs/verso/db/query"
 )
@@ -21,12 +21,23 @@ type Container struct {
 	Airbrake  *gobrake.Notifier
 	Asynq     *asynq.Client
 	Command   *command.Command
-	Config    *Config
+	Config    *config.Config
 	DB        *sql.DB
 	Queries   *query.Queries
 	Render    *render.Render
 	Validator *validator.Validate
 	Logger    *zerolog.Logger
+}
+
+type ContextDBQueriesKey struct{}
+
+func (c *Container) GetQueries(req *http.Request) *query.Queries {
+	if req.Context().Value(ContextDBQueriesKey{}) != nil {
+		queries := req.Context().Value(ContextDBQueriesKey{}).(*query.Queries)
+		return queries
+	}
+
+	return c.Queries
 }
 
 // Given a struct with request parameters, unmarshal the query string from the
@@ -55,17 +66,6 @@ func (c Container) Form(req *http.Request, s interface{}) error {
 	}
 
 	return c.Validator.Struct(s)
-}
-
-func (c Container) JSONBody(req *http.Request, s interface{}) error {
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(s)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Given a struct with request parameters, unmarshal the query string from the

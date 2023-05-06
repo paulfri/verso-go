@@ -1,0 +1,47 @@
+GET /stream/items/ids HTTP/1.1
+Host: localhost:8080
+User-Agent: Go-http-client/1.1
+Content-Length: 70
+Authorization: GoogleLogin auth=F2vwA2wKSHISLXT7slqt
+Accept-Encoding: gzip
+
+s=user/-/state/com.google/reading-list&xt=user/-/state/com.google/read
+
+HTTP/1.1 200 OK
+Content-Length: 1409
+Content-Type: application/json; charset=UTF-8
+Date: Thu, 1 Jan 1970 00:00:00 GMT
+
+{"itemRefs":[{"id":"6260925413280183827","timestampUsec":1682866181000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"298486425466011256","timestampUsec":1682830691000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"748914594873344","timestampUsec":1682824400000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"6770722397722409519","timestampUsec":1682811000000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"8386733508546654796","timestampUsec":1682795418000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"4071597870376514224","timestampUsec":1682787961000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"1581573699423108106","timestampUsec":1682719200000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]},{"id":"5894996448708168687","timestampUsec":1682717804000000,"directStreamIds":["user/-/state/com.google/reading-list","feed/https://www.sounderatheart.com/rss/current.xml"]}]}
+
+POST /mark-all-as-read HTTP/1.1
+Host: localhost:8080
+User-Agent: Go-http-client/1.1
+Content-Length: 38
+Authorization: GoogleLogin auth=F2vwA2wKSHISLXT7slqt
+Accept-Encoding: gzip
+
+s=user/-/state/com.google/reading-list
+
+HTTP/1.1 200 OK
+Content-Length: 2
+Content-Type: text/plain; charset=UTF-8
+Date: Thu, 1 Jan 1970 00:00:00 GMT
+
+OK
+
+GET /stream/items/ids HTTP/1.1
+Host: localhost:8080
+User-Agent: Go-http-client/1.1
+Content-Length: 70
+Authorization: GoogleLogin auth=F2vwA2wKSHISLXT7slqt
+Accept-Encoding: gzip
+
+s=user/-/state/com.google/reading-list&xt=user/-/state/com.google/read
+
+HTTP/1.1 200 OK
+Content-Length: 15
+Content-Type: application/json; charset=UTF-8
+Date: Thu, 1 Jan 1970 00:00:00 GMT
+
+{"itemRefs":[]}

@@ -25,6 +25,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 	params := StreamItemsContentsRequestParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -35,7 +36,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 		return common.ReaderIDFromInput(itemID)
 	})
 
-	items, err := c.Container.Queries.GetItemsWithContentDataByReaderIDs(
+	items, err := queries.GetItemsWithContentDataByReaderIDs(
 		ctx,
 		query.GetItemsWithContentDataByReaderIDsParams{
 			Column1: readerIDs,

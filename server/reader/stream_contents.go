@@ -41,14 +41,15 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}
-	err := c.Container.Params(&params, req)
+	err := c.Container.BodyParams(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user, err := c.Container.Queries.GetUser(ctx, userID)
+	user, err := queries.GetUser(ctx, userID)
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
 		return
@@ -62,7 +63,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 
 	switch streamIDType := common.StreamIDType(streamID); streamIDType {
 	case common.StreamIDReadingList:
-		items, err := c.Container.Queries.GetItemsWithURLByUserID(
+		items, err := queries.GetItemsWithURLByUserID(
 			ctx,
 			query.GetItemsWithURLByUserIDParams{
 				UserID: userID,
@@ -94,7 +95,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 		// Not implemented.
 		c.Container.Render.Text(w, http.StatusNotFound, "")
 	case common.StreamIDFormatFeed:
-		items, err := c.Container.Queries.GetRecentItemsByRSSFeedURL(
+		items, err := queries.GetRecentItemsByRSSFeedURL(
 			ctx,
 			query.GetRecentItemsByRSSFeedURLParams{
 				URL:   common.FeedURLFromReaderStreamID(streamID),

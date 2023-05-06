@@ -1,0 +1,9 @@
+env = "test"
+
+[database]
+host = "localhost"
+port = 5432
+database = "verso_ci"
+user = "postgres"
+password = "postgres"
+ssl_mode = "disable"

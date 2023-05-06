@@ -1,0 +1,45 @@
+[[tests]]
+name = "TestStatus"
+[[tests.requests]]
+method = "GET"
+path = "/status"
+auth = false
+
+[[tests]]
+name = "TestPing"
+[[tests.requests]]
+method = "GET"
+path = "/ping"
+auth = true
+
+[[tests]]
+name = "TestMultiplePing"
+[[tests.requests]]
+method = "GET"
+path = "/ping"
+auth = true
+[[tests.requests]]
+method = "GET"
+path = "/ping"
+auth = true
+
+[[tests]]
+name = "TestTransaction"
+# Query for unread items.
+[[tests.requests]]
+method = "GET"
+path = "/stream/items/ids"
+body = "s=user/-/state/com.google/reading-list&xt=user/-/state/com.google/read"
+auth = true
+[[tests.requests]]
+# Mark all items as read.
+method = "POST"
+path = "/mark-all-as-read"
+body = "s=user/-/state/com.google/reading-list"
+auth = true
+[[tests.requests]]
+# Query for unread items. Should be empty.
+method = "GET"
+path = "/stream/items/ids"
+body = "s=user/-/state/com.google/reading-list&xt=user/-/state/com.google/read"
+auth = true

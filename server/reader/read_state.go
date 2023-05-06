@@ -9,16 +9,17 @@ import (
 	"github.com/versolabs/verso/server/reader/common"
 )
 
-type StreamMarkAllAsReadRequestBody struct {
-	StreamID  string `json:"s" validate:"required"`
-	Timestamp int64  `json:"ts"`
+type StreamMarkAllAsReadRequestParams struct {
+	StreamID  string `query:"s" validate:"required"`
+	Timestamp int64  `query:"ts"`
 }
 
 func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
-	body := StreamMarkAllAsReadRequestBody{}
-	err := c.Container.JSONBody(req, &body)
+	params := StreamMarkAllAsReadRequestParams{}
+	err := c.Container.BodyOrQueryParams(&params, req)
+	queries := c.Container.GetQueries(req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
@@ -26,17 +27,17 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 	}
 
 	var publishedBefore sql.NullTime
-	if body.Timestamp > 0 {
+	if params.Timestamp > 0 {
 		// TODO: Is timestamp in milliseconds, microseconds, nanoseconds?
 		// Assumed milliseconds here.
-		publishedBefore = sql.NullTime{Time: time.Unix(body.Timestamp/1000, 0), Valid: true}
+		publishedBefore = sql.NullTime{Time: time.Unix(params.Timestamp/1000, 0), Valid: true}
 	} else {
 		publishedBefore = sql.NullTime{Valid: false}
 	}
 
-	switch streamIDType := common.StreamIDType(body.StreamID); streamIDType {
+	switch streamIDType := common.StreamIDType(params.StreamID); streamIDType {
 	case common.StreamIDReadingList:
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+		err := queries.MarkAllQueueItemsAsRead(
 			ctx,
 			query.MarkAllQueueItemsAsReadParams{
 				UserID:          userID,
@@ -50,8 +51,8 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 			return
 		}
 	case common.StreamIDFormatFeed:
-		feedURL := common.FeedURLFromReaderStreamID(body.StreamID)
-		err := c.Container.Queries.MarkAllQueueItemsAsRead(
+		feedURL := common.FeedURLFromReaderStreamID(params.StreamID)
+		err := queries.MarkAllQueueItemsAsRead(
 			ctx,
 			query.MarkAllQueueItemsAsReadParams{
 				UserID:          userID,

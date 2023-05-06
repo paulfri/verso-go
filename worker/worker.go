@@ -8,6 +8,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/unrolled/render"
 	"github.com/urfave/cli/v2"
+	"github.com/versolabs/verso/config"
 	"github.com/versolabs/verso/db"
 	"github.com/versolabs/verso/util"
 	"github.com/versolabs/verso/worker/tasks"
@@ -17,22 +18,22 @@ type Worker struct {
 	Container *util.Container
 }
 
-func Work(config *util.Config) cli.ActionFunc {
+func Work(config *config.Config) cli.ActionFunc {
 	return func(cliContext *cli.Context) error {
 		airbrake := util.Airbrake(config)
 		notifier := notify(airbrake)
 		handler := asynq.ErrorHandlerFunc(notifier)
 
 		srv := asynq.NewServer(
-			asynq.RedisClientOpt{Addr: config.RedisURL},
+			asynq.RedisClientOpt{Addr: config.Worker.RedisURL},
 			asynq.Config{
-				Concurrency:  config.WorkerConcurrency,
+				Concurrency:  config.Worker.Concurrency,
 				ErrorHandler: handler,
 			},
 		)
 
-		database, queries := db.Init(config.DatabaseURL, false)
-		client := Client(config.RedisURL)
+		database, queries := db.Init(config.Database.URL, false)
+		client := Client(config.Worker.RedisURL)
 
 		worker := Worker{
 			Container: &util.Container{

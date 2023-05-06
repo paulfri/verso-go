@@ -10,6 +10,16 @@ includes:
 
 tasks:
   default:
+    desc: Run the test suite.
+    aliases:
+      - test
+      - t
+    env:
+      VERSO_ENV: test
+    cmds:
+      - go test -v ./...
+
+  up:
     deps:
       - server
       - worker
@@ -22,6 +32,16 @@ tasks:
       - s
     cmds:
       - wgo run main.go server
+
+  test:snapshot:
+    desc: Run the test suite and update snapshots.
+    aliases:
+      - snapshot
+    env:
+      UPDATE_SNAPSHOTS: true
+      VERSO_ENV: test
+    deps:
+      - default
 
   worker:
     desc: Run the background worker.
