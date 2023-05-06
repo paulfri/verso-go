@@ -7,12 +7,12 @@ import (
 type StatusValue string
 
 const (
-	STATUS_OK  StatusValue = "ok"
-	STATUS_ERR StatusValue = "down"
+	StatusOk  StatusValue = "ok"
+	StatusErr StatusValue = "down"
 )
 
-const REDIRECT_URL = "https://verso.so"
-const ERROR_TEXT = "An unexpected error occurred."
+const RedirectURL = "https://verso.so"
+const ErrorText = "An unexpected error occurred."
 
 type StatusResponse struct {
 	Status      StatusValue `json:"status"`
@@ -22,22 +22,22 @@ type StatusResponse struct {
 
 type None struct{}
 
-func (c *ReaderController) MetaStatus(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) MetaStatus(w http.ResponseWriter, _ *http.Request) {
 	var err *None
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusOK, StatusResponse{
-			Status:      STATUS_ERR,
-			Description: ERROR_TEXT,
-			Redirect:    REDIRECT_URL,
+			Status:      StatusErr,
+			Description: ErrorText,
+			Redirect:    RedirectURL,
 		})
 	} else {
 		c.Container.Render.JSON(w, http.StatusOK, StatusResponse{
-			Status: STATUS_OK,
+			Status: StatusOk,
 		})
 	}
 }
 
-func (c *ReaderController) MetaPing(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) MetaPing(w http.ResponseWriter, _ *http.Request) {
 	c.Container.Render.Text(w, http.StatusOK, "OK")
 }

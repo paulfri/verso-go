@@ -12,7 +12,7 @@ type PingResponse struct {
 	Revision string `json:"revision"`
 }
 
-func ping(w http.ResponseWriter, r *http.Request) {
+func ping(w http.ResponseWriter, _ *http.Request) {
 	revision := os.Getenv("RENDER_GIT_COMMIT")
 	if revision != "" {
 		revision = "unknown"

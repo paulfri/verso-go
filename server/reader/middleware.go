@@ -9,7 +9,7 @@ import (
 type ContextUserIDKey struct{}
 type ContextAuthTokenKey struct{}
 
-func (c *ReaderController) AuthMiddleware(next http.Handler) http.Handler {
+func (c *Controller) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		auth := req.Header.Get("Authorization")
@@ -17,30 +17,33 @@ func (c *ReaderController) AuthMiddleware(next http.Handler) http.Handler {
 
 		if len(split) != 2 {
 			authFailed(w)
+
 			return
-		} else {
-			identifier := split[1]
+		}
 
-			if identifier != "" {
-				queries := c.Container.GetQueries(req)
-				token, err := queries.GetReaderTokenByIdentifier(
-					ctx,
-					identifier,
-				)
+		identifier := split[1]
 
-				if err != nil {
-					authFailed(w)
-					return
-				}
+		if identifier != "" {
+			queries := c.Container.GetQueries(req)
+			token, err := queries.GetReaderTokenByIdentifier(
+				ctx,
+				identifier,
+			)
 
-				withUser := context.WithValue(ctx, ContextUserIDKey{}, token.UserID)
-				withToken := context.WithValue(withUser, ContextAuthTokenKey{}, token.Identifier)
-
-				next.ServeHTTP(w, req.WithContext(withToken))
-			} else {
+			if err != nil {
 				authFailed(w)
+
 				return
 			}
+
+			withUser := context.WithValue(ctx, ContextUserIDKey{}, token.UserID)
+			withToken := context.WithValue(withUser, ContextAuthTokenKey{}, token.Identifier)
+
+			next.ServeHTTP(w, req.WithContext(withToken))
+		} else {
+			authFailed(w)
+
+			return
 		}
 	})
 }

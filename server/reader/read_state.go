@@ -14,7 +14,7 @@ type StreamMarkAllAsReadRequestParams struct {
 	Timestamp int64  `query:"ts"`
 }
 
-func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) StreamMarkAllAsRead(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamMarkAllAsReadRequestParams{}
@@ -23,6 +23,7 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -48,6 +49,7 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 
 		if err != nil {
 			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
+
 			return
 		}
 	case common.StreamIDFormatFeed:
@@ -63,10 +65,12 @@ func (c *ReaderController) StreamMarkAllAsRead(w http.ResponseWriter, req *http.
 
 		if err != nil {
 			c.Container.Render.Text(w, http.StatusInternalServerError, err.Error())
+
 			return
 		}
 	default:
 		c.Container.Render.Text(w, http.StatusBadRequest, "not supported yet")
+
 		return
 	}
 

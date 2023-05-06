@@ -16,7 +16,7 @@ type UserResponse struct {
 	IsPremium           bool   `json:"isPremium"`
 }
 
-func (c *ReaderController) User(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) User(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{})
 	queries := c.Container.GetQueries(req)
@@ -34,7 +34,7 @@ func (c *ReaderController) User(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
-func (c *ReaderController) UserToken(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) UserToken(w http.ResponseWriter, req *http.Request) {
 	token := req.Context().Value(ContextAuthTokenKey{}).(string)
 
 	c.Container.Render.Text(w, http.StatusOK, token)
@@ -47,7 +47,7 @@ const UserPreferencesResponse = `{
 	}]
 }`
 
-func (c *ReaderController) UserPreferences(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) UserPreferences(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(UserPreferencesResponse))
 }
@@ -56,7 +56,7 @@ const UserStreamPreferencesResponse = `{
     "streamprefs": {}
 }`
 
-func (c *ReaderController) UserStreamPreferences(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) UserStreamPreferences(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(UserStreamPreferencesResponse))
 }
@@ -74,7 +74,7 @@ type UserFriend struct {
 	N           string    `json:"n"`
 }
 
-func (c *ReaderController) UserFriendList(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) UserFriendList(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	strUserID := fmt.Sprintf("%d", userID)

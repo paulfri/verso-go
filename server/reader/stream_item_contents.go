@@ -20,7 +20,7 @@ type StreamItemsContentsRequestParams struct {
 	// MediaRSS `json:"mediaRss"`
 }
 
-func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) StreamItemsContents(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	params := StreamItemsContentsRequestParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
@@ -29,6 +29,7 @@ func (c *ReaderController) StreamItemsContents(w http.ResponseWriter, req *http.
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 

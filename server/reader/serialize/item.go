@@ -67,7 +67,7 @@ func FeedItemsFromSerializable(items []SerializableItem) []FeedItem {
 				StreamID: common.ReaderStreamIDFromFeedURL(item.RSSFeedURL),
 			},
 			ID:     common.LongItemID(item.ReaderID),
-			Author: null.String{item.Author},
+			Author: null.String{NullString: item.Author},
 			Content: FeedItemContent{
 				Direction: "ltr",
 				Content:   item.Content,

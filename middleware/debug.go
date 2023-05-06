@@ -3,7 +3,6 @@ package middleware
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/rs/zerolog"
@@ -23,7 +22,7 @@ func DebugRequestBody(logger *zerolog.Logger) func(http.Handler) http.Handler {
 				logger.Debug().Str("request_body", bodyStr).Msg("")
 			}
 
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+			r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 			next.ServeHTTP(w, r)
 		})
@@ -37,6 +36,7 @@ type responseBodyWriter struct {
 
 func (r responseBodyWriter) Write(b []byte) (int, error) {
 	r.body.Write(b)
+
 	return r.ResponseWriter.Write(b)
 }
 
