@@ -106,7 +106,7 @@ func LongItemID(readerID string) string {
 	return fmt.Sprintf(LongItemIDPrefix+"%s", readerID)
 }
 
-const INVALID_READER_ID = "0000000000000000"
+const InvalidReaderID = "0000000000000000"
 
 func ReaderIDFromInput(input string) string {
 	// Try parsing the reader ID as longform (with a hex string).
@@ -124,11 +124,11 @@ func ReaderIDFromInput(input string) string {
 				return fmt.Sprintf("%016s", id)
 			} else {
 				// Provided ID not a valid hex string and too long (info loss).
-				return INVALID_READER_ID
+				return InvalidReaderID
 			}
 		} else {
 			// No ID provided after longform prefix.
-			return INVALID_READER_ID
+			return InvalidReaderID
 		}
 	}
 
@@ -147,7 +147,7 @@ func ReaderIDFromInput(input string) string {
 			return fmt.Sprintf("%016s", input)
 		}
 
-		return INVALID_READER_ID
+		return InvalidReaderID
 	}
 
 	// Valid int, convert to uint.

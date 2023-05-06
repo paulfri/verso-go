@@ -123,7 +123,7 @@ func initTestContainer(db *sql.DB, queries *query.Queries) *util.Container {
 	}
 }
 
-func dumpRequest(req *http.Request, index int) string {
+func dumpRequest(req *http.Request, _ int) string {
 	reqDump, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		panic(err)

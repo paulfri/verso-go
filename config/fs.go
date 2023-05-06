@@ -34,6 +34,7 @@ func configFilePathFromEnv(env string) string {
 	dirEntry, found := lo.Find(files, func(f fs.DirEntry) bool {
 		return fileNameWithoutExt(f) == env
 	})
+
 	if !found {
 		log.Fatalf("Could not find config file for environment %s\n", env)
 	}
@@ -44,5 +45,6 @@ func configFilePathFromEnv(env string) string {
 
 func fileNameWithoutExt(file fs.DirEntry) string {
 	fileName := file.Name()
+
 	return fileName[:len(fileName)-len(filepath.Ext(fileName))]
 }

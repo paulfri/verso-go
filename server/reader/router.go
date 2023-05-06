@@ -7,14 +7,14 @@ import (
 	"github.com/versolabs/verso/util"
 )
 
-type ReaderController struct {
+type Controller struct {
 	Container *util.Container
 }
 
 // This handler allows the main server to mount the ClientLogin endpoint
 // at the API root instead of under the /reader/api/0 path.
 func LoginRouter(container *util.Container) http.Handler {
-	reader := ReaderController{Container: container}
+	reader := Controller{Container: container}
 
 	router := chi.NewRouter()
 	router.Post("/accounts/ClientLogin", reader.ClientLogin)
@@ -23,7 +23,7 @@ func LoginRouter(container *util.Container) http.Handler {
 }
 
 func Router(container *util.Container) http.Handler {
-	reader := ReaderController{Container: container}
+	reader := Controller{Container: container}
 
 	router := chi.NewRouter()
 

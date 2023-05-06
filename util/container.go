@@ -2,7 +2,7 @@ package util
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -34,6 +34,7 @@ type ContextDBQueriesKey struct{}
 func (c *Container) GetQueries(req *http.Request) *query.Queries {
 	if req.Context().Value(ContextDBQueriesKey{}) != nil {
 		queries := req.Context().Value(ContextDBQueriesKey{}).(*query.Queries)
+
 		return queries
 	}
 
@@ -71,7 +72,7 @@ func (c Container) Form(req *http.Request, s interface{}) error {
 // Given a struct with request parameters, unmarshal the query string from the
 // given request into that struct.
 func (c Container) BodyParams(s interface{}, req *http.Request) error {
-	body, _ := ioutil.ReadAll(req.Body)
+	body, _ := io.ReadAll(req.Body)
 
 	// urlquery library doesn't support repeated params (e.g. ?a=1&a=2) instead
 	// of array params (e.g. ?a[]=1&a[]=2) so we have to do this manually.

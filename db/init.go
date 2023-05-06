@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Postgres driver requires blank import.
 	sqldblogger "github.com/simukti/sqldb-logger"
 	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 	"github.com/versolabs/verso/db/query"

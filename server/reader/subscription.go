@@ -21,12 +21,13 @@ type SubscriptionQuickAddResponse struct {
 	StreamID   null.String `json:"streamId"`
 }
 
-func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) SubscriptionQuickAdd(w http.ResponseWriter, req *http.Request) {
 	params := SubscriptionQuickAddRequestParams{}
 	err := c.Container.BodyOrQueryParams(&params, req)
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -46,6 +47,7 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 				StreamID:   null.String{},
 			},
 		)
+
 		return
 	}
 
@@ -61,6 +63,7 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 				StreamID:   null.String{},
 			},
 		)
+
 		return
 	}
 
@@ -73,7 +76,7 @@ func (c *ReaderController) SubscriptionQuickAdd(w http.ResponseWriter, req *http
 		SubscriptionQuickAddResponse{
 			NumResults: 1,
 			Query:      params.Quickadd,
-			StreamID:   null.String{asSQL},
+			StreamID:   null.String{NullString: asSQL},
 		},
 	)
 }
@@ -82,7 +85,7 @@ type SubscriptionExistsRequestParams struct {
 	StreamID string `query:"s" validate:"required"`
 }
 
-func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) SubscriptionExists(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := SubscriptionExistsRequestParams{}
@@ -91,6 +94,7 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -99,6 +103,7 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 
 	if err == sql.ErrNoRows {
 		c.Container.Render.Text(w, http.StatusOK, strconv.FormatBool(false))
+
 		return
 	}
 
@@ -112,6 +117,7 @@ func (c *ReaderController) SubscriptionExists(w http.ResponseWriter, req *http.R
 
 	if err == sql.ErrNoRows {
 		c.Container.Render.Text(w, http.StatusOK, strconv.FormatBool(false))
+
 		return
 	} else if err != nil {
 		panic(err)
@@ -124,7 +130,7 @@ type SubscriptionListResponse struct {
 	Subscriptions []serialize.Subscription `json:"subscriptions"`
 }
 
-func (c *ReaderController) SubscriptionList(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) SubscriptionList(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	queries := c.Container.GetQueries(req)
@@ -151,7 +157,7 @@ type SubscriptionEditParams struct {
 	RemoveTag string `query:"r"`
 }
 
-func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) SubscriptionEdit(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := SubscriptionEditParams{}
@@ -160,6 +166,7 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -168,9 +175,11 @@ func (c *ReaderController) SubscriptionEdit(w http.ResponseWriter, req *http.Req
 	switch params.Action {
 	case "subscribe":
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error()) // TODO
+
 		return
 	case "edit":
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error()) // TODO
+
 		return
 	case "unsubscribe":
 		queries.DeleteSubscriptionByRSSFeedURLAndUserID(

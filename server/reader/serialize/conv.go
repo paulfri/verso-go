@@ -72,13 +72,13 @@ type SerializableItem struct {
 // identical JSON serialization tags. This is a huge hack and probably very
 // slow?
 func QueryRowsToSerializableItems(row interface{}) []SerializableItem {
-	asJson, err := json.Marshal(row)
+	asJSON, err := json.Marshal(row)
 	if err != nil {
 		panic(err)
 	}
 
 	var items []SerializableItem
-	err = json.Unmarshal(asJson, &items)
+	err = json.Unmarshal(asJSON, &items)
 	if err != nil {
 		panic(err)
 	}

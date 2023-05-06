@@ -21,7 +21,7 @@ type UnreadCountResponse struct {
 	UnreadCounts []UnreadCount `json:"unreadcounts"`
 }
 
-func (c *ReaderController) UnreadCount(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) UnreadCount(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	queries := c.Container.GetQueries(req)

@@ -2,7 +2,7 @@ package ai
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/sashabaranov/go-openai"
@@ -27,7 +27,7 @@ func Summarize(content string) string {
 	)
 
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
+		log.Printf("ChatCompletion error: %v\n", err)
 	}
 
 	return resp.Choices[0].Text

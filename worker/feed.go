@@ -13,20 +13,19 @@ import (
 )
 
 func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) error {
+	logger := worker.Container.Logger.With().Str("task", t.Type()).Logger()
 	var p tasks.FeedParsePayload
 
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	fmt.Printf("Parsing feed: feed_id=%d\n", p.FeedID)
+	logger.Info().Msgf("Parsing feed: feed_id=%d\n", p.FeedID)
 
 	thisFeed, err := worker.Container.Queries.GetRSSFeed(ctx, int64(p.FeedID))
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(thisFeed)
 
 	// Fetch the feed and parse it.
 	parser := gofeed.NewParser()
@@ -35,7 +34,8 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 	if err != nil {
 		// Parsing error. This will get re-enqueued, so failing is fine.
 		// TODO: Store parsing errors for investigation.
-		worker.Container.Logger.Error().Msgf("Failed to parse feed: %v", err.Error())
+		logger.Error().Msgf("Failed to parse feed: %v", err.Error())
+
 		return nil
 	}
 
@@ -43,6 +43,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 	if len(items) == 0 {
 		// Empty feed. Suspicious.
 		// TODO: probably log this error somewhere
+
 		return nil
 	}
 
@@ -53,14 +54,15 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 
 	for _, item := range items {
 		author := sql.NullString{}
-		author_email := sql.NullString{}
+		authorEmail := sql.NullString{}
+
 		if len(item.Authors) > 0 {
 			a := item.Authors[0]
 			if a.Name != "" {
 				author = sql.NullString{String: a.Name, Valid: true}
 			}
 			if a.Email != "" {
-				author_email = sql.NullString{String: a.Email, Valid: true}
+				authorEmail = sql.NullString{String: a.Email, Valid: true}
 			}
 		}
 
@@ -81,7 +83,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 				Title:           item.Title,
 				Content:         item.Content,
 				Author:          author,
-				AuthorEmail:     author_email,
+				AuthorEmail:     authorEmail,
 				Link:            item.Link,
 				PublishedAt:     published,
 				RemoteUpdatedAt: updated,
@@ -98,7 +100,7 @@ func (worker *Worker) HandleFeedParseTask(ctx context.Context, t *asynq.Task) er
 		}
 
 		if err != nil {
-			fmt.Println(err)
+			logger.Error().Msgf("Failed to write items: %v", err)
 		}
 	}
 

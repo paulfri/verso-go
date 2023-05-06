@@ -23,7 +23,7 @@ type ClientLoginRequest struct {
 	Password string `query:"Passwd"`
 }
 
-func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) ClientLogin(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	queries := c.Container.GetQueries(req)
 	body := ClientLoginRequest{}
@@ -63,5 +63,6 @@ func (c *ReaderController) ClientLogin(w http.ResponseWriter, req *http.Request)
 
 func match(input string, control string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(input), []byte(control))
+
 	return err == nil
 }

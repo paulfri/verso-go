@@ -21,7 +21,7 @@ type TagList struct {
 	Tags []Tag `json:"tags"`
 }
 
-func (c *ReaderController) TagList(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) TagList(w http.ResponseWriter, req *http.Request) {
 	userID := req.Context().Value(ContextUserIDKey{}).(int64)
 	queries := c.Container.GetQueries(req)
 
@@ -57,7 +57,7 @@ type EditTagRequestParams struct {
 	RemoveTag string   `query:"r" validate:"required_without=AddTag"`
 }
 
-func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) EditTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := EditTagRequestParams{}
@@ -65,12 +65,14 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
 	err = c.Container.Validator.Struct(params)
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -92,7 +94,7 @@ func (c *ReaderController) EditTag(w http.ResponseWriter, req *http.Request) {
 	c.Container.Render.Text(w, http.StatusOK, "OK")
 }
 
-func (c *ReaderController) addTag(ctx context.Context, readerID string, userID int64, tag string) error {
+func (c *Controller) addTag(ctx context.Context, readerID string, userID int64, tag string) error {
 	switch tag {
 	case common.StreamIDRead:
 		return c.Container.Command.MarkRead(ctx, readerID, userID)
@@ -103,7 +105,7 @@ func (c *ReaderController) addTag(ctx context.Context, readerID string, userID i
 	}
 }
 
-func (c *ReaderController) removeTag(ctx context.Context, readerID string, userID int64, tag string) error {
+func (c *Controller) removeTag(ctx context.Context, readerID string, userID int64, tag string) error {
 	switch tag {
 	case common.StreamIDRead:
 		return c.Container.Command.MarkUnread(ctx, readerID, userID)
@@ -118,7 +120,7 @@ type DisableTagRequestParams struct {
 	Tag string `query:"s" validate:"required"`
 }
 
-func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) DisableTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := DisableTagRequestParams{}
@@ -127,12 +129,14 @@ func (c *ReaderController) DisableTag(w http.ResponseWriter, req *http.Request) 
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
 	err = c.Container.Validator.Struct(params)
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -155,7 +159,7 @@ type RenameTagRequestParams struct {
 	NewName string `query:"dest" validate:"required"`
 }
 
-func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) RenameTag(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := RenameTagRequestParams{}
@@ -164,12 +168,14 @@ func (c *ReaderController) RenameTag(w http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
 	err = c.Container.Validator.Struct(params)
 	if err != nil {
 		c.Container.Render.JSON(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 

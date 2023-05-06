@@ -18,7 +18,7 @@ const (
 	Descending SortOrderValue = "a"
 )
 
-const DEFAULT_ITEMS_PER_PAGE = 1000
+const DefaultItemsPerPage = 1000
 
 type StreamContentsRequestParams struct {
 	// r: sort criteria. Items are sorted by date (descending by default), r=o inverts the order.
@@ -37,7 +37,7 @@ type StreamContentsRequestParams struct {
 	ExcludeNewerThan int `query:"nt"`
 }
 
-func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) StreamContents(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamContentsRequestParams{}
@@ -46,12 +46,14 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
 	user, err := queries.GetUser(ctx, userID)
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -67,7 +69,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 			ctx,
 			query.GetItemsWithURLByUserIDParams{
 				UserID: userID,
-				Limit:  DEFAULT_ITEMS_PER_PAGE,
+				Limit:  DefaultItemsPerPage,
 			},
 		)
 
@@ -99,7 +101,7 @@ func (c *ReaderController) StreamContents(w http.ResponseWriter, req *http.Reque
 			ctx,
 			query.GetRecentItemsByRSSFeedURLParams{
 				URL:   common.FeedURLFromReaderStreamID(streamID),
-				Limit: DEFAULT_ITEMS_PER_PAGE,
+				Limit: DefaultItemsPerPage,
 			},
 		)
 

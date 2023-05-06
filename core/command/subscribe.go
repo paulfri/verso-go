@@ -49,7 +49,7 @@ func (c Command) SubscribeToFeedByURL(ctx context.Context, url string, userID in
 	// then do that here.
 	title := feed.Title
 	if needsScrape {
-		// TOOD: this can probably be a helper
+		// TODO: this can probably be a helper
 		parser := gofeed.NewParser()
 		parsedFeed, err := parser.ParseURL(feedURL)
 

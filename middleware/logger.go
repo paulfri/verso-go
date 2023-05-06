@@ -44,6 +44,7 @@ func LoggerMiddleware(logger *zerolog.Logger) func(next http.Handler) http.Handl
 
 			next.ServeHTTP(ww, r)
 		}
+
 		return http.HandlerFunc(fn)
 	}
 }

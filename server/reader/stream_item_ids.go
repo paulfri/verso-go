@@ -19,7 +19,7 @@ type StreamItemsIDsResponse struct {
 	ItemRefs []serialize.FeedItemRef `json:"itemRefs"`
 }
 
-func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Request) {
+func (c *Controller) StreamItemsIDs(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	userID := ctx.Value(ContextUserIDKey{}).(int64)
 	params := StreamItemsIDsRequestParams{}
@@ -27,6 +27,7 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 
 	if err != nil {
 		c.Container.Render.Text(w, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -71,7 +72,7 @@ func (c *ReaderController) StreamItemsIDs(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (c *ReaderController) getAllItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+func (c *Controller) getAllItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
 	ctx := req.Context()
 	queries := c.Container.GetQueries(req)
 
@@ -79,7 +80,7 @@ func (c *ReaderController) getAllItemsByUserID(req *http.Request, userID int64) 
 		ctx,
 		query.GetItemsByUserIDParams{
 			UserID: userID,
-			Limit:  DEFAULT_ITEMS_PER_PAGE,
+			Limit:  DefaultItemsPerPage,
 		},
 	)
 
@@ -93,7 +94,7 @@ func (c *ReaderController) getAllItemsByUserID(req *http.Request, userID int64) 
 	return itemRefs
 }
 
-func (c *ReaderController) getReadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+func (c *Controller) getReadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
 	ctx := req.Context()
 	queries := c.Container.GetQueries(req)
 
@@ -101,7 +102,7 @@ func (c *ReaderController) getReadItemsByUserID(req *http.Request, userID int64)
 		ctx,
 		query.GetReadItemsByUserIDParams{
 			UserID: userID,
-			Limit:  DEFAULT_ITEMS_PER_PAGE,
+			Limit:  DefaultItemsPerPage,
 		},
 	)
 
@@ -115,7 +116,7 @@ func (c *ReaderController) getReadItemsByUserID(req *http.Request, userID int64)
 	return itemRefs
 }
 
-func (c *ReaderController) getUnreadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+func (c *Controller) getUnreadItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
 	ctx := req.Context()
 	queries := c.Container.GetQueries(req)
 
@@ -123,7 +124,7 @@ func (c *ReaderController) getUnreadItemsByUserID(req *http.Request, userID int6
 		ctx,
 		query.GetUnreadItemsByUserIDParams{
 			UserID: userID,
-			Limit:  DEFAULT_ITEMS_PER_PAGE,
+			Limit:  DefaultItemsPerPage,
 		},
 	)
 
@@ -137,7 +138,7 @@ func (c *ReaderController) getUnreadItemsByUserID(req *http.Request, userID int6
 	return itemRefs
 }
 
-func (c *ReaderController) getStarredItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
+func (c *Controller) getStarredItemsByUserID(req *http.Request, userID int64) []serialize.FeedItemRef {
 	ctx := req.Context()
 	queries := c.Container.GetQueries(req)
 
@@ -145,7 +146,7 @@ func (c *ReaderController) getStarredItemsByUserID(req *http.Request, userID int
 		ctx,
 		query.GetStarredItemsByUserIDParams{
 			UserID: userID,
-			Limit:  DEFAULT_ITEMS_PER_PAGE,
+			Limit:  DefaultItemsPerPage,
 		},
 	)
 
