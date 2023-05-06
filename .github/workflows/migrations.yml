@@ -1,0 +1,32 @@
+name: Lint migrations
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get modified migrations
+        id: modified
+        uses: tj-actions/changed-files@v35
+        with:
+          files: db/migrate/*.sql
+
+      - uses: actions/setup-node@v3
+        if: steps.modified.outputs.any_changed == 'true'
+
+      - run: npm install -g squawk-cli@latest
+        if: steps.modified.outputs.any_changed == 'true'
+
+      - name: Lint migrations
+        if: steps.modified.outputs.any_changed == 'true'
+        run: |
+          squawk --config db/migrate/.squawk.toml --verbose ${{ steps.modified.outputs.all_changed_files }}
