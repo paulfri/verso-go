@@ -17,7 +17,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mmcdole/gofeed v1.2.1
-	github.com/pressly/goose/v3 v3.11.0
+	github.com/pressly/goose/v3 v3.11.2
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.29.1
 	github.com/samber/lo v1.38.1
@@ -58,7 +58,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
