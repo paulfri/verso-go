@@ -1,8 +1,8 @@
 # 📚 verso
 
-![build](https://github.com/versolabs/verso/actions/workflows/build.yml/badge.svg)
+This project was a Google Reader API clone based on [unofficial documentation](https://github.com/mihaip/google-reader-api). It is no longer updated.
 
-Syndication summarized.
+The API is about 80% functional and usable in third-party apps like NetNewsWire or Reeder.
 
 ## Dependencies
 
