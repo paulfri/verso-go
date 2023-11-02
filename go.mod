@@ -10,7 +10,7 @@ require (
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/dchest/uniuri v1.2.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/go-playground/validator/v10 v10.13.0
+	github.com/go-playground/validator/v10 v10.15.5
 	github.com/google/uuid v1.3.0
 	github.com/hetiansu5/urlquery v1.2.7
 	github.com/hibiken/asynq v0.24.1
@@ -39,12 +39,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/leodido/go-urn v1.2.3 // indirect
+	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mmcdole/goxpp v1.1.0 // indirect
