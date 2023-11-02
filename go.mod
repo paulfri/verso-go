@@ -26,7 +26,7 @@ require (
 	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/unrolled/render v1.6.0
 	github.com/urfave/cli/v2 v2.25.3
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.14.0
 	gopkg.in/guregu/null.v4 v4.0.0
 )
 
@@ -58,8 +58,8 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
