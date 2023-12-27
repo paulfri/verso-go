@@ -3,7 +3,7 @@ module github.com/versolabs/verso
 go 1.20
 
 require (
-	github.com/BurntSushi/toml v1.2.1
+	github.com/BurntSushi/toml v1.3.2
 	github.com/PuerkitoBio/purell v1.2.0
 	github.com/airbrake/gobrake/v5 v5.6.1
 	github.com/bradleyjkemp/cupaloy/v2 v2.8.0
@@ -25,7 +25,7 @@ require (
 	github.com/simukti/sqldb-logger v0.0.0-20230108155151-646c1a075551
 	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/unrolled/render v1.6.0
-	github.com/urfave/cli/v2 v2.25.3
+	github.com/urfave/cli/v2 v2.27.0
 	golang.org/x/crypto v0.9.0
 	gopkg.in/guregu/null.v4 v4.0.0
 )
